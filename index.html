@@ -7,238 +7,167 @@
 <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { 
-    background: #05050a; 
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
-    display: flex; justify-content: center; align-items: center; 
-    height: 100vh; width: 100vw; 
-    overflow: hidden; /* Prevents scroll bounce */
-    touch-action: none; 
-    overscroll-behavior: none;
+  body, html { 
+    background: #05050a; color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
+    height: 100%; height: 100dvh; width: 100vw; 
+    overflow: hidden; touch-action: none; overscroll-behavior: none;
   }
   
-  #app { width: 100%; max-width: 900px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
+  #app { height: 100%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
   .version-badge { position: absolute; top: 10px; right: 10px; font-size: 10px; color: rgba(255,255,255,0.3); z-index: 100; }
 
   /* Screens */
-  .screen { display: none; width: 100%; padding: 10px; }
-  .screen.active { display: block; }
+  .screen { display: none; width: 100%; max-width: 900px; padding: 10px; height: 100%; }
+  .screen.active { display: flex; flex-direction: column; justify-content: center; }
 
-  /* LOBBY UI (Kept from v0.3.2) */
-  #lobby-ui { background: #111122; padding: 20px; border-radius: 12px; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.1); color: white; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); max-width: 500px; margin: 0 auto 20px; }
+  /* LOBBY UI */
+  #lobby-ui { background: #111122; padding: 20px; border-radius: 12px; margin: 0 auto 20px; border: 1px solid rgba(255,255,255,0.1); text-align: center; max-width: 500px; width: 100%; }
   .input-group { margin-bottom: 12px; text-align: left; }
-  .input-group label { font-size: 12px; color: #aaa; display: block; margin-bottom: 4px; }
+  .input-group label { font-size: 12px; color: #aaa; margin-bottom: 4px; display: block; }
   input { width: 100%; padding: 10px; background: #05050a; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: #fff; font-size: 14px; outline: none; }
-  input:focus { border-color: #4f46e5; }
-  button { width: 100%; padding: 10px; background: linear-gradient(90deg, #4f46e5, #6366f1); color: #fff; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4); }
+  button { width: 100%; padding: 10px; background: #4f46e5; color: #fff; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 5px; }
   button:active { transform: scale(0.98); }
   
   .id-box { background: rgba(79, 70, 229, 0.1); border: 1px dashed #4f46e5; padding: 10px; border-radius: 6px; margin: 15px 0; }
-  .my-id { font-family: monospace; color: #818cf8; font-weight: bold; font-size: 20px; letter-spacing: 2px; text-shadow: 0 0 10px rgba(129, 140, 248, 0.5); }
-  
+  .my-id { font-family: monospace; color: #818cf8; font-weight: bold; font-size: 20px; }
   #connection-status { font-size: 14px; margin-top: 15px; padding: 10px; border-radius: 6px; display: none; font-weight: bold; }
-  .status-success { background: rgba(74, 222, 128, 0.1); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.3); }
-  .status-error { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
 
   /* CHAR SELECT */
-  .header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px; color: #fff; max-width: 600px; margin: 0 auto 15px; }
-  .char-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 600px; margin: 0 auto; }
-  .char-card { background: #111122; border-radius: 10px; border: 2px solid rgba(255,255,255,0.05); padding: 12px; text-align: center; cursor: pointer; transition: 0.2s; opacity: 0.4; pointer-events: none; }
+  .header { display: flex; justify-content: space-between; align-items: center; margin: 0 auto 15px; max-width: 600px; width: 100%; }
+  .char-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-width: 600px; margin: 0 auto; width: 100%; }
+  .char-card { background: #111122; border-radius: 8px; border: 2px solid rgba(255,255,255,0.05); padding: 10px; text-align: center; cursor: pointer; opacity: 0.4; pointer-events: none; }
   .char-card.unlocked { opacity: 1; pointer-events: auto; }
-  .char-card.unlocked:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.3); }
-  .char-card.selected-p1 { border-color: #4f46e5; background: #1e1e3f; box-shadow: 0 0 15px rgba(79, 70, 229, 0.4); }
-  .char-card.selected-p2 { border-color: #ef4444; background: #3f1e1e; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
-  .char-emoji { font-size: 32px; margin-bottom: 4px; display: block; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); }
-  .char-name { font-size: 14px; font-weight: bold; color: #fff; display: block; }
-  .char-power { font-size: 10px; color: #fbbf24; margin-top: 2px; display: block; font-weight: bold; }
-  
-  /* HIGH-DEF ARENA */
-  #arena-screen { height: 100%; display: flex; flex-direction: column; justify-content: center; padding: 0; }
-  #game-container { position: relative; width: 100%; max-width: 900px; height: 100%; max-height: 500px; background: linear-gradient(180deg, #0f172a 0%, #1e1b4b 100%); border-radius: 16px; overflow: hidden; border: 2px solid #2a2a4a; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
-  
-  /* 3D Floor Effect */
-  #arena { width: 100%; height: 100%; position: relative; perspective: 800px; }
-  .floor { 
-    position: absolute; bottom: -20px; width: 120%; left: -10%; height: 120px; 
-    background-color: #0c0a20;
-    background-image: 
-      linear-gradient(90deg, rgba(79, 70, 229, 0.3) 1px, transparent 1px),
-      linear-gradient(rgba(79, 70, 229, 0.3) 1px, transparent 1px);
-    background-size: 40px 40px;
-    transform: rotateX(70deg);
-    transform-origin: top;
-    border-top: 3px solid #4f46e5;
-    box-shadow: 0 -10px 30px rgba(79, 70, 229, 0.4);
-  }
-  
-  /* HUD Overlay */
-  .hud { position: absolute; top: 0; width: 100%; padding: 16px 20px; display: flex; justify-content: space-between; z-index: 10; background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, transparent 100%); }
-  .player-tag { font-size: 12px; color: #fff; margin-bottom: 6px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 2px 4px rgba(0,0,0,1); }
-  .hp-bar-bg { width: 42vw; max-width: 350px; height: 18px; background: rgba(0,0,0,0.7); border-radius: 9px; overflow: hidden; border: 2px solid rgba(255,255,255,0.2); box-shadow: 0 0 10px rgba(0,0,0,0.5); }
-  .hp-bar-fill { height: 100%; transition: width 0.15s ease-out; }
-  .hp-p1 { background: linear-gradient(90deg, #4f46e5, #a5b4fc); box-shadow: inset 0 0 10px rgba(255,255,255,0.5); }
-  .hp-p2 { background: linear-gradient(90deg, #ef4444, #fca5a5); box-shadow: inset 0 0 10px rgba(255,255,255,0.5); }
-  .sp-bar-bg { width: 42vw; max-width: 350px; height: 8px; background: rgba(0,0,0,0.7); border-radius: 4px; margin-top: 6px; }
-  .sp-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #d97706, #fbbf24); transition: width 0.2s; box-shadow: 0 0 8px #fbbf24; }
+  .char-card.selected-p1 { border-color: #4f46e5; background: #1e1e3f; }
+  .char-card.selected-p2 { border-color: #ef4444; background: #3f1e1e; }
+  .char-name { font-size: 14px; font-weight: bold; color: #fff; display: block; margin-top: 5px;}
+  .char-power { font-size: 10px; color: #fbbf24; margin-top: 2px; display: block; }
+  .char-preview { width: 30px; height: 30px; border-radius: 50%; margin: 0 auto; box-shadow: inset 0 0 5px rgba(0,0,0,0.5); }
 
-  /* 2.5D FIGHTER MODELS */
-  .fighter { position: absolute; bottom: 30px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; transition: transform 0.05s; }
-  .fighter-head { font-size: 38px; z-index: 3; margin-bottom: -15px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.8)); transition: 0.1s; }
-  .fighter-body { 
-    position: relative; width: 100%; height: 100%; 
-    border-radius: 20px 20px 8px 8px; 
-    border: 2px solid rgba(255,255,255,0.7);
-    box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 10px 20px rgba(0,0,0,0.6);
-    z-index: 2;
-    overflow: hidden;
-  }
-  /* Neon Core inside the body */
-  .fighter-body::after {
-    content: ''; position: absolute; top: 20%; left: 20%; width: 60%; height: 60%;
-    background: rgba(255,255,255,0.3); border-radius: 50%; filter: blur(8px);
-  }
+  /* ARENA */
+  #game-container { position: relative; width: 100%; flex: 1; background: linear-gradient(180deg, #0f172a 0%, #1e1b4b 100%); border-radius: 12px; overflow: hidden; border: 2px solid #2a2a4a; display: flex; flex-direction: column; }
+  #arena { position: absolute; width: 100%; height: 100%; perspective: 800px; overflow: hidden; }
+  .floor { position: absolute; bottom: 0; width: 120%; left: -10%; height: 35%; background-color: #0c0a20; background-image: linear-gradient(90deg, rgba(79, 70, 229, 0.3) 1px, transparent 1px), linear-gradient(rgba(79, 70, 229, 0.3) 1px, transparent 1px); background-size: 40px 40px; transform: rotateX(70deg); transform-origin: top; border-top: 3px solid #4f46e5; }
   
-  .hurt .fighter-body { filter: brightness(2) contrast(1.5); background-color: #fff !important; box-shadow: 0 0 30px red; border-color: red; }
-  .hurt .fighter-head { transform: scale(1.2) rotate(-10deg); filter: brightness(1.5) drop-shadow(0 0 10px red); }
+  /* HUD */
+  .hud { position: absolute; top: 0; width: 100%; padding: 10px 15px; display: flex; justify-content: space-between; z-index: 10; background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%); }
+  .player-tag { font-size: 12px; font-weight: 800; text-transform: uppercase; margin-bottom: 4px; text-shadow: 0 2px 4px black; }
+  .hp-bar-bg { width: 38vw; max-width: 300px; height: 16px; background: rgba(0,0,0,0.7); border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); }
+  .hp-bar-fill { height: 100%; transition: width 0.15s ease-out; border-radius: 8px;}
+  .hp-p1 { background: linear-gradient(90deg, #4f46e5, #a5b4fc); }
+  .hp-p2 { background: linear-gradient(90deg, #ef4444, #fca5a5); }
+  .sp-bar-bg { width: 38vw; max-width: 300px; height: 6px; background: rgba(0,0,0,0.7); border-radius: 3px; margin-top: 4px; }
+  .sp-bar-fill { height: 100%; width: 0%; background: #fbbf24; transition: width 0.2s; }
+
+  /* SKELETAL FIGHTER MODELS */
+  .fighter { position: absolute; bottom: 25%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
+  .f-rig { position: relative; width: 40px; height: 80px; }
+  .f-head { position: absolute; top: -20px; left: 50%; width: 22px; height: 26px; margin-left: -11px; border-radius: 40% 40% 50% 50%; z-index: 5; box-shadow: inset -2px -2px 6px rgba(0,0,0,0.4); transition: transform 0.1s;}
+  .f-torso { position: absolute; top: 5px; left: 50%; width: 26px; height: 35px; margin-left: -13px; border-radius: 6px 6px 4px 4px; z-index: 4; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); clip-path: polygon(10% 0, 90% 0, 100% 100%, 0 100%); }
+  .f-limb { position: absolute; width: 8px; border-radius: 4px; transform-origin: top center; box-shadow: inset -1px -1px 4px rgba(0,0,0,0.4); }
+  .f-arm-b { top: 7px; left: 6px; height: 30px; z-index: 2; filter: brightness(0.7); }
+  .f-arm-f { top: 7px; left: 24px; height: 30px; z-index: 6; }
+  .f-leg-b { top: 35px; left: 10px; height: 35px; z-index: 1; filter: brightness(0.7); }
+  .f-leg-f { top: 35px; left: 22px; height: 35px; z-index: 3; }
+
+  /* Combat Status Effects */
+  .hurt .f-head, .hurt .f-torso, .hurt .f-limb { filter: brightness(2) drop-shadow(0 0 5px red) !important; background: white !important; }
+  .hurt .f-head { transform: rotate(-20deg) translate(-5px, -5px); }
+  .blocking .f-arm-f { transform: rotate(-130deg) translate(0px, -5px) !important; }
+  .blocking .f-arm-b { transform: rotate(130deg) !important; }
+
+  .special-label { position: absolute; top: -60px; left: 50%; transform: translateX(-50%); color: #fbbf24; font-weight: 900; font-size: 14px; opacity: 0; transition: 0.2s; text-shadow: 0 4px 10px black; z-index: 20; }
+  .special-label.show { opacity: 1; top: -80px; }
+
+  /* OVERLAY CONTROLS */
+  #pc-controls { position: absolute; bottom: 5px; width: 100%; text-align: center; color: rgba(255,255,255,0.4); font-size: 12px; z-index: 5; pointer-events: none; }
   
-  .parry-glow { box-shadow: 0 0 25px #60a5fa, inset 0 0 15px #60a5fa !important; border-color: #60a5fa !important; }
-
-  .special-label { position: absolute; top: -50px; left: 50%; transform: translateX(-50%) scale(0.5); color: #fbbf24; font-weight: 900; font-size: 16px; white-space: nowrap; pointer-events: none; opacity: 0; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-shadow: 0 4px 10px rgba(0,0,0,0.8); z-index: 20; }
-  .special-label.show { opacity: 1; transform: translateX(-50%) scale(1.2); top: -70px; }
-
-  /* PC CONTROLS HUD */
-  #pc-controls { position: absolute; bottom: 10px; width: 100%; text-align: center; color: rgba(255,255,255,0.4); font-size: 12px; font-weight: bold; letter-spacing: 1px; z-index: 5; pointer-events: none; }
-  #pc-controls span { background: rgba(0,0,0,0.5); padding: 4px 8px; border-radius: 4px; margin: 0 4px; }
-
-  /* OVERLAY MOBILE CONTROLS (Landscape Optimized) */
   #mobile-controls { 
-    position: absolute; bottom: 15px; width: 100%; height: 120px;
-    display: none; justify-content: space-between; padding: 0 15px; 
-    z-index: 50; pointer-events: none; /* Allows canvas touching */
+    position: absolute; bottom: 10px; left: 0; width: 100%; height: 130px;
+    display: none; justify-content: space-between; padding: 0 20px; 
+    z-index: 50; pointer-events: none; 
   }
-  .d-pad, .action-pad { 
-    pointer-events: auto; display: grid; gap: 8px;
-    grid-template-columns: 60px 60px 60px; grid-template-rows: 60px 60px;
-  }
-  
-  /* D-Pad positioning */
-  #btn-up { grid-column: 2; grid-row: 1; }
-  #btn-left { grid-column: 1; grid-row: 2; }
-  #btn-right { grid-column: 3; grid-row: 2; }
-  
-  /* Action Pad positioning */
-  #btn-sp { grid-column: 2; grid-row: 1; }
-  #btn-punch { grid-column: 1; grid-row: 2; }
-  #btn-kick { grid-column: 3; grid-row: 2; }
+  .d-pad, .action-pad { pointer-events: auto; display: grid; gap: 8px; grid-template-columns: 55px 55px 55px; grid-template-rows: 55px 55px; }
+  #btn-up { grid-column: 2; grid-row: 1; } #btn-left { grid-column: 1; grid-row: 2; } #btn-right { grid-column: 3; grid-row: 2; }
+  #btn-sp { grid-column: 2; grid-row: 1; } #btn-punch { grid-column: 1; grid-row: 2; } #btn-kick { grid-column: 3; grid-row: 2; }
 
   .touch-btn { 
-    background: rgba(15, 23, 42, 0.6); border: 2px solid rgba(255,255,255,0.15); 
+    background: rgba(15, 23, 42, 0.5); border: 2px solid rgba(255,255,255,0.2); 
     color: #fff; border-radius: 50%; font-weight: 900; font-size: 20px;
     display: flex; align-items: center; justify-content: center; 
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5); backdrop-filter: blur(4px);
-    transition: 0.1s; user-select: none; -webkit-touch-callout: none;
+    backdrop-filter: blur(5px); user-select: none;
   }
-  .touch-btn.pressed { background: rgba(255,255,255,0.3); transform: scale(0.9); box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
-  .btn-sp { border-color: rgba(251, 191, 36, 0.5); color: #fbbf24; font-size: 24px; text-shadow: 0 0 8px rgba(251, 191, 36, 0.8); }
-  
-  #quit-btn { position: absolute; top: 10px; right: 10px; z-index: 100; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 5px 10px; border-radius: 4px; font-size: 10px; cursor: pointer; display: none; }
+  .touch-btn.pressed { background: rgba(255,255,255,0.4); transform: scale(0.9); }
+  .btn-sp { border-color: #fbbf24; color: #fbbf24; font-size: 24px; text-shadow: 0 0 8px rgba(251, 191, 36, 0.8); }
 
 </style>
 </head>
 <body>
 
 <div id="app">
-  <div class="version-badge">v0.3.3 (Graphics & Mobile Patch)</div>
+  <div class="version-badge">v0.3.4 (The Skeletal Update)</div>
 
   <div id="select-screen" class="screen active">
     <div id="lobby-ui">
-      <div class="input-group">
-        <label>Step 1: Enter your tag</label>
-        <input type="text" id="player-name" placeholder="e.g. Parv" maxlength="12">
-      </div>
-      <div class="id-box">
-        <div class="id-label">Your Session ID (Host):</div>
-        <div class="my-id" id="my-peer-id">Generating...</div>
-      </div>
+      <div class="input-group"><label>Enter your tag</label><input type="text" id="player-name" placeholder="e.g. Parv" maxlength="12"></div>
+      <div class="id-box"><div style="font-size:12px; color:#aaa;">Your Session ID:</div><div class="my-id" id="my-peer-id">Generating...</div></div>
       <div class="input-group" style="margin-top: 15px;">
-        <label>Step 2: Join a friend (Leave blank to Host)</label>
-        <input type="text" id="join-id" placeholder="Paste Session ID here" style="text-transform: uppercase;">
-        <button onclick="connectToFriend()">Connect via P2P</button>
+        <label>Join a friend (Leave blank to Host)</label>
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="join-id" placeholder="Friend's ID" style="text-transform: uppercase;">
+          <button onclick="connectToFriend()" style="margin:0; width:100px;">Connect</button>
+        </div>
       </div>
       <div id="connection-status"></div>
     </div>
-
-    <div class="header">
-      <h2 id="select-title">Choose Your Fighter</h2>
-      <button onclick="pickAI()" style="width:auto; padding:8px 16px; background:rgba(255,255,255,0.1); box-shadow:none;">Play Solo vs AI</button>
-    </div>
+    <div class="header"><h2>Choose Fighter</h2><button onclick="pickAI()" style="width:auto; padding:6px 12px; background:#334155;">Solo vs AI</button></div>
     <div class="char-grid" id="char-list"></div>
   </div>
 
   <div id="arena-screen" class="screen">
-    <button id="quit-btn" onclick="location.reload()">EXIT</button>
-    
     <div id="game-container">
       <div class="hud">
-        <div style="width: 45%;">
-          <div id="p1-tag" class="player-tag">Player 1</div>
-          <div class="hp-bar-bg"><div id="hp-1" class="hp-bar-fill hp-p1"></div></div>
-          <div class="sp-bar-bg"><div id="sp-1" class="sp-bar-fill"></div></div>
-        </div>
-        <div style="width: 45%; text-align: right;">
-          <div id="p2-tag" class="player-tag">Player 2</div>
-          <div class="hp-bar-bg" style="margin-left:auto;"><div id="hp-2" class="hp-bar-fill hp-p2"></div></div>
-          <div class="sp-bar-bg" style="margin-left:auto;"><div id="sp-2" class="sp-bar-fill"></div></div>
-        </div>
+        <div style="width: 45%;"><div id="p1-tag" class="player-tag">Player 1</div><div class="hp-bar-bg"><div id="hp-1" class="hp-bar-fill hp-p1"></div></div><div class="sp-bar-bg"><div id="sp-1" class="sp-bar-fill"></div></div></div>
+        <div style="width: 45%; text-align: right;"><div id="p2-tag" class="player-tag">Player 2</div><div class="hp-bar-bg" style="margin-left:auto;"><div id="hp-2" class="hp-bar-fill hp-p2"></div></div><div class="sp-bar-bg" style="margin-left:auto;"><div id="sp-2" class="sp-bar-fill"></div></div></div>
       </div>
-      
       <div id="arena">
         <div class="floor"></div>
-        
-        <div id="pc-controls">
-          <span>[A][D] Move</span> <span>[W] Jump</span> <span>[J] Punch</span> <span>[K] Kick</span> <span>[L] Special</span>
-        </div>
+        <div id="pc-controls">[A][D] Move &nbsp;|&nbsp; [W] Jump &nbsp;|&nbsp; [J] Punch &nbsp;|&nbsp; [K] Kick &nbsp;|&nbsp; [L] Special</div>
 
         <div id="p1" class="fighter">
           <div class="special-label" id="p1-label">SPECIAL!</div>
-          <div class="fighter-head" id="p1-h">👤</div>
-          <div class="fighter-body" id="p1-b"></div>
+          <div class="f-rig">
+            <div class="f-head"></div><div class="f-arm-b f-limb"></div><div class="f-torso"></div><div class="f-leg-b f-limb"></div><div class="f-leg-f f-limb"></div><div class="f-arm-f f-limb"></div>
+          </div>
         </div>
         <div id="p2" class="fighter">
           <div class="special-label" id="p2-label">SPECIAL!</div>
-          <div class="fighter-head" id="p2-h">👤</div>
-          <div class="fighter-body" id="p2-b"></div>
+          <div class="f-rig">
+            <div class="f-head"></div><div class="f-arm-b f-limb"></div><div class="f-torso"></div><div class="f-leg-b f-limb"></div><div class="f-leg-f f-limb"></div><div class="f-arm-f f-limb"></div>
+          </div>
         </div>
-      </div>
 
-      <div id="mobile-controls">
-        <div class="d-pad">
-          <div class="touch-btn" id="btn-up">↑</div>
-          <div class="touch-btn" id="btn-left">←</div>
-          <div class="touch-btn" id="btn-right">→</div>
-        </div>
-        <div class="action-pad">
-          <div class="touch-btn btn-sp" id="btn-sp">★</div>
-          <div class="touch-btn" id="btn-punch">P</div>
-          <div class="touch-btn" id="btn-kick">K</div>
-        </div>
       </div>
-      
+      <div id="mobile-controls">
+        <div class="d-pad"><div class="touch-btn" id="btn-up">↑</div><div class="touch-btn" id="btn-left">←</div><div class="touch-btn" id="btn-right">→</div></div>
+        <div class="action-pad"><div class="touch-btn btn-sp" id="btn-sp">★</div><div class="touch-btn" id="btn-punch">P</div><div class="touch-btn" id="btn-kick">K</div></div>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
+// THEMED CHARACTER DATA
 const CHARS = [
-  { id:'karthik', name:'Karthik', emoji:'⚡', power:'67 Burst', color:'#4f46e5', h:60, w:45 },
-  { id:'andi', name:'Andi', emoji:'🤢', power:'Hulk Out', color:'#22c55e', h:60, w:45 },
-  { id:'jz', name:'JZ', emoji:'🎧', power:'Rhythm Dash', color:'#ec4899', h:60, w:45 },
-  { id:'dexter', name:'Dexter', emoji:'🧪', power:'Acid Spit', color:'#a855f7', h:60, w:45 },
-  { id:'yiliang', name:'Yi Liang', emoji:'💨', power:'Smoke Vanish', color:'#94a3b8', h:60, w:45 },
-  { id:'sherman', name:'Sherman', emoji:'🍺', power:'Drunken Sip', color:'#f59e0b', h:60, w:45 },
-  { id:'parveer', name:'Parveer', emoji:'🥁', power:'Dhol Wave', color:'#ea580c', h:60, w:45 },
-  { id:'hari', name:'Hari', emoji:'😴', power:'Sleepwalk', color:'#60a5fa', h:60, w:45 },
-  { id:'jerell', name:'Jerell', emoji:'🤓', power:'IQ Strike', color:'#ffffff', h:60, w:45 }
+  { id:'karthik', name:'Karthik', power:'67 Burst', skin:'#c79a7b', suit:'#1e1b4b', acc:'#4f46e5' },
+  { id:'andi', name:'Andi', power:'Hulk Out', skin:'#22c55e', suit:'#4c1d95', acc:'#22c55e' }, // Green Skin
+  { id:'jz', name:'JZ', power:'Rhythm Dash', skin:'#fbcfe8', suit:'#111827', acc:'#ec4899' },
+  { id:'dexter', name:'Dexter', power:'Acid Spit', skin:'#e2b999', suit:'#3b0764', acc:'#a855f7' },
+  { id:'yiliang', name:'Yi Liang', power:'Smoke Vanish', skin:'#f1f5f9', suit:'#475569', acc:'#94a3b8' },
+  { id:'sherman', name:'Sherman', power:'Drunken Sip', skin:'#fcd34d', suit:'#78350f', acc:'#f59e0b' },
+  { id:'parveer', name:'Parveer', power:'Dhol Wave', skin:'#d2a881', suit:'#ea580c', acc:'#facc15' }, // Dhol/Traditional Colors
+  { id:'hari', name:'Hari', power:'Sleepwalk', skin:'#93c5fd', suit:'#1e3a8a', acc:'#60a5fa' },
+  { id:'jerell', name:'Jerell', power:'IQ Strike', skin:'#ffffff', suit:'#000000', acc:'#e2e8f0' }
 ];
 
 let peer, conn, myPeerId, isHost = false, onlineMode = false;
@@ -246,7 +175,6 @@ let myName = "Player", oppName = "Opponent";
 let p1Sel=null, p2Sel=null, aiMode=false, f1, f2;
 let keys1 = {}, keys2 = {}, keys = {};
 
-// Mobile UI Detection
 function checkMobileUI() {
   if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
     document.getElementById('mobile-controls').style.display = 'flex';
@@ -268,29 +196,20 @@ window.onload = () => {
     showStatus("Connecting...", "success");
   });
 
-  peer.on('error', err => {
-    if(err.type === 'peer-unavailable') {
-      showStatus("Error: Session ID not found.", "error");
-    } else { showStatus("Connection error.", "error"); }
-  });
+  peer.on('error', err => { showStatus("Error: Session ID not found.", "error"); });
   renderChars();
 };
 
 function showStatus(text, type) {
   const el = document.getElementById('connection-status');
   el.style.display = 'block'; el.innerText = text;
-  el.className = type === "error" ? "status-error" : "status-success";
-}
-
-function getMyName() {
-  const input = document.getElementById('player-name').value.trim();
-  return input !== "" ? input : (isHost ? "Host" : "Challenger");
+  el.style.color = type === "error" ? "#ef4444" : "#4ade80";
 }
 
 function connectToFriend() {
   const friendId = document.getElementById('join-id').value.toUpperCase().trim();
-  if(!friendId) { showStatus("Please enter an ID to join.", "error"); return; }
-  showStatus("Searching for session...", "success");
+  if(!friendId) return;
+  showStatus("Searching...", "success");
   conn = peer.connect(friendId);
   isHost = false; onlineMode = true;
   setupDataListeners();
@@ -298,31 +217,30 @@ function connectToFriend() {
 
 function setupDataListeners() {
   conn.on('open', () => {
-    myName = getMyName();
+    myName = document.getElementById('player-name').value || "Challenger";
     conn.send({type: 'hello', name: myName});
     document.querySelectorAll('.char-card').forEach(c => c.classList.add('unlocked'));
   });
 
   conn.on('data', data => {
     if (data.type === 'hello') {
-      oppName = data.name;
-      showStatus(`Connected to: ${oppName}! Pick your character.`, "success");
+      oppName = data.name; showStatus(`Connected to: ${oppName}! Pick character.`, "success");
       if(isHost) {
-        myName = getMyName();
+        myName = document.getElementById('player-name').value || "Host";
         conn.send({type: 'hello', name: myName});
         document.querySelectorAll('.char-card').forEach(c => c.classList.add('unlocked'));
       }
     }
-    if (data.type === 'ready') {
-      p2Sel = CHARS.find(c => c.id === data.p2);
-      showStatus(`${oppName} is ready!`, "success");
-      if(p1Sel) sendStart();
-    }
+    if (data.type === 'ready') { p2Sel = CHARS.find(c => c.id === data.p2); if(p1Sel) sendStart(); }
     if (data.type === 'keys') { if (isHost) keys2 = data.keys; else keys1 = data.keys; }
-    if (data.type === 'start') {
-      p1Sel = CHARS.find(c => c.id === data.p1);
-      p2Sel = CHARS.find(c => c.id === data.p2);
-      startFight();
+    if (data.type === 'start') { p1Sel = CHARS.find(c => c.id === data.p1); p2Sel = CHARS.find(c => c.id === data.p2); startFight(); }
+  });
+
+  // BUG FIX: HANDLE DISCONNECTS
+  conn.on('close', () => {
+    if (onlineMode && (f1.hp > 0 && f2.hp > 0)) {
+      alert("Match ended: Opponent disconnected.");
+      location.reload();
     }
   });
 }
@@ -331,16 +249,14 @@ function pickAI() {
   aiMode = true; onlineMode = false;
   document.querySelectorAll('.char-card').forEach(c => c.classList.add('unlocked'));
   document.getElementById('lobby-ui').style.display = 'none';
-  document.getElementById('select-title').innerText = "Pick your fighter to start";
 }
 
 function renderChars(){
   const grid = document.getElementById('char-list');
-  grid.innerHTML = "";
   CHARS.forEach(c=>{
     const div = document.createElement('div');
     div.className = 'char-card';
-    div.innerHTML = `<span class="char-emoji">${c.emoji}</span><span class="char-name">${c.name}</span><span class="char-power">${c.power}</span>`;
+    div.innerHTML = `<div class="char-preview" style="background:${c.skin}; border: 3px solid ${c.suit}"></div><span class="char-name">${c.name}</span><span class="char-power">${c.power}</span>`;
     div.onclick = () => selectChar(c, div);
     grid.appendChild(div);
   });
@@ -348,96 +264,84 @@ function renderChars(){
 
 function selectChar(c, el){
   if(onlineMode) {
-    if(isHost) {
-      p1Sel = c;
-      document.querySelectorAll('.char-card').forEach(x=>x.classList.remove('selected-p1'));
-      el.classList.add('selected-p1');
-      if(p2Sel) sendStart();
-    } else {
-      p2Sel = c;
-      document.querySelectorAll('.char-card').forEach(x=>x.classList.remove('selected-p2'));
-      el.classList.add('selected-p2');
-      conn.send({type:'ready', p2: p2Sel.id});
-      showStatus("Waiting for Host to pick...", "success");
-    }
+    if(isHost) { p1Sel = c; document.querySelectorAll('.char-card').forEach(x=>x.classList.remove('selected-p1')); el.classList.add('selected-p1'); if(p2Sel) sendStart(); } 
+    else { p2Sel = c; document.querySelectorAll('.char-card').forEach(x=>x.classList.remove('selected-p2')); el.classList.add('selected-p2'); conn.send({type:'ready', p2: p2Sel.id}); }
     return;
   }
   if(!p1Sel){ p1Sel=c; el.classList.add('selected-p1'); } 
   if(aiMode) {
     const others = CHARS.filter(char => char.id !== p1Sel.id);
     p2Sel = others[Math.floor(Math.random() * others.length)];
-    myName = getMyName(); oppName = "AI Bot";
+    myName = document.getElementById('player-name').value || "Player"; oppName = "AI Bot";
     startFight();
   }
 }
 
 function sendStart() { conn.send({type:'start', p1: p1Sel.id, p2: p2Sel.id}); startFight(); }
 
+function applySkin(fObj, sel) {
+  const rig = document.getElementById(fObj.id);
+  rig.querySelector('.f-head').style.background = sel.skin;
+  rig.querySelector('.f-torso').style.background = sel.suit;
+  rig.querySelectorAll('.f-limb').forEach(l => l.style.background = sel.acc);
+}
+
 function startFight(){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('arena-screen').classList.add('active');
-  document.getElementById('quit-btn').style.display = 'block';
   
-  if(onlineMode) {
-    document.getElementById('p1-tag').innerText = isHost ? myName : oppName;
-    document.getElementById('p2-tag').innerText = isHost ? oppName : myName;
-  } else {
-    document.getElementById('p1-tag').innerText = myName;
-    document.getElementById('p2-tag').innerText = oppName;
-  }
+  document.getElementById('p1-tag').innerText = isHost ? myName : (onlineMode ? oppName : myName);
+  document.getElementById('p2-tag').innerText = isHost ? oppName : (onlineMode ? myName : oppName);
 
-  // Setup Graphical Models
-  document.getElementById('p1-h').innerText = p1Sel.emoji;
-  document.getElementById('p2-h').innerText = p2Sel.emoji;
-  document.getElementById('p1-b').style.backgroundColor = p1Sel.color;
-  document.getElementById('p2-b').style.backgroundColor = p2Sel.color;
-  document.getElementById('p1-b').style.boxShadow = `inset 0 0 20px rgba(0,0,0,0.5), 0 0 20px ${p1Sel.color}`;
-  document.getElementById('p2-b').style.boxShadow = `inset 0 0 20px rgba(0,0,0,0.5), 0 0 20px ${p2Sel.color}`;
-
-  // Get arena width for boundaries
-  const arenaWidth = document.getElementById('game-container').offsetWidth;
-
-  f1 = { id:'p1', x:50, y:0, vx:0, vy:0, hp:100, sp:0, w:p1Sel.w, h:p1Sel.h, color:p1Sel.color, dir:1, state:'idle', jump:false, hit:false, lastHits:0, acid:0, buff:0, parry:false, maxW: arenaWidth };
-  f2 = { id:'p2', x:arenaWidth - 100, y:0, vx:0, vy:0, hp:100, sp:0, w:p2Sel.w, h:p2Sel.h, color:p2Sel.color, dir:-1, state:'idle', jump:false, hit:false, lastHits:0, acid:0, buff:0, parry:false, maxW: arenaWidth };
+  const aW = document.getElementById('game-container').offsetWidth;
+  f1 = { id:'p1', x:50, y:0, vx:0, vy:0, hp:100, sp:0, dir:1, action:'idle', hit:false, w:40, maxW: aW, isBlocking: false };
+  f2 = { id:'p2', x:aW - 90, y:0, vx:0, vy:0, hp:100, sp:0, dir:-1, action:'idle', hit:false, w:40, maxW: aW, isBlocking: false };
   
+  applySkin(f1, p1Sel); applySkin(f2, p2Sel);
   requestAnimationFrame(gameLoop);
 }
 
 function gameLoop(){
   if(!f1 || !f2) return;
-  if(onlineMode && conn && conn.open) {
-    conn.send({type: 'keys', keys: keys});
-    if(isHost) { keys1 = keys; } else { keys2 = keys; }
+  if(onlineMode) {
+    if(conn && conn.open) {
+      conn.send({type: 'keys', keys: keys});
+      if(isHost) keys2 = keys2; else keys1 = keys1; 
+    } else { return; } // Pause if connection state is weird
   } else { keys1 = keys; }
+  
   updateFighter(f1, f2, keys1);
   updateFighter(f2, f1, aiMode ? {} : keys2);
   if(aiMode) doAI();
   draw();
   if(f1.hp > 0 && f2.hp > 0) requestAnimationFrame(gameLoop);
-  else {
-    const winner = f1.hp <= 0 ? document.getElementById('p2-tag').innerText : document.getElementById('p1-tag').innerText;
-    setTimeout(() => { alert(`${winner} WINS!`); location.reload(); }, 500);
-  }
+  else { setTimeout(() => { alert("GAME OVER"); location.reload(); }, 1000); }
 }
 
 function updateFighter(f, opp, k){
-  if(k['a']) f.vx = -5; else if(k['d']) f.vx = 5; else f.vx *= 0.8;
-  if(k['w'] && !f.jump) { f.vy = -14; f.jump = true; }
-  f.x += f.vx; f.y += f.vy; f.vy += 0.8;
-  if(f.y >= 0){ f.y=0; f.vy=0; f.jump=false; }
+  f.action = 'idle';
   
-  // Dynamic boundaries based on screen size
+  // Movement & Auto-Block Logic
+  if(k['a']) { f.vx = -5; f.action = 'walk'; } 
+  else if(k['d']) { f.vx = 5; f.action = 'walk'; } 
+  else f.vx *= 0.8;
+
+  // AUTO BLOCK: If walking away from opponent
+  f.isBlocking = ((f.dir === 1 && k['a']) || (f.dir === -1 && k['d'])) && f.y === 0;
+
+  if(k['w'] && f.y === 0) { f.vy = -14; f.action = 'jump'; }
+  f.x += f.vx; f.y += f.vy; f.vy += 0.8;
+  if(f.y >= 0){ f.y=0; f.vy=0; }
+  
   if(f.x < 0) f.x=0; 
   if(f.x > f.maxW - f.w) f.x = f.maxW - f.w;
-  
   f.dir = (f.x < opp.x) ? 1 : -1;
   
-  if(k['j']) attack(f, opp, 6, 25);
-  if(k['k']) attack(f, opp, 9, 35);
-  if(k['l'] && f.sp >= 100) doSpecial(f, opp);
+  // Attacks
+  if(k['j']) { attack(f, opp, 6, 35); f.action = 'punch'; }
+  else if(k['k']) { attack(f, opp, 9, 45); f.action = 'kick'; }
+  else if(k['l'] && f.sp >= 100) doSpecial(f, opp);
   
-  if(f.acid > 0 && Math.random() < 0.05) { f.hp -= 1; f.acid--; }
-  if(f.buff > 0) f.buff--; else { f.w = (f.id==='p1'?p1Sel:p2Sel).w; f.h = (f.id==='p1'?p1Sel:p2Sel).h; }
   f.sp = Math.min(100, f.sp + 0.15);
 }
 
@@ -445,48 +349,50 @@ function attack(f, opp, dmg, range){
   if(f.hit) return; f.hit = true; setTimeout(()=>f.hit=false, 300);
   const dist = Math.abs((f.x + f.w/2) - (opp.x + opp.w/2));
   if(dist < range + f.w/2 + opp.w/2){
-    if(opp.parry){ f.hp -= 10; opp.parry=false; return;}
-    let finalDmg = dmg * (f.buff > 0 ? 1.5 : 1);
-    opp.hp -= finalDmg; opp.vx = f.dir * 8;
+    if(opp.isBlocking) {
+      opp.hp -= dmg * 0.5; // Blocked! Take half damage, no knockback
+      showLabel(opp.id, "BLOCKED!");
+    } else {
+      opp.hp -= dmg; 
+      opp.vx = f.dir * 8; // Knockback
+    }
   }
 }
 
 function doSpecial(f, opp){
-  const char = (f.id==='p1' ? p1Sel : p2Sel).id;
-  f.sp = 0;
-  showLabel(f.id, "SPECIAL: " + char.toUpperCase() + "!");
-  switch(char){
-    case 'andi': f.buff = 240; f.w=65; f.h=80; break;
-    case 'jz': let i=0; let itv = setInterval(()=>{ f.x += f.dir * 45; attack(f, opp, 10, 40); if(++i > 3) clearInterval(itv); }, 100); break;
-    case 'dexter': opp.acid = 200; break;
-    case 'yiliang': f.x = opp.x - (f.dir * 50); setTimeout(()=>attack(f,opp,15,50), 100); break;
-    case 'sherman': f.hp = Math.min(100, f.hp+20); attack(f, opp, 15, 40); break;
-    case 'parveer': opp.hp -= 22; opp.vx = f.dir * 30; break;
-    case 'hari': f.parry = true; setTimeout(()=>f.parry=false, 2000); break;
-    case 'jerell': let j=0; let jitv = setInterval(()=>{ attack(f, opp, 12, 40); if(++j > 3) clearInterval(jitv); }, 150); break;
-    case 'karthik': opp.hp -= 15; opp.vx = f.dir * 12; break;
-  }
+  f.sp = 0; showLabel(f.id, "SPECIAL!");
+  opp.hp -= 20; opp.vx = f.dir * 15;
 }
 
 function showLabel(pid, txt){
   const l = document.getElementById(pid+'-label');
   l.innerText = txt; l.classList.add('show');
-  setTimeout(()=>l.classList.remove('show'), 1500);
+  setTimeout(()=>l.classList.remove('show'), 800);
 }
 
 function draw(){
+  const t = Date.now() / 100;
+  
   const updateF = (f, el) => {
-    // Math logic for placement relative to the screen width
-    el.style.transform = `translate(${f.x}px, ${f.y}px)`;
-    const b = el.querySelector('.fighter-body');
-    b.style.width = f.w + 'px'; b.style.height = f.h + 'px';
+    el.style.transform = `translate(${f.x}px, ${f.y}px) scaleX(${f.dir})`;
     
-    // Direction facing
-    el.querySelector('.fighter-head').style.transform = `scaleX(${f.dir})`;
+    // Procedural Animation
+    let aF = 0, aB = 0, lF = 0, lB = 0;
     
-    // Status visual effects
+    if(f.action === 'punch') { aF = 90; aB = -20; }
+    else if(f.action === 'kick') { lF = 90; aF = 40; aB = -40; }
+    else if(f.action === 'walk') {
+      aF = Math.sin(t) * 40; aB = -Math.sin(t) * 40;
+      lF = -Math.sin(t) * 45; lB = Math.sin(t) * 45;
+    }
+    
+    el.querySelector('.f-arm-f').style.transform = `rotate(${aF}deg)`;
+    el.querySelector('.f-arm-b').style.transform = `rotate(${aB}deg)`;
+    el.querySelector('.f-leg-f').style.transform = `rotate(${lF}deg)`;
+    el.querySelector('.f-leg-b').style.transform = `rotate(${lB}deg)`;
+
     if(f.hit) el.classList.add('hurt'); else el.classList.remove('hurt');
-    if(f.parry) b.classList.add('parry-glow'); else b.classList.remove('parry-glow');
+    if(f.isBlocking) el.classList.add('blocking'); else el.classList.remove('blocking');
   };
   updateF(f1, document.getElementById('p1'));
   updateF(f2, document.getElementById('p2'));
@@ -504,11 +410,9 @@ function doAI(){
   if(f2.sp >= 100) keys2['l'] = true; else keys2['l'] = false;
 }
 
-// Keyboard Listeners
 document.addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; });
 document.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
 
-// Mobile Touch Listeners (preventing default avoids screen scrolling/zooming)
 function bindTouch(id, k) {
   const btn = document.getElementById(id);
   btn.addEventListener('touchstart', e => { e.preventDefault(); keys[k] = true; btn.classList.add('pressed'); }, {passive: false});
