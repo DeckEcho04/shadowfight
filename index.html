@@ -7,18 +7,23 @@
 <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  /* LOBBY CAN SCROLL NOW */
   body, html { 
-    background: #05050a; color: #fff;
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
-    height: 100%; height: 100dvh; width: 100vw; 
-    overflow: hidden; touch-action: none; overscroll-behavior: none;
+    background: radial-gradient(circle at top, #1a1a2e 0%, #05050a 100%); 
+    color: #fff; font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
+    min-height: 100dvh; width: 100vw; 
+    overflow-x: hidden; overflow-y: auto; touch-action: pan-y;
   }
   
-  #app { height: 100%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+  #app { min-height: 100dvh; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 20px 10px; position: relative; }
   .version-badge { position: absolute; top: 10px; right: 10px; font-size: 10px; color: rgba(255,255,255,0.3); z-index: 100; }
 
-  .screen { display: none; width: 100%; max-width: 900px; padding: 10px; height: 100%; }
-  .screen.active { display: flex; flex-direction: column; justify-content: center; }
+  .screen { display: none; width: 100%; max-width: 900px; }
+  .screen.active { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
+
+  /* ARENA LOCKS SCREEN SO NO BOUNCING WHILE FIGHTING */
+  #arena-screen.active { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; padding: 0; background: #05050a; overflow: hidden; touch-action: none; justify-content: center; }
 
   /* LOBBY UI */
   #lobby-ui { background: #111122; padding: 20px; border-radius: 12px; margin: 0 auto 20px; border: 1px solid rgba(255,255,255,0.1); text-align: center; max-width: 600px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
@@ -46,8 +51,17 @@
   .char-power { font-size: 10px; color: #fbbf24; margin-top: 2px; display: block; font-weight: bold;}
   .char-preview { width: 30px; height: 30px; border-radius: 50%; margin: 0 auto; box-shadow: inset 0 0 8px rgba(0,0,0,0.6); }
 
-  /* ARENA DYNAMICS */
-  #game-container { position: relative; width: 100%; flex: 1; border-radius: 12px; overflow: hidden; border: 2px solid #2a2a4a; display: flex; flex-direction: column; transition: background 0.5s; }
+  /* ARENA DYNAMICS & SCREEN SHAKE */
+  @keyframes shake {
+    0% { transform: translate(3px, 1px) rotate(0deg); }
+    25% { transform: translate(-2px, -3px) rotate(-1deg); }
+    50% { transform: translate(-4px, 0px) rotate(1deg); }
+    75% { transform: translate(2px, 3px) rotate(0deg); }
+    100% { transform: translate(0px, 0px) rotate(0deg); }
+  }
+  .shake-anim { animation: shake 0.2s; }
+
+  #game-container { position: relative; width: 100%; flex: 1; border-radius: 12px; overflow: hidden; border: 2px solid #2a2a4a; display: flex; flex-direction: column; transition: background 0.5s; max-height: 800px; }
   #arena { position: absolute; width: 100%; height: 100%; perspective: 800px; overflow: hidden; }
   .floor { position: absolute; bottom: 0; width: 120%; left: -10%; height: 35%; transform: rotateX(70deg); transform-origin: top; transition: 0.5s; }
   
@@ -65,7 +79,7 @@
   #boss-hud { position: absolute; top: 60px; left: 50%; transform: translateX(-50%); width: 60vw; max-width: 400px; text-align: center; display: none; z-index: 9; }
 
   /* SKELETAL FIGHTERS */
-  .fighter { position: absolute; bottom: 25%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
+  .fighter { position: absolute; bottom: 25%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; transition: transform 0.05s; }
   .f-rig { position: relative; width: 40px; height: 80px; }
   .f-head { position: absolute; top: -20px; left: 50%; width: 22px; height: 26px; margin-left: -11px; border-radius: 40% 40% 50% 50%; z-index: 5; box-shadow: inset -2px -2px 6px rgba(0,0,0,0.6); transition: transform 0.1s;}
   .f-torso { position: absolute; top: 5px; left: 50%; width: 26px; height: 35px; margin-left: -13px; border-radius: 6px 6px 4px 4px; z-index: 4; box-shadow: inset 0 0 10px rgba(0,0,0,0.7); clip-path: polygon(10% 0, 90% 0, 100% 100%, 0 100%); }
@@ -75,19 +89,21 @@
   .f-leg-b { top: 35px; left: 10px; height: 35px; z-index: 1; filter: brightness(0.6); }
   .f-leg-f { top: 35px; left: 22px; height: 35px; z-index: 3; }
 
-  .boss-rig { transform: scale(1.6); transform-origin: bottom center; filter: drop-shadow(0 0 15px rgba(255,0,0,0.5)); }
-
   .hurt .f-head, .hurt .f-torso, .hurt .f-limb { filter: brightness(2) drop-shadow(0 0 10px red) !important; background: #fff !important; }
   .hurt .f-head { transform: rotate(-20deg) translate(-5px, -5px); }
   .blocking .f-arm-f { transform: rotate(-130deg) translate(0px, -5px) !important; }
   .blocking .f-arm-b { transform: rotate(130deg) !important; }
 
-  .special-label { position: absolute; top: -60px; left: 50%; transform: translateX(-50%); color: #fbbf24; font-weight: 900; font-size: 14px; opacity: 0; transition: 0.2s; text-shadow: 0 4px 10px black; z-index: 20; }
+  .special-label { position: absolute; top: -60px; left: 50%; transform: translateX(-50%); color: #ef4444; font-weight: 900; font-size: 16px; opacity: 0; transition: 0.2s; text-shadow: 0 4px 10px black; z-index: 20; }
   .special-label.show { opacity: 1; top: -80px; }
 
   /* OVERLAY CONTROLS */
   #pc-controls { position: absolute; bottom: 5px; width: 100%; text-align: center; color: rgba(255,255,255,0.4); font-size: 12px; z-index: 5; pointer-events: none; font-weight: bold; }
-  #mobile-controls { position: absolute; bottom: 10px; left: 0; width: 100%; height: 130px; display: none; justify-content: space-between; padding: 0 20px; z-index: 50; pointer-events: none; }
+  #mobile-controls { position: absolute; bottom: 15px; left: 0; width: 100%; height: 130px; display: none; justify-content: space-between; padding: 0 20px; z-index: 50; pointer-events: none; }
+  
+  /* Media Query to gracefully hide PC text on mobile */
+  @media (max-width: 768px) { #pc-controls { display: none; } }
+
   .d-pad, .action-pad { pointer-events: auto; display: grid; gap: 8px; grid-template-columns: 55px 55px 55px; grid-template-rows: 55px 55px; }
   #btn-up { grid-column: 2; grid-row: 1; } #btn-left { grid-column: 1; grid-row: 2; } #btn-right { grid-column: 3; grid-row: 2; }
   #btn-sp { grid-column: 2; grid-row: 1; } #btn-punch { grid-column: 1; grid-row: 2; } #btn-kick { grid-column: 3; grid-row: 2; }
@@ -101,7 +117,7 @@
 <body>
 
 <div id="app">
-  <div class="version-badge">v0.3.5 (Co-op & Map Update)</div>
+  <div class="version-badge">v0.3.6 (The Cinematic Juice Update)</div>
 
   <div id="select-screen" class="screen active">
     <div id="lobby-ui">
@@ -175,7 +191,7 @@
         
         <div id="p3" class="fighter" style="display:none;">
           <div class="special-label" id="p3-label">SLAM!</div>
-          <div class="f-rig boss-rig"><div class="f-head" style="background:#450a0a;"></div><div class="f-arm-b f-limb" style="background:#7f1d1d;"></div><div class="f-torso" style="background:#200; border-color:#ef4444;"></div><div class="f-leg-b f-limb" style="background:#7f1d1d;"></div><div class="f-leg-f f-limb" style="background:#b91c1c;"></div><div class="f-arm-f f-limb" style="background:#b91c1c;"></div></div>
+          <div class="f-rig"><div class="f-head" style="background:#450a0a;"></div><div class="f-arm-b f-limb" style="background:#7f1d1d;"></div><div class="f-torso" style="background:#200; border-color:#ef4444;"></div><div class="f-leg-b f-limb" style="background:#7f1d1d;"></div><div class="f-leg-f f-limb" style="background:#b91c1c;"></div><div class="f-arm-f f-limb" style="background:#b91c1c;"></div></div>
         </div>
 
       </div>
@@ -208,14 +224,13 @@ const MAPS = {
 
 let peer, conn, myPeerId, isHost = false, onlineMode = false;
 let myName = "", oppName = "Opponent";
-let p1Sel=null, p2Sel=null, f1, f2, f3; // f3 is Boss
-let keys1 = {}, keys2 = {}, keys = {}, keys3 = {}; // keys3 for AI
+let p1Sel=null, p2Sel=null, f1, f2, f3; 
+let keys1 = {}, keys2 = {}, keys = {}, keys3 = {}; 
 let activeMode = '1v1', activeMap = 'alley';
 
 function checkMobileUI() {
   if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
     document.getElementById('mobile-controls').style.display = 'flex';
-    document.getElementById('pc-controls').style.display = 'none';
   }
 }
 
@@ -258,7 +273,7 @@ function connectToFriend() {
   const friendId = document.getElementById('join-id').value.toUpperCase().trim();
   if(!friendId) { showStatus("Paste an ID to join.", "error"); return; }
   
-  peer = new Peer(); // Joiner doesn't need specific ID
+  peer = new Peer(); 
   peer.on('open', () => {
     showStatus("Searching...", "success");
     conn = peer.connect(friendId);
@@ -281,7 +296,7 @@ function setupDataListeners() {
     }
     if (data.type === 'ready') { p2Sel = CHARS.find(c => c.id === data.p2); if(p1Sel) sendStart(); }
     
-    // SYNC FIX: Host receives keys into keys2, Joiner receives keys into keys1
+    // INPUT ROUTING FIX
     if (data.type === 'keys') { if (isHost) keys2 = data.keys; else keys1 = data.keys; }
     
     if (data.type === 'start') { 
@@ -322,6 +337,13 @@ function selectChar(c, el){
       document.querySelectorAll('.char-card').forEach(x=>x.classList.remove('selected-p2')); el.classList.add('selected-p2'); 
       conn.send({type:'ready', p2: p2Sel.id}); 
     }
+  } else {
+    if(!checkName()) return;
+    p1Sel = c;
+    const others = CHARS.filter(char => char.id !== p1Sel.id);
+    p2Sel = others[Math.floor(Math.random() * others.length)];
+    oppName = "AI Bot";
+    startFight();
   }
 }
 
@@ -354,14 +376,13 @@ function startFight(){
   
   applyMap();
 
-  document.getElementById('p1-tag').innerText = isHost ? myName : oppName;
-  document.getElementById('p2-tag').innerText = isHost ? oppName : myName;
+  document.getElementById('p1-tag').innerText = isHost ? myName : (onlineMode ? oppName : myName);
+  document.getElementById('p2-tag').innerText = isHost ? oppName : (onlineMode ? myName : oppName);
 
   const aW = document.getElementById('game-container').offsetWidth;
   
-  // Set Teams based on Mode
   const team1 = 1;
-  const team2 = activeMode === 'coop' ? 1 : 2; // In co-op, both are team 1
+  const team2 = activeMode === 'coop' ? 1 : 2;
 
   f1 = { id:'p1', x:50, y:0, vx:0, vy:0, hp:100, sp:0, dir:1, action:'idle', hit:false, w:40, maxW: aW, isBlocking: false, team: team1 };
   f2 = { id:'p2', x:aW - 90, y:0, vx:0, vy:0, hp:100, sp:0, dir:-1, action:'idle', hit:false, w:40, maxW: aW, isBlocking: false, team: team2 };
@@ -380,24 +401,25 @@ function startFight(){
 function gameLoop(){
   if(!f1 || !f2) return;
   
-  // SYNC FIX: Map local keys to the correct local player, and send them.
-  if(onlineMode && conn && conn.open) {
-    conn.send({type: 'keys', keys: keys});
+  // THE PC CONTROLS FREEZE FIX: Always assign local keys immediately
+  if(onlineMode) {
     if(isHost) { keys1 = keys; } else { keys2 = keys; }
+    if(conn && conn.open) conn.send({type: 'keys', keys: keys});
+  } else { 
+    keys1 = keys; 
   }
   
   updateFighter(f1, f2, keys1, f3);
   updateFighter(f2, f1, keys2, f3);
   
   if(activeMode === 'coop' && f3 && f3.hp > 0) {
-    if(isHost) doBossAI(); // Only host calculates Boss AI to prevent desync
-    updateFighter(f3, f1, keys3, f2); // Boss attacks closest
+    if(isHost || !onlineMode) doBossAI(); 
+    updateFighter(f3, f1, keys3, f2); 
     document.getElementById('hp-3').style.width = (f3.hp / f3.maxHp * 100) + '%';
   }
 
   draw();
 
-  // Win/Loss logic
   if(activeMode === 'coop') {
     if(f3.hp <= 0) { setTimeout(() => { alert("BOSS DEFEATED! YOU WIN!"); location.reload(); }, 1000); return; }
     if(f1.hp <= 0 && f2.hp <= 0) { setTimeout(() => { alert("BOTH PLAYERS DIED. GAME OVER."); location.reload(); }, 1000); return; }
@@ -425,7 +447,6 @@ function updateFighter(f, opp, k, opp2){
   
   if(f.x < 0) f.x=0; if(f.x > f.maxW - f.w) f.x = f.maxW - f.w;
   
-  // Find closest valid target for direction and attacks
   let target = opp;
   if(opp2 && opp2.hp > 0) {
     const d1 = Math.abs(f.x - opp.x); const d2 = Math.abs(f.x - opp2.x);
@@ -441,6 +462,14 @@ function updateFighter(f, opp, k, opp2){
   f.sp = Math.min(100, f.sp + 0.15);
 }
 
+// SCREEN SHAKE TRIGGERED HERE
+function triggerShake() {
+  const arena = document.getElementById('game-container');
+  arena.classList.remove('shake-anim');
+  void arena.offsetWidth; // Trigger reflow
+  arena.classList.add('shake-anim');
+}
+
 function attack(f, o1, o2, dmg, range){
   if(f.hit) return; f.hit = true; setTimeout(()=>f.hit=false, f.id === 'p3' ? 600 : 300);
   
@@ -448,11 +477,13 @@ function attack(f, o1, o2, dmg, range){
     if(!opp || opp.hp <= 0 || f.team === opp.team) return;
     const dist = Math.abs((f.x + f.w/2) - (opp.x + opp.w/2));
     if(dist < range + f.w/2 + opp.w/2){
+      triggerShake();
       if(opp.isBlocking) {
-        opp.hp -= dmg * 0.5; showLabel(opp.id, "BLOCKED!");
+        opp.hp -= dmg * 0.5; showLabel(opp.id, "BLOCKED", "#a1a1aa");
       } else {
         opp.hp -= dmg; opp.vx = f.dir * 8;
-        if(f.id === 'p3') { opp.vx = f.dir * 15; opp.vy = -5; showLabel(f.id, "BOSS SLAM!"); }
+        if(f.id === 'p3') { opp.vx = f.dir * 15; opp.vy = -5; showLabel(opp.id, `-${dmg} SLAM!`, "#ef4444"); }
+        else { showLabel(opp.id, `-${dmg} DMG!`, "#ef4444"); }
       }
     }
   });
@@ -460,15 +491,28 @@ function attack(f, o1, o2, dmg, range){
 
 function doSpecial(f, opp){
   if(!opp) return;
-  f.sp = 0; showLabel(f.id, "SPECIAL!");
-  opp.hp -= 20; opp.vx = f.dir * 15;
+  f.sp = 0; showLabel(f.id, "SPECIAL!", "#fbbf24");
+  opp.hp -= 20; opp.vx = f.dir * 15; triggerShake();
+}
+
+function showLabel(pid, txt, color){
+  const l = document.getElementById(pid+'-label');
+  l.innerText = txt; l.style.color = color;
+  l.classList.add('show');
+  setTimeout(()=>l.classList.remove('show'), 800);
 }
 
 function draw(){
   const t = Date.now() / 100;
   const updateF = (f, el) => {
     if(f.hp <= 0) return;
-    el.style.transform = `translate(${f.x}px, ${f.y}px) scaleX(${f.dir})`;
+    
+    // DYNAMIC HULK SCALING LOGIC
+    let scale = 1;
+    if(f.id === 'p3') scale = 1.6;
+    else if((f.id==='p1'?p1Sel:p2Sel).id === 'andi' && f.buff > 0) scale = 1.4; // Andi grows 40% when buffed!
+
+    el.style.transform = `translate(${f.x}px, ${f.y}px) scaleX(${f.dir * scale}) scaleY(${scale})`;
     let aF = 0, aB = 0, lF = 0, lB = 0;
     
     if(f.action === 'punch') { aF = 90; aB = -20; }
