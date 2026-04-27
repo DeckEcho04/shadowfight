@@ -40,8 +40,9 @@
   .char-grid.locked { opacity: 0.3; filter: grayscale(100%); pointer-events: none; }
   .char-card { background: linear-gradient(180deg, #1e1e3f 0%, #111122 100%); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); padding: 15px 10px; text-align: center; cursor: pointer; opacity: 0.5; transition: 0.2s; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
   .char-card.unlocked { opacity: 1; pointer-events: auto; }
-  .char-card.selected-p1 { border-color: #6366f1; background: linear-gradient(180deg, #312e81 0%, #1e1b4b 100%); box-shadow: 0 0 20px rgba(79, 70, 229, 0.6); transform: scale(1.05); }
-  .char-card.selected-p2 { border-color: #ef4444; background: linear-gradient(180deg, #7f1d1d 0%, #450a0a 100%); box-shadow: 0 0 20px rgba(239, 68, 68, 0.6); transform: scale(1.05); }
+  .char-card.unlocked:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.4); box-shadow: 0 8px 20px rgba(0,0,0,0.6); }
+  .char-card.selected-p1 { border-color: #6366f1; background: linear-gradient(180deg, #312e81 0%, #1e1b4b 100%); box-shadow: 0 0 20px rgba(79, 70, 229, 0.6); transform: scale(1.05); z-index: 2; position: relative; }
+  .char-card.selected-p2 { border-color: #ef4444; background: linear-gradient(180deg, #7f1d1d 0%, #450a0a 100%); box-shadow: 0 0 20px rgba(239, 68, 68, 0.6); transform: scale(1.05); z-index: 2; position: relative; }
   .char-name { font-size: 15px; font-weight: 900; display: block; margin-top: 8px;}
   .char-power { font-size: 10px; margin-top: 2px; display: block; font-weight: 800; text-transform: uppercase;}
   .char-icon { width: 50px; height: 50px; margin: 0 auto; border-radius: 14px; background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(0,0,0,0.4) 100%); box-shadow: inset 0px 2px 4px rgba(255,255,255,0.5), 0 5px 10px rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
@@ -51,7 +52,7 @@
   @keyframes shake { 0%{transform:translate(4px,2px);} 25%{transform:translate(-3px,-4px);} 50%{transform:translate(-6px,0px);} 75%{transform:translate(3px,4px);} 100%{transform:translate(0,0);} }
   .shake-anim { animation: shake 0.25s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
 
-  #game-container { position: relative; width: 100%; flex: 1; border-radius: 12px; overflow: hidden; border: 2px solid #2a2a4a; display: flex; flex-direction: column; max-height: 800px; }
+  #game-container { position: relative; width: 100%; flex: 1; border-radius: 12px; overflow: hidden; border: 2px solid #2a2a4a; display: flex; flex-direction: column; max-height: 800px; background-size: cover; background-position: center bottom; }
   #arena { position: absolute; width: 100%; height: 100%; perspective: 800px; overflow: hidden; }
   .floor { position: absolute; bottom: 0; width: 120%; left: -10%; height: 35%; transform: rotateX(70deg); transform-origin: top; }
   
@@ -59,7 +60,7 @@
   .hud { position: absolute; top: 0; width: 100%; padding: 12px 15px; display: flex; justify-content: space-between; z-index: 10; background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%); }
   .player-tag { font-size: 12px; font-weight: 900; text-transform: uppercase; margin-bottom: 4px; text-shadow: 0 2px 4px black; letter-spacing: 1px; }
   .hp-bar-bg { width: 35vw; max-width: 280px; height: 16px; background: rgba(0,0,0,0.7); border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); }
-  .hp-bar-fill { height: 100%; border-radius: 8px;}
+  .hp-bar-fill { height: 100%; border-radius: 8px; transition: width 0.15s ease-out;}
   .hp-p1 { background: linear-gradient(90deg, #4f46e5, #a5b4fc); }
   .hp-p2 { background: linear-gradient(90deg, #ef4444, #fca5a5); }
   .hp-boss { background: linear-gradient(90deg, #7f1d1d, #ef4444); width: 100%; }
@@ -70,22 +71,18 @@
   /* K.O. VICTORY SCREEN */
   #victory-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; backdrop-filter: blur(5px); }
   #victory-ko { font-size: 120px; color: #ef4444; font-style: italic; font-weight: 900; text-shadow: 0 0 30px red, 5px 5px 0px #7f1d1d; margin-bottom: -10px; line-height: 1; }
-  #victory-name { font-size: 35px; font-weight: 900; color: #fff; text-transform: uppercase; letter-spacing: 3px; text-shadow: 0 4px 10px rgba(0,0,0,0.8); }
-  .rematch-btn { margin-top: 40px; padding: 15px 40px; font-size: 18px; border-radius: 30px; }
+  #winner-name { font-size: 35px; font-weight: 900; color: #fff; text-transform: uppercase; letter-spacing: 3px; text-shadow: 0 4px 10px rgba(0,0,0,0.8); }
+  .rematch-btn { margin-top: 40px; padding: 15px 40px; font-size: 18px; border-radius: 30px; background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 5px 20px rgba(16, 185, 129, 0.4); border: none; color: white; cursor: pointer; font-weight: bold; text-transform: uppercase; }
 
-  /* PARTICLES */
   .particle { position: absolute; width: 6px; height: 6px; background: #fbbf24; border-radius: 50%; pointer-events: none; z-index: 50; box-shadow: 0 0 10px #ef4444, 0 0 20px #fbbf24; }
 
-  /* SKELETAL FIGHTERS WITH INVERSE KINEMATICS (JOINTED LIMBS) */
+  /* SKELETAL FIGHTERS WITH INVERSE KINEMATICS */
   .fighter { position: absolute; bottom: 25%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
-  
-  /* THE RIG IS WHAT FLIPS, THE TEXT STAYS UN-MIRRORED */
   .f-rig { position: relative; width: 40px; height: 80px; transition: transform 0.05s; }
   
   .f-head { position: absolute; top: -20px; left: 50%; width: 22px; height: 26px; margin-left: -11px; border-radius: 40% 40% 50% 50%; z-index: 5; box-shadow: inset -2px -2px 6px rgba(0,0,0,0.6);}
   .f-torso { position: absolute; top: 5px; left: 50%; width: 26px; height: 35px; margin-left: -13px; border-radius: 6px 6px 4px 4px; z-index: 4; box-shadow: inset 0 0 10px rgba(0,0,0,0.7); clip-path: polygon(10% 0, 90% 0, 100% 100%, 0 100%); }
   
-  /* Jointed Limbs using CSS Pseudo-Elements & CSS Variables */
   .f-limb { position: absolute; width: 8px; border-radius: 4px; transform-origin: top center; box-shadow: inset -1px -1px 4px rgba(0,0,0,0.6); }
   .f-limb::after { content: ''; position: absolute; top: calc(100% - 4px); left: 0; width: 100%; height: 100%; background: inherit; border-radius: inherit; transform-origin: top center; box-shadow: inherit; transform: rotate(var(--joint, 0deg)); transition: transform 0.05s; }
   
@@ -99,8 +96,9 @@
   /* Damage Effects */
   .hurt .f-head, .hurt .f-torso, .hurt .f-limb { filter: brightness(2) drop-shadow(0 0 10px red) !important; background: #fff !important; }
   .hurt .f-head { transform: rotate(-20deg) translate(-5px, -5px); }
+  .blocking .f-arm-f { transform: rotate(-130deg) translate(0px, -5px) !important; }
+  .blocking .f-arm-b { transform: rotate(130deg) !important; }
 
-  /* DECOUPLED TEXT LABEL (WON'T MIRROR) */
   .special-label { position: absolute; top: -60px; left: 50%; transform: translateX(-50%); color: #ef4444; font-weight: 900; font-size: 16px; opacity: 0; transition: 0.1s; text-shadow: 0 4px 10px black; z-index: 20; width: 200px; text-align: center; pointer-events: none;}
   .special-label.show { opacity: 1; top: -80px; }
 
@@ -118,7 +116,7 @@
 <body>
 
 <div id="app">
-  <div class="version-badge">v0.3.8 (The Game Feel Update)</div>
+  <div class="version-badge">v0.3.9 (SPA Rematch & Realms Update)</div>
 
   <div id="select-screen" class="screen active">
     <div id="lobby-ui">
@@ -171,7 +169,7 @@
     <div id="victory-screen">
       <div id="victory-ko">K.O.</div>
       <div id="winner-name">PLAYER WINS</div>
-      <button class="rematch-btn" onclick="location.reload()">Return to Lobby</button>
+      <button class="rematch-btn" onclick="handleRematch()">Return to Lobby</button>
     </div>
 
     <div id="game-container">
@@ -188,19 +186,9 @@
         <div class="floor" id="arena-floor"></div>
         <div id="pc-controls">[A][D] Move &nbsp;|&nbsp; [W] Jump &nbsp;|&nbsp; [J] Punch &nbsp;|&nbsp; [K] Kick &nbsp;|&nbsp; [L] Special</div>
 
-        <div id="p1" class="fighter">
-          <div class="special-label" id="p1-label"></div>
-          <div class="f-rig"><div class="f-head"></div><div class="f-arm-b f-limb"></div><div class="f-torso"></div><div class="f-leg-b f-limb"></div><div class="f-leg-f f-limb"></div><div class="f-arm-f f-limb"></div></div>
-        </div>
-        <div id="p2" class="fighter">
-          <div class="special-label" id="p2-label"></div>
-          <div class="f-rig"><div class="f-head"></div><div class="f-arm-b f-limb"></div><div class="f-torso"></div><div class="f-leg-b f-limb"></div><div class="f-leg-f f-limb"></div><div class="f-arm-f f-limb"></div></div>
-        </div>
-        
-        <div id="p3" class="fighter" style="display:none;">
-          <div class="special-label" id="p3-label"></div>
-          <div class="f-rig boss-rig"><div class="f-head" style="background:#450a0a;"></div><div class="f-arm-b f-limb" style="background:#7f1d1d;"></div><div class="f-torso" style="background:#200; border-color:#ef4444;"></div><div class="f-leg-b f-limb" style="background:#7f1d1d;"></div><div class="f-leg-f f-limb" style="background:#b91c1c;"></div><div class="f-arm-f f-limb" style="background:#b91c1c;"></div></div>
-        </div>
+        <div id="p1" class="fighter"><div class="special-label" id="p1-label"></div><div class="f-rig"><div class="f-head"></div><div class="f-arm-b f-limb"></div><div class="f-torso"></div><div class="f-leg-b f-limb"></div><div class="f-leg-f f-limb"></div><div class="f-arm-f f-limb"></div></div></div>
+        <div id="p2" class="fighter"><div class="special-label" id="p2-label"></div><div class="f-rig"><div class="f-head"></div><div class="f-arm-b f-limb"></div><div class="f-torso"></div><div class="f-leg-b f-limb"></div><div class="f-leg-f f-limb"></div><div class="f-arm-f f-limb"></div></div></div>
+        <div id="p3" class="fighter" style="display:none;"><div class="special-label" id="p3-label"></div><div class="f-rig boss-rig"><div class="f-head" style="background:#450a0a;"></div><div class="f-arm-b f-limb" style="background:#7f1d1d;"></div><div class="f-torso" style="background:#200; border-color:#ef4444;"></div><div class="f-leg-b f-limb" style="background:#7f1d1d;"></div><div class="f-leg-f f-limb" style="background:#b91c1c;"></div><div class="f-arm-f f-limb" style="background:#b91c1c;"></div></div></div>
       </div>
       <div id="mobile-controls">
         <div class="d-pad"><div class="touch-btn" id="btn-up">↑</div><div class="touch-btn" id="btn-left">←</div><div class="touch-btn" id="btn-right">→</div></div>
@@ -223,10 +211,11 @@ const CHARS = [
   { id:'jerell', name:'Jerell', power:'IQ Strike', skin:'#ffffff', suit:'#000000', acc:'#e2e8f0', icon: '<path d="M12 15.5C8.5 15.5 5 12 5 12s3.5-3.5 7-3.5 7 3.5 7 3.5-3.5 3.5-7 3.5zm0-5a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"/>' }
 ];
 
+// ADVANCED MAP CSS (Sun, Grass, Red Moon)
 const MAPS = {
   alley: { bg: 'linear-gradient(180deg, #0f172a 0%, #1e1b4b 100%)', floor: '#0c0a20', grid: '#4f46e5' },
-  dojo:  { bg: 'linear-gradient(180deg, #7c2d12 0%, #f59e0b 100%)', floor: '#451a03', grid: '#fcd34d' },
-  mamak: { bg: 'linear-gradient(180deg, #171717 0%, #404040 100%)', floor: '#262626', grid: '#facc15' }
+  dojo:  { bg: 'radial-gradient(circle at 50% 50%, #ef4444 10%, transparent 20%), linear-gradient(180deg, #7c2d12 0%, #f59e0b 60%, #000 100%)', floor: '#451a03', grid: '#fcd34d' },
+  mamak: { bg: 'radial-gradient(circle at 70% 30%, #fde047 10%, transparent 15%), linear-gradient(180deg, #38bdf8 0%, #bae6fd 50%, #4ade80 50%, #166534 100%)', floor: '#262626', grid: '#facc15' }
 };
 
 let peer, conn, myPeerId, isHost = true, onlineMode = false;
@@ -234,13 +223,11 @@ let myName = "", oppName = "Opponent";
 let p1Sel=null, p2Sel=null, f1, f2, f3; 
 let keys1 = {}, keys2 = {}, keys = {}, keys3 = {}; 
 let activeMode = '1v1', activeMap = 'alley';
-let hitStopFrames = 0; // The Game Feel Freeze!
+let hitStopFrames = 0;
+let isGameOver = false; // Prevents multiple KOs and page reloads
 
-function checkMobileUI() {
-  if ('ontouchstart' in window || navigator.maxTouchPoints > 0) { document.getElementById('mobile-controls').style.display = 'flex'; }
-}
+function checkMobileUI() { if ('ontouchstart' in window || navigator.maxTouchPoints > 0) document.getElementById('mobile-controls').style.display = 'flex'; }
 
-// STRICT NAME LOCK
 document.getElementById('player-name').addEventListener('input', (e) => {
   if(e.target.value.trim().length > 0) document.getElementById('char-list').classList.remove('locked');
   else document.getElementById('char-list').classList.add('locked');
@@ -253,7 +240,14 @@ window.onload = () => {
   const randomId = Math.floor(1000 + Math.random() * 9000);
   myPeerId = `SF-${randomId}`; peer = new Peer(myPeerId);
   peer.on('open', id => { document.getElementById('my-peer-id').innerText = id; });
-  peer.on('connection', c => { conn = c; isHost = true; onlineMode = true; setupDataListeners(); showStatus("Opponent Connected!", "success"); });
+  
+  // HOST CONNECTION OVERWRITE LOGIC
+  peer.on('connection', c => { 
+    if(conn && conn.open) conn.close(); // Clean up old connection if a new friend joins
+    conn = c; isHost = true; onlineMode = true; 
+    setupDataListeners(); showStatus("Opponent Connected!", "success"); 
+  });
+  peer.on('error', err => { document.getElementById('my-peer-id').innerText = "Failed. Refresh."; });
 };
 
 function showStatus(text, type) {
@@ -273,14 +267,15 @@ function connectToFriend() {
   const friendId = document.getElementById('join-id').value.toUpperCase().trim();
   if(!friendId) { showStatus("Paste an ID to join.", "error"); return; }
   
-  peer.destroy(); peer = new Peer(); 
+  if(peer) peer.destroy(); // Clear old peer to generate a new connection if needed
+  peer = new Peer(); 
   peer.on('open', () => {
     showStatus("Searching...", "success");
     conn = peer.connect(friendId);
     isHost = false; onlineMode = true;
     setupDataListeners();
   });
-  peer.on('error', err => showStatus("Session not found.", "error"));
+  peer.on('error', err => showStatus("Session not found. Try again.", "error"));
 }
 
 function setupDataListeners() {
@@ -292,7 +287,7 @@ function setupDataListeners() {
   conn.on('data', data => {
     if (data.type === 'hello') {
       oppName = data.name; showStatus(`Connected to: ${oppName}!`, "success");
-      if(isHost) { myName = document.getElementById('player-name').value.trim(); conn.send({type: 'hello', name: myName}); }
+      if(isHost) { myName = document.getElementById('player-name').value.trim() || "Host"; conn.send({type: 'hello', name: myName}); }
     }
     if (data.type === 'ready') { p2Sel = CHARS.find(c => c.id === data.p2); if(p1Sel) sendStart(); }
     if (data.type === 'keys') { if (isHost) keys2 = data.keys; else keys1 = data.keys; }
@@ -300,18 +295,20 @@ function setupDataListeners() {
       p1Sel = CHARS.find(c => c.id === data.p1); p2Sel = CHARS.find(c => c.id === data.p2); 
       activeMap = data.map; activeMode = data.mode; startFight(); 
     }
+    // REMATCH LOGIC (Receiving end)
+    if (data.type === 'rematch') { resetToLobby(); }
   });
 
   conn.on('close', () => {
-    if (onlineMode && f1 && f1.hp > 0 && f2 && f2.hp > 0) { alert("Match ended: Player disconnected."); location.reload(); }
+    if (onlineMode) { alert("Opponent disconnected."); location.reload(); }
   });
 }
 
 function renderChars(){
   const grid = document.getElementById('char-list');
+  grid.innerHTML = '';
   CHARS.forEach(c=>{
-    const div = document.createElement('div');
-    div.className = 'char-card';
+    const div = document.createElement('div'); div.className = 'char-card';
     div.innerHTML = `<div class="char-icon" style="background-color:${c.suit}"><svg viewBox="0 0 24 24">${c.icon}</svg></div><span class="char-name">${c.name}</span><span class="char-power" style="color:${c.acc}">${c.power}</span>`;
     div.onclick = () => { if(!grid.classList.contains('locked')) selectChar(c, div); }
     grid.appendChild(div);
@@ -339,16 +336,14 @@ function pickAI() {
 }
 
 function sendStart() { 
-  activeMap = document.getElementById('map-select').value;
-  activeMode = document.getElementById('mode-select').value;
+  activeMap = document.getElementById('map-select').value; activeMode = document.getElementById('mode-select').value;
   conn.send({type:'start', p1: p1Sel.id, p2: p2Sel.id, map: activeMap, mode: activeMode}); 
   startFight(); 
 }
 
 function applySkin(fObj, sel) {
   const rig = document.getElementById(fObj.id);
-  rig.querySelector('.f-head').style.background = sel.skin;
-  rig.querySelector('.f-torso').style.background = sel.suit;
+  rig.querySelector('.f-head').style.background = sel.skin; rig.querySelector('.f-torso').style.background = sel.suit;
   rig.querySelectorAll('.f-limb').forEach(l => l.style.background = sel.acc);
 }
 
@@ -356,12 +351,27 @@ function applyMap() {
   const m = MAPS[activeMap];
   document.getElementById('game-container').style.background = m.bg;
   const floor = document.getElementById('arena-floor');
-  floor.style.backgroundColor = m.floor;
-  floor.style.borderTopColor = m.grid;
+  floor.style.backgroundColor = m.floor; floor.style.borderTopColor = m.grid;
   floor.style.backgroundImage = `linear-gradient(90deg, ${m.grid}40 1px, transparent 1px), linear-gradient(${m.grid}40 1px, transparent 1px)`;
 }
 
+// REMATCH / LOBBY RESET LOGIC (No Reloads)
+function resetToLobby() {
+  isGameOver = false;
+  document.getElementById('victory-screen').style.display = 'none';
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('select-screen').classList.add('active');
+  p1Sel = null; p2Sel = null; keys = {}; keys1 = {}; keys2 = {};
+  document.querySelectorAll('.char-card').forEach(c => { c.classList.remove('selected-p1', 'selected-p2'); });
+}
+
+function handleRematch() {
+  resetToLobby();
+  if(onlineMode && conn && conn.open) conn.send({type: 'rematch'});
+}
+
 function startFight(){
+  isGameOver = false;
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('arena-screen').classList.add('active');
   
@@ -377,21 +387,25 @@ function startFight(){
 
   if(activeMode === 'coop') {
     document.getElementById('boss-hud').style.display = 'block'; document.getElementById('p3').style.display = 'flex';
-    f3 = { id:'p3', x: aW/2, y:0, vx:0, vy:0, hp:400, maxHp:400, sp:0, dir:-1, action:'idle', hit:false, w:60, maxW: aW, isBlocking: false, team: 2 };
+    f3 = { id:'p3', x: aW/2, y:0, vx:0, vy:0, hp:200, maxHp:200, sp:0, dir:-1, action:'idle', hit:false, w:60, maxW: aW, isBlocking: false, team: 2 }; // BOSS NERFED
+  } else {
+    document.getElementById('boss-hud').style.display = 'none'; document.getElementById('p3').style.display = 'none'; f3 = null;
   }
   requestAnimationFrame(gameLoop);
 }
 
-function showVictory(winnerText) {
+function triggerKO(winnerText) {
+  if(isGameOver) return;
+  isGameOver = true;
   document.getElementById('winner-name').innerText = winnerText;
   document.getElementById('victory-screen').style.display = 'flex';
 }
 
 function gameLoop(){
-  // GAME FEEL: Hit Stop Engine Freeze
+  if(isGameOver) return;
   if(hitStopFrames > 0) { hitStopFrames--; requestAnimationFrame(gameLoop); return; }
-
   if(!f1 || !f2) return;
+
   if(onlineMode && conn && conn.open) {
     if(isHost) { keys1 = keys; } else { keys2 = keys; }
     conn.send({type: 'keys', keys: keys});
@@ -407,21 +421,23 @@ function gameLoop(){
   }
   draw();
 
-  // CINEMATIC VICTORY CHECKS
+  // SYNCED VICTORY CHECKS
   if(activeMode === 'coop') {
-    if(f3.hp <= 0) { setTimeout(() => showVictory("PLAYERS WIN!"), 800); return; }
-    if(f1.hp <= 0 && f2.hp <= 0) { setTimeout(() => showVictory("BOSS WINS!"), 800); return; }
+    if(f3 && f3.hp <= 0) { triggerKO("PLAYERS WIN!"); }
+    else if(f1.hp <= 0 && f2.hp <= 0) { triggerKO("BOSS WINS!"); }
   } else {
     if(f1.hp <= 0 || f2.hp <= 0) { 
       const winner = f1.hp <= 0 ? document.getElementById('p2-tag').innerText : document.getElementById('p1-tag').innerText;
-      setTimeout(() => showVictory(`${winner} WINS!`), 800); return; 
+      triggerKO(`${winner} WINS!`); 
     }
   }
-  requestAnimationFrame(gameLoop);
+
+  if(!isGameOver) requestAnimationFrame(gameLoop);
 }
 
 function updateFighter(f, opp, k, opp2){
   if(f.hp <= 0) { document.getElementById(f.id).style.display = 'none'; return; }
+  else { document.getElementById(f.id).style.display = 'flex'; }
   f.action = 'idle';
   
   if(k['a']) { f.vx = -6; f.action = 'walk'; } else if(k['d']) { f.vx = 6; f.action = 'walk'; } else f.vx *= 0.8;
@@ -452,33 +468,26 @@ function triggerShake() {
   arena.classList.remove('shake-anim'); void arena.offsetWidth; arena.classList.add('shake-anim');
 }
 
-// PARTICLE ENGINE
 function spawnParticles(x, y, dir) {
   for(let i=0; i<6; i++) {
-    const p = document.createElement('div'); p.className = 'particle';
-    document.getElementById('arena').appendChild(p);
+    const p = document.createElement('div'); p.className = 'particle'; document.getElementById('arena').appendChild(p);
     let vx = dir * (Math.random() * 8 + 4); let vy = (Math.random() - 1) * 12; let life = 20;
     let cx = x + 20; let cy = y - 40;
     const anim = () => {
       if(life <= 0) { p.remove(); return; }
       cx += vx; cy += vy; vy += 1; p.style.transform = `translate(${cx}px, ${cy}px)`; p.style.opacity = life / 20;
       life--; requestAnimationFrame(anim);
-    };
-    requestAnimationFrame(anim);
+    }; requestAnimationFrame(anim);
   }
 }
 
 function attack(f, o1, o2, dmg, range){
   if(f.hit) return; f.hit = true; setTimeout(()=>f.hit=false, f.id === 'p3' ? 600 : 300);
-  
   [o1, o2].forEach(opp => {
     if(!opp || opp.hp <= 0 || f.team === opp.team) return;
     const dist = Math.abs((f.x + f.w/2) - (opp.x + opp.w/2));
     if(dist < range + f.w/2 + opp.w/2){
-      triggerShake();
-      spawnParticles(opp.x, opp.y, f.dir);
-      hitStopFrames = 4; // GAME FEEL: Freeze engine for 4 frames!
-      
+      triggerShake(); spawnParticles(opp.x, opp.y, f.dir); hitStopFrames = 4;
       if(opp.isBlocking) {
         opp.hp -= dmg * 0.5; showLabel(opp.id, "BLOCKED", "#a1a1aa");
       } else {
@@ -491,14 +500,12 @@ function attack(f, o1, o2, dmg, range){
 }
 
 function doSpecial(f, opp){
-  if(!opp) return;
-  f.sp = 0; showLabel(f.id, "SPECIAL!", "#fbbf24");
+  if(!opp) return; f.sp = 0; showLabel(f.id, "SPECIAL!", "#fbbf24");
   opp.hp -= 20; opp.vx = f.dir * 20; triggerShake(); spawnParticles(opp.x, opp.y, f.dir); hitStopFrames = 8;
 }
 
 function showLabel(pid, txt, color){
-  const l = document.getElementById(pid+'-label');
-  l.innerText = txt; l.style.color = color;
+  const l = document.getElementById(pid+'-label'); l.innerText = txt; l.style.color = color;
   l.classList.add('show'); setTimeout(()=>l.classList.remove('show'), 800);
 }
 
@@ -506,47 +513,26 @@ function draw(){
   const t = Date.now() / 100;
   const updateF = (f, el) => {
     if(f.hp <= 0) return;
-    
     let scale = f.id === 'p3' ? 1.6 : (((f.id==='p1'?p1Sel:p2Sel).id === 'andi' && f.buff > 0) ? 1.4 : 1);
+    el.style.transform = `translate(${f.x}px, ${f.y}px)`; el.querySelector('.f-rig').style.transform = `scaleX(${f.dir * scale}) scaleY(${scale})`;
     
-    // DECOUPLED MIRRORING: The container handles X/Y, the Rig handles flipping!
-    el.style.transform = `translate(${f.x}px, ${f.y}px)`;
-    el.querySelector('.f-rig').style.transform = `scaleX(${f.dir * scale}) scaleY(${scale})`;
-    
-    // INVERSE KINEMATICS (JOINT ANIMATIONS)
-    let aF = 20, aB = -10, lF = 10, lB = -10; // Thigh/Shoulder
-    let j_aF = -40, j_aB = -30, j_lF = 20, j_lB = 10; // Knee/Elbow
-
+    let aF = 20, aB = -10, lF = 10, lB = -10, j_aF = -40, j_aB = -30, j_lF = 20, j_lB = 10; 
     if(f.action === 'punch') { aF = -90; j_aF = 0; aB = 20; j_aB = -60; lF = -20; j_lF = 30; }
     else if(f.action === 'kick') { lF = -100; j_lF = 0; aF = 40; j_aF = -40; aB = -40; j_aB = -20; lB = 10; j_lB = 20; }
     else if(f.action === 'walk') {
-      aF = Math.sin(t) * -40; j_aF = -20 + Math.sin(t) * -20; 
-      aB = Math.sin(t) * 40; j_aB = -20 - Math.sin(t) * -20;
-      lF = Math.sin(t) * -50; j_lF = Math.max(0, Math.sin(t) * 40); 
-      lB = Math.sin(t) * 50; j_lB = Math.max(0, -Math.sin(t) * 40);
-    } else {
-      // Bouncy Idle
-      const bob = Math.sin(t*2) * 2;
-      el.querySelector('.f-rig').style.transform += ` translateY(${bob}px)`;
-    }
+      aF = Math.sin(t) * -40; j_aF = -20 + Math.sin(t) * -20; aB = Math.sin(t) * 40; j_aB = -20 - Math.sin(t) * -20;
+      lF = Math.sin(t) * -50; j_lF = Math.max(0, Math.sin(t) * 40); lB = Math.sin(t) * 50; j_lB = Math.max(0, -Math.sin(t) * 40);
+    } else { const bob = Math.sin(t*2) * 2; el.querySelector('.f-rig').style.transform += ` translateY(${bob}px)`; }
     
-    // Apply Primary Rotation
-    el.querySelector('.f-arm-f').style.transform = `rotate(${aF}deg)`;
-    el.querySelector('.f-arm-b').style.transform = `rotate(${aB}deg)`;
-    el.querySelector('.f-leg-f').style.transform = `rotate(${lF}deg)`;
-    el.querySelector('.f-leg-b').style.transform = `rotate(${lB}deg)`;
-    
-    // Apply Joint Rotation via CSS Variables
-    el.querySelector('.f-arm-f').style.setProperty('--joint', `${j_aF}deg`);
-    el.querySelector('.f-arm-b').style.setProperty('--joint', `${j_aB}deg`);
-    el.querySelector('.f-leg-f').style.setProperty('--joint', `${j_lF}deg`);
-    el.querySelector('.f-leg-b').style.setProperty('--joint', `${j_lB}deg`);
+    el.querySelector('.f-arm-f').style.transform = `rotate(${aF}deg)`; el.querySelector('.f-arm-b').style.transform = `rotate(${aB}deg)`;
+    el.querySelector('.f-leg-f').style.transform = `rotate(${lF}deg)`; el.querySelector('.f-leg-b').style.transform = `rotate(${lB}deg)`;
+    el.querySelector('.f-arm-f').style.setProperty('--joint', `${j_aF}deg`); el.querySelector('.f-arm-b').style.setProperty('--joint', `${j_aB}deg`);
+    el.querySelector('.f-leg-f').style.setProperty('--joint', `${j_lF}deg`); el.querySelector('.f-leg-b').style.setProperty('--joint', `${j_lB}deg`);
 
     if(f.hit) el.classList.add('hurt'); else el.classList.remove('hurt');
     if(f.isBlocking) el.classList.add('blocking'); else el.classList.remove('blocking');
   };
   updateF(f1, document.getElementById('p1')); updateF(f2, document.getElementById('p2')); if(f3) updateF(f3, document.getElementById('p3'));
-  
   document.getElementById('hp-1').style.width = Math.max(0, f1.hp) + '%'; document.getElementById('hp-2').style.width = Math.max(0, f2.hp) + '%';
   document.getElementById('sp-1').style.width = f1.sp + '%'; document.getElementById('sp-2').style.width = f2.sp + '%';
 }
@@ -556,7 +542,7 @@ function doBossAI(){
   if(f1.hp <= 0) target = f2; else if(f2.hp > 0 && Math.abs(f3.x - f2.x) < Math.abs(f3.x - f1.x)) target = f2;
   const dist = Math.abs(f3.x - target.x);
   if (dist > 80) { keys3['a'] = f3.x > target.x; keys3['d'] = f3.x < target.x; } 
-  else { keys3['a'] = false; keys3['d'] = false; keys3['j'] = Math.random() < 0.08; keys3['k'] = Math.random() < 0.05; }
+  else { keys3['a'] = false; keys3['d'] = false; keys3['j'] = Math.random() < 0.03; keys3['k'] = Math.random() < 0.02; } // NERFED
 }
 
 document.addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; }); document.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
