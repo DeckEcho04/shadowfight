@@ -60,6 +60,7 @@
   #arena { position: absolute; width: 100%; height: 100%; perspective: 1000px; overflow: hidden; }
   .floor { position: absolute; bottom: 0; width: 120%; left: -10%; height: 40%; transform: rotateX(75deg); transform-origin: top; box-shadow: 0 -30px 60px rgba(0,0,0,0.9); }
   
+  /* NEW HIGH-END VFX ENGINE */
   #vfx-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 15; overflow: hidden;}
   .vfx-base { position: absolute; bottom: 25%; pointer-events: none; z-index: 15; }
   .vfx-ring { border-radius: 50%; opacity: 1; animation: explodeRing 0.4s ease-out forwards; }
@@ -110,6 +111,7 @@
   .fighter { position: absolute; bottom: 25%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
   .f-rig { position: relative; width: 40px; height: 80px; transition: transform 0.05s, width 0.3s; }
   
+  /* HULK OUT CSS */
   .hulk-mode { transform: scale(1.3) !important; transform-origin: bottom center; filter: drop-shadow(0 0 10px #22c55e); }
   .hulk-mode .f-limb { width: 14px; border-radius: 7px; }
   .hulk-mode .f-torso { width: 36px; margin-left: -18px; border-radius: 10px 10px 4px 4px; }
@@ -158,14 +160,14 @@
 <body>
 
 <div id="app">
-  <div class="version-badge">v0.6.0 (The Netcode & Firewall Patch)</div>
+  <div class="version-badge">v0.6.5 (The Delta-Time Engine Update)</div>
 
   <div id="select-screen" class="screen active">
     <div id="lobby-ui">
       <div class="id-box" id="host-panel">
         <div>
           <div style="font-size:11px; color:#a5b4fc; font-weight:900; text-transform:uppercase;">Your Session ID:</div>
-          <div class="my-id" id="my-peer-id">Loading...</div>
+          <div class="my-id" id="my-peer-id">Connecting...</div>
         </div>
         <div style="text-align:right;">
           <label style="font-size:10px; color:#aaa; font-weight:bold; text-transform:uppercase;">Map:</label><br>
@@ -281,7 +283,6 @@ const MAPS = {
   mamak: { bg: 'radial-gradient(circle at 80% 30%, #fde047 10%, transparent 12%), linear-gradient(180deg, #38bdf8 0%, #7dd3fc 45%, #22c55e 45%, #14532d 50%, #171717 50%)', floor: '#262626', grid: '#facc15' }
 };
 
-// ADDING GOOGLE STUN SERVERS TO PUNCH THROUGH FIREWALLS
 const peerConfig = {
     config: {
         'iceServers': [
@@ -331,7 +332,7 @@ window.onload = () => {
   });
   peer.on('error', err => { 
       if(err.type === 'unavailable-id') {
-          myPeerId = generateIDStr(); peer = new Peer(myPeerId, peerConfig); // Retry if taken
+          myPeerId = generateIDStr(); peer = new Peer(myPeerId, peerConfig); 
       } else {
           document.getElementById('my-peer-id').innerText = "Failed. Refresh."; 
       }
@@ -366,7 +367,6 @@ function connectToFriend() {
     isHost = false; onlineMode = true;
     p1Score = 0; p2Score = 0; updateScoreboard();
     
-    // INCREASED TIMEOUT FOR MOBILE NAT TRAVERSAL
     connTimeout = setTimeout(() => {
         if(conn && !conn.open) {
             showStatus("Firewall blocked connection. Try hosting instead.", "error");
@@ -494,6 +494,10 @@ function handleRematch() {
   if(onlineMode && conn && conn.open) conn.send({type: 'rematch'});
 }
 
+// 60 FPS GOVERNOR VARIABLES
+let lastTime = 0;
+const fpsInterval = 1000 / 60; // 16.66ms per frame
+
 function startFight(){
   isGameOver = false;
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
@@ -519,6 +523,8 @@ function startFight(){
   } else {
     document.getElementById('boss-hud').style.display = 'none'; document.getElementById('p3').style.display = 'none'; f3 = null;
   }
+  
+  lastTime = performance.now();
   requestAnimationFrame(gameLoop);
 }
 
@@ -538,47 +544,57 @@ function triggerKO(winnerText, sendSignal = true) {
   document.getElementById('victory-screen').style.display = 'flex';
   
   if(sendSignal && onlineMode && conn && conn.open) {
-    conn.send({type: 'gameover', winner: winnerText, s1: p1Score, s2: p2Score});
+    try { conn.send({type: 'gameover', winner: winnerText, s1: p1Score, s2: p2Score}); } catch(e){}
   }
 }
 
-function gameLoop(){
+// DELTA-TIME 60 FPS GAME LOOP
+function gameLoop(timestamp){
   if(isGameOver) return;
-  if(hitStopFrames > 0) { hitStopFrames--; requestAnimationFrame(gameLoop); return; }
-  if(!f1 || !f2) return;
-
-  if(onlineMode && conn && conn.open) {
-    if(isHost) { 
-      keys1 = keys; 
-      conn.send({type: 'sync', hp1: f1.hp, hp2: f2.hp, hp3: f3?f3.hp:0, x1: f1.x, x2: f2.x, s1: p1Score, s2: p2Score});
-    } else { keys2 = keys; }
-    conn.send({type: 'keys', keys: keys});
-  } else { keys1 = keys; }
+  requestAnimationFrame(gameLoop); // Queue next frame immediately
   
-  updateFighter(f1, f2, keys1, f3);
-  updateFighter(f2, f1, keys2, f3);
+  if(!lastTime) lastTime = timestamp;
+  const elapsed = timestamp - lastTime;
   
-  if(activeMode === 'coop' && f3 && f3.hp > 0) {
-    if(isHost || !onlineMode) doBossAI(); 
-    updateFighter(f3, f1, keys3, f2); 
-    document.getElementById('hp-3').style.width = (f3.hp / f3.maxHp * 100) + '%';
-  }
-  draw();
+  // Only run physics if 16.6ms have passed (60fps)
+  if(elapsed > fpsInterval) {
+      lastTime = timestamp - (elapsed % fpsInterval);
 
-  if(isHost || !onlineMode) {
-    if(activeMode === 'coop') {
-      if(f3 && f3.hp <= 0) { triggerKO("PLAYERS WIN!"); }
-      else if(f1.hp <= 0 && f2.hp <= 0) { triggerKO("BOSS WINS!"); }
-    } else {
-      if(f1.hp <= 0 || f2.hp <= 0) { 
-        let p1Name = isHost ? myName : oppName; let p2Name = isHost ? oppName : myName;
-        const winner = f1.hp <= 0 ? p2Name : p1Name;
-        triggerKO(`${winner} WINS!`); 
+      if(hitStopFrames > 0) { hitStopFrames--; return; } // Pauses physics safely
+
+      if(onlineMode && conn && conn.open) {
+        if(isHost) { 
+          keys1 = keys; 
+          try { conn.send({type: 'sync', hp1: f1.hp, hp2: f2.hp, hp3: f3?f3.hp:0, x1: f1.x, x2: f2.x, s1: p1Score, s2: p2Score}); } catch(e){}
+        } else { keys2 = keys; }
+        try { conn.send({type: 'keys', keys: keys}); } catch(e){}
+      } else { keys1 = keys; }
+      
+      updateFighter(f1, f2, keys1, f3);
+      updateFighter(f2, f1, keys2, f3);
+      
+      if(activeMode === 'coop' && f3 && f3.hp > 0) {
+        if(isHost || !onlineMode) doBossAI(); 
+        updateFighter(f3, f1, keys3, f2); 
+        document.getElementById('hp-3').style.width = (f3.hp / f3.maxHp * 100) + '%';
       }
-    }
-  }
+      
+      draw();
 
-  if(!isGameOver) requestAnimationFrame(gameLoop);
+      // GAME OVER CHECK
+      if(isHost || !onlineMode) {
+        if(activeMode === 'coop') {
+          if(f3 && f3.hp <= 0) { triggerKO("PLAYERS WIN!"); }
+          else if(f1.hp <= 0 && f2.hp <= 0) { triggerKO("BOSS WINS!"); }
+        } else {
+          if(f1.hp <= 0 || f2.hp <= 0) { 
+            let p1Name = isHost ? myName : oppName; let p2Name = isHost ? oppName : myName;
+            const winner = f1.hp <= 0 ? p2Name : p1Name;
+            triggerKO(`${winner} WINS!`); 
+          }
+        }
+      }
+  }
 }
 
 function updateFighter(f, opp, k, opp2){
@@ -705,6 +721,7 @@ function doSpecial(f, opp){
     f.action = 'special_active'; 
     let count = 0;
     const runInt = setInterval(() => {
+        if(isGameOver) { clearInterval(runInt); return; }
         f.x += f.dir * 10; count++;
         if(Math.abs(f.x - opp.x) < 60 || count > 30) {
             clearInterval(runInt); f.action = 'idle'; hitStopFrames = 10;
@@ -748,6 +765,7 @@ function doSpecial(f, opp){
     showLabel(f.id, "DHOL BEAT!", "#ea580c");
     let beat = 0;
     const dholInt = setInterval(() => {
+        if(isGameOver) { clearInterval(dholInt); return; }
         createVFX('ring', f.x, f.y, '#facc15'); triggerShake();
         if(!opp.isBlocking) { opp.hp -= (beat===2 ? 14 : 13); opp.vx = f.dir * 10; } else { opp.hp -= 3; }
         if(++beat > 2) clearInterval(dholInt);
@@ -757,6 +775,7 @@ function doSpecial(f, opp){
     showLabel(f.id, "ZZZ...", "#60a5fa");
     let z = 0;
     const zInt = setInterval(() => {
+        if(isGameOver) { clearInterval(zInt); return; }
         createVFX('text', f.x, f.y, '#60a5fa', 'Z'); createVFX('projectile', f.x, f.y, '#60a5fa', '', f.dir, opp.x);
         setTimeout(() => { if(!opp.isBlocking) { opp.hp -= (z===2 ? 14 : 13); opp.vx = f.dir * 5; triggerShake();} else { opp.hp-=3; } }, 400);
         if(++z > 2) clearInterval(zInt);
@@ -777,6 +796,7 @@ function doSpecial(f, opp){
   else if (charId === 'jz') { 
     showLabel(f.id, "RHYTHM DASH!", "#ec4899"); let count = 0;
     const dash = setInterval(() => {
+      if(isGameOver) { clearInterval(dash); return; }
       f.x += f.dir * 45; spawnParticles(f.x, f.y, f.dir * -1, '#ec4899'); triggerShake('heavy');
       if(Math.abs(f.x - opp.x) < 70) { if(!opp.isBlocking){ opp.hp -= (count===2 ? 14 : 13); opp.vx = f.dir * 10; } else { opp.hp-=3;} }
       if(++count > 2) clearInterval(dash);
@@ -786,6 +806,11 @@ function doSpecial(f, opp){
     f.x = opp.x - (opp.dir * 60); createVFX('smoke', f.x, f.y, '#94a3b8');
     setTimeout(() => { applyDamage(opp, 40, f.dir, true); }, 300);
   }
+}
+
+function showLabel(pid, txt, color){
+  const l = document.getElementById(pid+'-label'); l.innerText = txt; l.style.color = color;
+  l.classList.add('show'); setTimeout(()=>l.classList.remove('show'), 800);
 }
 
 function draw(){
