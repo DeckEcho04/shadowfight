@@ -66,19 +66,24 @@
   .vfx-ring { border-radius: 50%; opacity: 1; animation: explodeRing 0.4s ease-out forwards; }
   @keyframes explodeRing { 0% { transform: translate(var(--vx), var(--vy)) scale(0); border-width: 15px; } 100% { transform: translate(var(--vx), var(--vy)) scale(3.5); opacity: 0; border-width: 0px; } }
   .vfx-acid { background: rgba(34, 197, 94, 0.5); border-radius: 50%; transform: translate(var(--vx), calc(var(--vy) + 60px)) rotateX(70deg); box-shadow: 0 0 30px #22c55e, inset 0 0 30px #22c55e; filter: blur(2px); width: 180px; height: 50px; }
-  .vfx-smoke { width: 180px; height: 180px; background: radial-gradient(circle, rgba(148,163,184,1) 0%, rgba(71,85,105,0.8) 40%, transparent 70%); border-radius: 50%; opacity: 1; animation: smokePoof 0.8s ease-out forwards; filter: blur(10px); mix-blend-mode: screen; }
+  .vfx-smoke { width: 180px; height: 180px; background: radial-gradient(circle, rgba(148,163,184,1) 0%, rgba(245, 158, 11,0.8) 40%, transparent 70%); border-radius: 50%; opacity: 1; animation: smokePoof 0.8s ease-out forwards; filter: blur(10px); mix-blend-mode: screen; }
   @keyframes smokePoof { 0% { transform: translate(var(--vx), var(--vy)) scale(0.2); opacity: 1; } 100% { transform: translate(var(--vx), var(--vy)) scale(2.5); opacity: 0; } }
   .vfx-crosshair { width: 80px; height: 80px; border: 6px solid #dc2626; border-radius: 50%; opacity: 0; animation: lockOn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; box-shadow: 0 0 15px #dc2626, inset 0 0 15px #dc2626;}
   .vfx-crosshair::before, .vfx-crosshair::after { content: ''; position: absolute; background: #dc2626; box-shadow: 0 0 8px #dc2626;}
   .vfx-crosshair::before { top: 50%; left: -20px; right: -20px; height: 6px; margin-top: -3px; }
   .vfx-crosshair::after { left: 50%; top: -20px; bottom: -20px; width: 6px; margin-left: -3px; }
   @keyframes lockOn { 0% { transform: translate(var(--vx), var(--vy)) scale(4) rotate(90deg); opacity: 0; } 100% { transform: translate(var(--vx), var(--vy)) scale(1) rotate(0deg); opacity: 1; } }
-  .vfx-projectile { width: 25px; height: 25px; border-radius: 50%; animation: flyAcross 0.4s linear forwards; }
-  @keyframes flyAcross { 0% { transform: translate(var(--start-x), var(--start-y)); } 100% { transform: translate(var(--end-x), var(--end-y)); } }
+  
+  .vfx-projectile { width: 35px; height: 35px; border-radius: 50%; animation: flyAcross 0.4s linear forwards; }
+  @keyframes flyAcross { 0% { transform: translate(var(--start-x), var(--start-y)) rotate(0deg); } 100% { transform: translate(var(--end-x), var(--end-y)) rotate(360deg); } }
+  
   .vfx-text { font-family: monospace; font-weight: bold; font-size: 24px; animation: floatUp 1s ease-out forwards; text-shadow: 0 0 10px currentColor; }
   @keyframes floatUp { 0% { transform: translate(var(--vx), var(--vy)) scale(0.5); opacity: 1; } 100% { transform: translate(var(--vx), calc(var(--vy) - 80px)) scale(1.5); opacity: 0; } }
-  .vfx-comic { font-family: Impact, sans-serif; font-weight: 900; font-size: 60px; font-style: italic; letter-spacing: 2px; text-transform: uppercase; animation: kapow 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; text-shadow: 4px 4px 0px #fff, 0 0 20px currentColor; }
-  @keyframes kapow { 0% { transform: translate(var(--vx), var(--vy)) scale(0) rotate(-20deg); opacity: 1; } 80% { transform: translate(var(--vx), var(--vy)) scale(1.2) rotate(10deg); opacity: 1; } 100% { transform: translate(var(--vx), calc(var(--vy) + 20px)) scale(1) rotate(0deg); opacity: 0; } }
+  
+  /* FIXED KARTHIK COMIC TEXT */
+  .vfx-comic { position: absolute; font-family: Impact, sans-serif; font-weight: 900; font-size: 80px; font-style: italic; letter-spacing: 2px; text-transform: uppercase; animation: kapow 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; text-shadow: 4px 4px 0px #fff, 0 0 20px currentColor; z-index: 100; white-space: nowrap; }
+  @keyframes kapow { 0% { transform: translate(var(--vx), var(--vy)) scale(0) rotate(-15deg); opacity: 1; } 80% { transform: translate(var(--vx), var(--vy)) scale(1) rotate(5deg); opacity: 1; } 100% { transform: translate(var(--vx), calc(var(--vy) + 20px)) scale(0.8) rotate(0deg); opacity: 0; } }
+  
   .vfx-paper { width: 80px; height: 100px; background: white; border: 2px solid #ccc; font-family: impact; color: red; font-size: 40px; text-align: center; line-height: 100px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); animation: dropDown 0.4s ease-in forwards; }
   @keyframes dropDown { 0% { transform: translate(var(--vx), -200px) rotate(45deg); } 100% { transform: translate(var(--vx), var(--vy)) rotate(0deg); } }
 
@@ -107,18 +112,22 @@
 
   .particle { position: absolute; width: 8px; height: 8px; background: #fbbf24; border-radius: 50%; pointer-events: none; z-index: 50; box-shadow: 0 0 15px #ef4444, 0 0 25px #fbbf24; }
 
-  /* SKELETAL FIGHTERS & MUSCLE CLASSES */
+  /* SKELETAL FIGHTERS & PROPS */
   .fighter { position: absolute; bottom: 25%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
   .f-rig { position: relative; width: 40px; height: 80px; transition: transform 0.05s, width 0.3s; }
   
-  /* HULK OUT CSS */
   .hulk-mode { transform: scale(1.3) !important; transform-origin: bottom center; filter: drop-shadow(0 0 10px #22c55e); }
   .hulk-mode .f-limb { width: 14px; border-radius: 7px; }
   .hulk-mode .f-torso { width: 36px; margin-left: -18px; border-radius: 10px 10px 4px 4px; }
   .hulk-mode .f-arm-b { left: 0px; } .hulk-mode .f-arm-f { left: 22px; }
 
-  .f-head { position: absolute; top: -20px; left: 50%; width: 22px; height: 26px; margin-left: -11px; border-radius: 40% 40% 50% 50%; z-index: 5; box-shadow: inset -2px -2px 6px rgba(0,0,0,0.6);}
-  .f-torso { position: absolute; top: 5px; left: 50%; width: 26px; height: 35px; margin-left: -13px; border-radius: 6px 6px 4px 4px; z-index: 4; box-shadow: inset 0 0 10px rgba(0,0,0,0.7); clip-path: polygon(10% 0, 90% 0, 100% 100%, 0 100%); transition: width 0.3s, margin-left 0.3s; }
+  /* PARV'S DHOL PROP */
+  .dhol-prop { position: absolute; font-size: 35px; top: 10px; left: -5px; display: none; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.8)); z-index: 10; pointer-events: none;}
+  .dhol-active .dhol-prop { display: block; animation: drumBounce 0.3s infinite alternate; }
+  @keyframes drumBounce { 0% { transform: scale(1) rotate(-5deg); } 100% { transform: scale(1.1) rotate(5deg); } }
+
+  .f-head { position: absolute; top: -20px; left: 50%; width: 22px; height: 26px; margin-left: -11px; border-radius: 40% 40% 50% 50%; z-index: 5; box-shadow: inset -2px -2px 6px rgba(0,0,0,0.6); transition: transform 0.1s;}
+  .f-torso { position: absolute; top: 5px; left: 50%; width: 26px; height: 35px; margin-left: -13px; border-radius: 6px 6px 4px 4px; z-index: 4; box-shadow: inset 0 0 10px rgba(0,0,0,0.7); clip-path: polygon(10% 0, 90% 0, 100% 100%, 0 100%); transition: width 0.3s, margin-left 0.3s, transform 0.1s; }
   .f-limb { position: absolute; width: 8px; border-radius: 4px; transform-origin: top center; box-shadow: inset -1px -1px 4px rgba(0,0,0,0.6); transition: width 0.3s; }
   .f-limb::after { content: ''; position: absolute; top: calc(100% - 4px); left: 0; width: 100%; height: 100%; background: inherit; border-radius: inherit; transform-origin: top center; box-shadow: inherit; transform: rotate(var(--joint, 0deg)); transition: transform 0.05s; }
   
@@ -160,7 +169,7 @@
 <body>
 
 <div id="app">
-  <div class="version-badge">v0.6.5 (The Delta-Time Engine Update)</div>
+  <div class="version-badge">v0.6.6 (The Meme & Prop Update)</div>
 
   <div id="select-screen" class="screen active">
     <div id="lobby-ui">
@@ -222,8 +231,8 @@
         <div id="vfx-layer"></div>
         <div id="pc-controls">[A][D] Move &nbsp;|&nbsp; [W] Jump &nbsp;|&nbsp; [B] Block &nbsp;|&nbsp; [J] Punch &nbsp;|&nbsp; [K] Kick &nbsp;|&nbsp; [L] Special</div>
 
-        <div id="p1" class="fighter"><div class="special-label" id="p1-label"></div><div class="f-rig"><div class="f-head"></div><div class="f-arm-b f-limb"></div><div class="f-torso"></div><div class="f-leg-b f-limb"></div><div class="f-leg-f f-limb"></div><div class="f-arm-f f-limb"></div></div></div>
-        <div id="p2" class="fighter"><div class="special-label" id="p2-label"></div><div class="f-rig"><div class="f-head"></div><div class="f-arm-b f-limb"></div><div class="f-torso"></div><div class="f-leg-b f-limb"></div><div class="f-leg-f f-limb"></div><div class="f-arm-f f-limb"></div></div></div>
+        <div id="p1" class="fighter"><div class="special-label" id="p1-label"></div><div class="f-rig"><div class="f-head"></div><div class="f-arm-b f-limb"></div><div class="f-torso"><div class="dhol-prop">🥁</div></div><div class="f-leg-b f-limb"></div><div class="f-leg-f f-limb"></div><div class="f-arm-f f-limb"></div></div></div>
+        <div id="p2" class="fighter"><div class="special-label" id="p2-label"></div><div class="f-rig"><div class="f-head"></div><div class="f-arm-b f-limb"></div><div class="f-torso"><div class="dhol-prop">🥁</div></div><div class="f-leg-b f-limb"></div><div class="f-leg-f f-limb"></div><div class="f-arm-f f-limb"></div></div></div>
         <div id="p3" class="fighter" style="display:none;"><div class="special-label" id="p3-label"></div><div class="f-rig boss-rig"><div class="f-head" style="background:#450a0a;"></div><div class="f-arm-b f-limb" style="background:#7f1d1d;"></div><div class="f-torso" style="background:#200; border-color:#ef4444;"></div><div class="f-leg-b f-limb" style="background:#7f1d1d;"></div><div class="f-leg-f f-limb" style="background:#b91c1c;"></div><div class="f-arm-f f-limb" style="background:#b91c1c;"></div></div></div>
       </div>
       
@@ -270,7 +279,7 @@ const CHARS = [
   { id:'jz', name:'JZ', power:'Rhythm Dash', skin:'#fbcfe8', suit:'#111827', acc:'#ec4899', icon: '<path stroke="#fff" stroke-width="2" stroke-linecap="round" d="M12 3v18m-4-14v10m8-10v10m-12-6v2m16-2v2"/>' },
   { id:'dexter', name:'Dexter', power:'Acid Spit', skin:'#e2b999', suit:'#3b0764', acc:'#a855f7', icon: '<path d="M12 2c0 0-7 7-7 11a7 7 0 0014 0c0-4-7-11-7-11z"/>' },
   { id:'yiliang', name:'Yi Liang', power:'Smoke Vanish', skin:'#f1f5f9', suit:'#475569', acc:'#94a3b8', icon: '<path d="M19 14.5a3.5 3.5 0 00-6.5-1.7A4.5 4.5 0 005.5 15c0 2 1.6 3.5 3.5 3.5h10a3.5 3.5 0 000-7z"/>' },
-  { id:'sherman', name:'Sherman', power:'Beer Wave', skin:'#fcd34d', suit:'#78350f', acc:'#f59e0b', icon: '<path d="M7 2h10v3l-3 4v11H10V9L7 5V2z"/>' },
+  { id:'sherman', name:'Sherman', power:'Beer Volley', skin:'#fcd34d', suit:'#78350f', acc:'#f59e0b', icon: '<path d="M7 2h10v3l-3 4v11H10V9L7 5V2z"/>' },
   { id:'parv', name:'Parv', power:'Dhol Beat', skin:'#d2a881', suit:'#ea580c', acc:'#facc15', icon: '<path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 16a6 6 0 110-12 6 6 0 010 12z"/>' },
   { id:'hari', name:'Hari', power:'Sleepwalk', skin:'#93c5fd', suit:'#1e3a8a', acc:'#60a5fa', icon: '<path d="M12 3a9 9 0 109 9c-1.6 0-3-1.4-3-3s1.4-3 3-3a9 9 0 00-9-3z"/>' },
   { id:'jerell', name:'Jerell', power:'A+ Paper', skin:'#ffffff', suit:'#000000', acc:'#e2e8f0', icon: '<path d="M12 15.5C8.5 15.5 5 12 5 12s3.5-3.5 7-3.5 7 3.5 7 3.5-3.5 3.5-7 3.5zm0-5a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"/>' },
@@ -487,6 +496,8 @@ function resetToLobby() {
   document.getElementById('vfx-layer').innerHTML = ''; 
   document.getElementById('p1').querySelector('.f-rig').classList.remove('hulk-mode');
   document.getElementById('p2').querySelector('.f-rig').classList.remove('hulk-mode');
+  document.getElementById('p1').querySelector('.f-torso').classList.remove('dhol-active');
+  document.getElementById('p2').querySelector('.f-torso').classList.remove('dhol-active');
 }
 
 function handleRematch() {
@@ -494,9 +505,8 @@ function handleRematch() {
   if(onlineMode && conn && conn.open) conn.send({type: 'rematch'});
 }
 
-// 60 FPS GOVERNOR VARIABLES
 let lastTime = 0;
-const fpsInterval = 1000 / 60; // 16.66ms per frame
+const fpsInterval = 1000 / 60; 
 
 function startFight(){
   isGameOver = false;
@@ -548,19 +558,17 @@ function triggerKO(winnerText, sendSignal = true) {
   }
 }
 
-// DELTA-TIME 60 FPS GAME LOOP
 function gameLoop(timestamp){
   if(isGameOver) return;
-  requestAnimationFrame(gameLoop); // Queue next frame immediately
+  requestAnimationFrame(gameLoop); 
   
   if(!lastTime) lastTime = timestamp;
   const elapsed = timestamp - lastTime;
   
-  // Only run physics if 16.6ms have passed (60fps)
   if(elapsed > fpsInterval) {
       lastTime = timestamp - (elapsed % fpsInterval);
 
-      if(hitStopFrames > 0) { hitStopFrames--; return; } // Pauses physics safely
+      if(hitStopFrames > 0) { hitStopFrames--; return; } 
 
       if(onlineMode && conn && conn.open) {
         if(isHost) { 
@@ -581,7 +589,6 @@ function gameLoop(timestamp){
       
       draw();
 
-      // GAME OVER CHECK
       if(isHost || !onlineMode) {
         if(activeMode === 'coop') {
           if(f3 && f3.hp <= 0) { triggerKO("PLAYERS WIN!"); }
@@ -600,7 +607,7 @@ function gameLoop(timestamp){
 function updateFighter(f, opp, k, opp2){
   f.maxW = document.getElementById('game-container').offsetWidth;
 
-  if(f.action !== 'special_active') {
+  if(f.action !== 'special_active' && f.action !== 'dhol_beat' && f.action !== 'karthik_meme') {
       f.action = 'idle';
       if(k['b']) { f.isBlocking = true; f.vx *= 0.5; } 
       else {
@@ -621,9 +628,9 @@ function updateFighter(f, opp, k, opp2){
     const d1 = Math.abs(f.x - opp.x); const d2 = Math.abs(f.x - opp2.x);
     if(d2 < d1 && f.team !== opp2.team) target = opp2;
   }
-  if(target && target.hp > 0 && f.action !== 'special_active') f.dir = (f.x < target.x) ? 1 : -1;
+  if(target && target.hp > 0 && f.action !== 'special_active' && f.action !== 'dhol_beat' && f.action !== 'karthik_meme') f.dir = (f.x < target.x) ? 1 : -1;
   
-  if(!f.isBlocking && f.action !== 'special_active') {
+  if(!f.isBlocking && f.action !== 'special_active' && f.action !== 'dhol_beat' && f.action !== 'karthik_meme') {
     if(k['j']) { attack(f, opp, opp2, 6, 45); f.action = 'punch'; }
     else if(k['k']) { attack(f, opp, opp2, 9, 55); f.action = 'kick'; }
     else if(k['l'] && f.sp >= 100) doSpecial(f, target);
@@ -668,9 +675,18 @@ function createVFX(type, x, y, color, text = '', dir = 1, destX = 0) {
   } else if (type === 'text') {
     vfx.style.color = color; vfx.innerText = text;
   } else if (type === 'comic') {
+    // THE FIX: Clamping logic so text doesn't cut off at the edges
+    let maxW = document.getElementById('game-container').offsetWidth;
+    let safeX = Math.max(100, Math.min(x + 20, maxW - 200)); 
+    vfx.style.setProperty('--vx', `${safeX}px`);
     vfx.style.color = color; vfx.innerText = text;
   } else if (type === 'projectile') {
-    vfx.style.background = color; vfx.style.boxShadow = `0 0 20px ${color}`;
+    if(text) {
+        vfx.innerText = text; vfx.style.background = 'transparent'; vfx.style.boxShadow = 'none'; vfx.style.fontSize = '40px';
+        vfx.style.display = 'flex'; vfx.style.alignItems = 'center'; vfx.style.justifyContent = 'center';
+    } else {
+        vfx.style.background = color; vfx.style.boxShadow = `0 0 20px ${color}`;
+    }
     vfx.style.setProperty('--start-x', `${x + (dir*40)}px`); vfx.style.setProperty('--start-y', `${y - 40}px`);
     vfx.style.setProperty('--end-x', `${destX}px`); vfx.style.setProperty('--end-y', `${y - 20}px`);
   } else if (type === 'paper') {
@@ -718,12 +734,12 @@ function doSpecial(f, opp){
   
   if (charId === 'karthik') { 
     showLabel(f.id, "WAIT FOR IT...", "#4f46e5");
-    f.action = 'special_active'; 
+    f.action = 'karthik_meme'; 
     let count = 0;
     const runInt = setInterval(() => {
         if(isGameOver) { clearInterval(runInt); return; }
-        f.x += f.dir * 10; count++;
-        if(Math.abs(f.x - opp.x) < 60 || count > 30) {
+        count++;
+        if(count > 25) {
             clearInterval(runInt); f.action = 'idle'; hitStopFrames = 10;
             createVFX('comic', opp.x, opp.y, '#4f46e5', 'SIX!');
             if(!opp.isBlocking) { opp.hp -= 15; opp.vx = f.dir * 5; } else { opp.hp -= 5; }
@@ -753,30 +769,32 @@ function doSpecial(f, opp){
     }, 400);
   }
   else if (charId === 'sherman') { 
-    showLabel(f.id, "BEER BURP!", "#f59e0b");
+    showLabel(f.id, "HAVE A DRINK!", "#f59e0b");
     f.action = 'special_active'; 
-    f.vx = f.dir * 15; 
+    createVFX('projectile', f.x, f.y, 'transparent', '🍺', f.dir, opp.x);
     setTimeout(() => {
-        createVFX('smoke', f.x + (f.dir*50), f.y, '#f59e0b'); f.action = 'idle';
-        if(Math.abs(f.x - opp.x) < 100) applyDamage(opp, 40, f.dir, true);
-    }, 300);
+        f.action = 'idle';
+        applyDamage(opp, 40, f.dir, true);
+        createVFX('smoke', opp.x, opp.y, '#f59e0b');
+    }, 400);
   }
   else if (charId === 'parv') { 
     showLabel(f.id, "DHOL BEAT!", "#ea580c");
+    f.action = 'dhol_beat';
     let beat = 0;
     const dholInt = setInterval(() => {
         if(isGameOver) { clearInterval(dholInt); return; }
         createVFX('ring', f.x, f.y, '#facc15'); triggerShake();
         if(!opp.isBlocking) { opp.hp -= (beat===2 ? 14 : 13); opp.vx = f.dir * 10; } else { opp.hp -= 3; }
-        if(++beat > 2) clearInterval(dholInt);
-    }, 300);
+        if(++beat > 2) { clearInterval(dholInt); setTimeout(() => f.action = 'idle', 300); }
+    }, 400);
   }
   else if (charId === 'hari') { 
     showLabel(f.id, "ZZZ...", "#60a5fa");
     let z = 0;
     const zInt = setInterval(() => {
         if(isGameOver) { clearInterval(zInt); return; }
-        createVFX('text', f.x, f.y, '#60a5fa', 'Z'); createVFX('projectile', f.x, f.y, '#60a5fa', '', f.dir, opp.x);
+        createVFX('projectile', f.x, f.y, 'transparent', 'Z', f.dir, opp.x);
         setTimeout(() => { if(!opp.isBlocking) { opp.hp -= (z===2 ? 14 : 13); opp.vx = f.dir * 5; triggerShake();} else { opp.hp-=3; } }, 400);
         if(++z > 2) clearInterval(zInt);
     }, 200);
@@ -821,7 +839,18 @@ function draw(){
     
     let aF = 20, aB = -10, lF = 10, lB = -10, j_aF = -40, j_aB = -30, j_lF = 20, j_lB = 10; 
     
-    if(f.action === 'special_active') {
+    if(f.action === 'karthik_meme') {
+       // Face front and pump arms strictly up and down
+       el.querySelector('.f-head').style.transform = `rotate(0deg) scaleX(1.2)`;
+       el.querySelector('.f-torso').style.transform = `scaleX(1.3)`;
+       aF = 160 + Math.sin(t*15) * 40; aB = 160 + Math.sin(t*15 + Math.PI) * 40; 
+       j_aF = 0; j_aB = 0; lF = 0; lB = 0;
+    }
+    else if(f.action === 'dhol_beat') {
+       el.querySelector('.f-torso').classList.add('dhol-active');
+       aF = 90 + Math.sin(t*20)*30; aB = 90 + Math.sin(t*20 + Math.PI)*30; j_aF = 0; j_aB = 0; lF = 0; lB = 0;
+    }
+    else if(f.action === 'special_active') { // Generic stumble
        aF = Math.sin(t*5) * 180; aB = -Math.sin(t*5) * 180; j_aF = 0; j_aB = 0;
        lF = Math.sin(t*2) * 50; lB = -Math.sin(t*2) * 50;
     }
@@ -832,6 +861,15 @@ function draw(){
       lF = Math.sin(t) * -50; j_lF = Math.max(0, Math.sin(t) * 40); lB = Math.sin(t) * 50; j_lB = Math.max(0, -Math.sin(t) * 40);
     } else { const bob = Math.sin(t*2) * 2; el.querySelector('.f-rig').style.transform += ` translateY(${bob}px)`; }
     
+    // Reset transforms if not in action
+    if(f.action !== 'karthik_meme') {
+       el.querySelector('.f-head').style.transform = ``;
+       el.querySelector('.f-torso').style.transform = ``;
+    }
+    if(f.action !== 'dhol_beat') {
+       el.querySelector('.f-torso').classList.remove('dhol-active');
+    }
+
     el.querySelector('.f-arm-f').style.transform = `rotate(${aF}deg)`; el.querySelector('.f-arm-b').style.transform = `rotate(${aB}deg)`;
     el.querySelector('.f-leg-f').style.transform = `rotate(${lF}deg)`; el.querySelector('.f-leg-b').style.transform = `rotate(${lB}deg)`;
     el.querySelector('.f-arm-f').style.setProperty('--joint', `${j_aF}deg`); el.querySelector('.f-arm-b').style.setProperty('--joint', `${j_aB}deg`);
