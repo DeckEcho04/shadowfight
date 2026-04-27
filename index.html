@@ -8,7 +8,6 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   
-  /* LOBBY CAN SCROLL NOW */
   body, html { 
     background: radial-gradient(circle at top, #1a1a2e 0%, #05050a 100%); 
     color: #fff; font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
@@ -22,34 +21,46 @@
   .screen { display: none; width: 100%; max-width: 900px; }
   .screen.active { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
 
-  /* ARENA LOCKS SCREEN SO NO BOUNCING WHILE FIGHTING */
-  #arena-screen.active { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; padding: 0; background: #05050a; overflow: hidden; touch-action: none; justify-content: center; }
+  #arena-screen.active { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; padding: 0; background: #05050a; overflow: hidden; touch-action: none; justify-content: center; z-index: 999;}
 
   /* LOBBY UI */
-  #lobby-ui { background: #111122; padding: 20px; border-radius: 12px; margin: 0 auto 20px; border: 1px solid rgba(255,255,255,0.1); text-align: center; max-width: 600px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
-  .lobby-row { display: flex; gap: 15px; margin-bottom: 15px; text-align: left; }
+  #lobby-ui { background: rgba(17, 17, 34, 0.85); padding: 20px; border-radius: 16px; margin: 0 auto 20px; border: 1px solid rgba(255,255,255,0.1); border-top: 1px solid rgba(255,255,255,0.2); text-align: center; max-width: 600px; width: 100%; box-shadow: 0 15px 35px rgba(0,0,0,0.8); backdrop-filter: blur(10px); }
+  .lobby-row { display: flex; gap: 15px; margin-bottom: 15px; text-align: left; align-items: flex-end;}
   .input-group { flex: 1; display: flex; flex-direction: column; }
-  .input-group label { font-size: 11px; color: #aaa; margin-bottom: 4px; text-transform: uppercase; font-weight: bold; }
-  input, select { padding: 12px; background: #05050a; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: #fff; font-size: 14px; outline: none; }
+  .input-group label { font-size: 11px; color: #cbd5e1; margin-bottom: 6px; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; }
+  
+  input, select { padding: 14px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff; font-size: 14px; outline: none; transition: border 0.2s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
+  input:focus { border-color: #6366f1; }
   select { cursor: pointer; }
-  button { padding: 12px; background: linear-gradient(90deg, #4f46e5, #6366f1); color: #fff; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4); }
+  button { padding: 14px; background: linear-gradient(135deg, #4f46e5, #6366f1); color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 900; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4); text-transform: uppercase; letter-spacing: 1px; }
   button:active { transform: scale(0.96); }
   
-  .id-box { background: rgba(79, 70, 229, 0.1); border: 1px dashed #4f46e5; padding: 15px; border-radius: 6px; margin: 15px 0; display: flex; justify-content: space-between; align-items: center; }
-  .my-id { font-family: monospace; color: #818cf8; font-weight: bold; font-size: 22px; letter-spacing: 2px; }
+  .id-box { background: rgba(79, 70, 229, 0.1); border: 1px dashed #6366f1; padding: 15px; border-radius: 8px; margin: 15px 0; display: flex; justify-content: space-between; align-items: center; box-shadow: inset 0 0 20px rgba(79, 70, 229, 0.1); }
+  .my-id { font-family: monospace; color: #a5b4fc; font-weight: bold; font-size: 24px; letter-spacing: 2px; text-shadow: 0 0 10px rgba(99, 102, 241, 0.5); }
   #connection-status { font-size: 14px; margin-top: 15px; padding: 10px; border-radius: 6px; display: none; font-weight: bold; }
 
-  /* CHAR SELECT */
+  /* CHAR SELECT (GLOSSY ICONS) */
   .header { display: flex; justify-content: space-between; align-items: center; margin: 0 auto 15px; max-width: 600px; width: 100%; }
-  .char-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-width: 600px; margin: 0 auto; width: 100%; }
-  .char-card { background: #111122; border-radius: 8px; border: 2px solid rgba(255,255,255,0.05); padding: 10px; text-align: center; cursor: pointer; opacity: 0.4; pointer-events: none; transition: 0.2s; }
+  .header h2 { font-weight: 900; letter-spacing: 1px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+  
+  .char-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 600px; margin: 0 auto; width: 100%; transition: opacity 0.3s; }
+  
+  /* The Roster Lock mechanism */
+  .char-grid.locked { opacity: 0.3; filter: grayscale(100%); pointer-events: none; }
+
+  .char-card { background: linear-gradient(180deg, #1e1e3f 0%, #111122 100%); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); border-top: 1px solid rgba(255,255,255,0.15); padding: 15px 10px; text-align: center; cursor: pointer; opacity: 0.5; pointer-events: none; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
   .char-card.unlocked { opacity: 1; pointer-events: auto; }
-  .char-card.unlocked:hover { border-color: rgba(255,255,255,0.3); transform: translateY(-2px); }
-  .char-card.selected-p1 { border-color: #4f46e5; background: #1e1e3f; box-shadow: 0 0 15px rgba(79, 70, 229, 0.4); }
-  .char-card.selected-p2 { border-color: #ef4444; background: #3f1e1e; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
-  .char-name { font-size: 14px; font-weight: bold; color: #fff; display: block; margin-top: 5px;}
-  .char-power { font-size: 10px; color: #fbbf24; margin-top: 2px; display: block; font-weight: bold;}
-  .char-preview { width: 30px; height: 30px; border-radius: 50%; margin: 0 auto; box-shadow: inset 0 0 8px rgba(0,0,0,0.6); }
+  .char-card.unlocked:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.4); box-shadow: 0 8px 20px rgba(0,0,0,0.6); }
+  .char-card.selected-p1 { border-color: #6366f1; background: linear-gradient(180deg, #312e81 0%, #1e1b4b 100%); box-shadow: 0 0 20px rgba(79, 70, 229, 0.6); transform: scale(1.05); }
+  .char-card.selected-p2 { border-color: #ef4444; background: linear-gradient(180deg, #7f1d1d 0%, #450a0a 100%); box-shadow: 0 0 20px rgba(239, 68, 68, 0.6); transform: scale(1.05); }
+  
+  .char-name { font-size: 15px; font-weight: 900; color: #f8fafc; display: block; margin-top: 8px; letter-spacing: 0.5px;}
+  .char-power { font-size: 10px; color: #fbbf24; margin-top: 2px; display: block; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;}
+  
+  /* GLOSSY EMBLEMS */
+  .char-icon { width: 50px; height: 50px; margin: 0 auto; border-radius: 14px; background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(0,0,0,0.4) 100%); box-shadow: inset 0px 2px 4px rgba(255,255,255,0.5), 0 5px 10px rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.2); position: relative; overflow: hidden; }
+  .char-icon::after { content: ''; position: absolute; top: 0; left: -50%; width: 200%; height: 50%; background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 100%); transform: rotate(-15deg); }
+  .char-icon svg { width: 28px; height: 28px; fill: #fff; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6)); z-index: 2; position: relative; }
 
   /* ARENA DYNAMICS & SCREEN SHAKE */
   @keyframes shake {
@@ -78,7 +89,7 @@
 
   #boss-hud { position: absolute; top: 60px; left: 50%; transform: translateX(-50%); width: 60vw; max-width: 400px; text-align: center; display: none; z-index: 9; }
 
-  /* SKELETAL FIGHTERS */
+  /* SKELETAL FIGHTERS (KEPT FOR ARENA) */
   .fighter { position: absolute; bottom: 25%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; transition: transform 0.05s; }
   .f-rig { position: relative; width: 40px; height: 80px; }
   .f-head { position: absolute; top: -20px; left: 50%; width: 22px; height: 26px; margin-left: -11px; border-radius: 40% 40% 50% 50%; z-index: 5; box-shadow: inset -2px -2px 6px rgba(0,0,0,0.6); transition: transform 0.1s;}
@@ -88,6 +99,8 @@
   .f-arm-f { top: 7px; left: 24px; height: 30px; z-index: 6; }
   .f-leg-b { top: 35px; left: 10px; height: 35px; z-index: 1; filter: brightness(0.6); }
   .f-leg-f { top: 35px; left: 22px; height: 35px; z-index: 3; }
+
+  .boss-rig { transform: scale(1.6); transform-origin: bottom center; filter: drop-shadow(0 0 15px rgba(255,0,0,0.5)); }
 
   .hurt .f-head, .hurt .f-torso, .hurt .f-limb { filter: brightness(2) drop-shadow(0 0 10px red) !important; background: #fff !important; }
   .hurt .f-head { transform: rotate(-20deg) translate(-5px, -5px); }
@@ -101,7 +114,6 @@
   #pc-controls { position: absolute; bottom: 5px; width: 100%; text-align: center; color: rgba(255,255,255,0.4); font-size: 12px; z-index: 5; pointer-events: none; font-weight: bold; }
   #mobile-controls { position: absolute; bottom: 15px; left: 0; width: 100%; height: 130px; display: none; justify-content: space-between; padding: 0 20px; z-index: 50; pointer-events: none; }
   
-  /* Media Query to gracefully hide PC text on mobile */
   @media (max-width: 768px) { #pc-controls { display: none; } }
 
   .d-pad, .action-pad { pointer-events: auto; display: grid; gap: 8px; grid-template-columns: 55px 55px 55px; grid-template-rows: 55px 55px; }
@@ -117,55 +129,57 @@
 <body>
 
 <div id="app">
-  <div class="version-badge">v0.3.6 (The Cinematic Juice Update)</div>
+  <div class="version-badge">v0.3.7 (Glossy UI & Auto-ID Update)</div>
 
   <div id="select-screen" class="screen active">
     <div id="lobby-ui">
-      <div class="lobby-row">
-        <div class="input-group" style="flex:2;">
-          <label>1. Your Nickname (Required)</label>
-          <input type="text" id="player-name" placeholder="e.g. Parv" maxlength="12">
-        </div>
-        <button onclick="generateID()" id="gen-btn" style="flex:1; margin-top:19px;">Create Host ID</button>
-      </div>
-
-      <div class="id-box" id="host-panel" style="display:none;">
+      
+      <div class="id-box" id="host-panel">
         <div>
-          <div style="font-size:11px; color:#aaa; font-weight:bold; text-transform:uppercase;">Your Session ID:</div>
-          <div class="my-id" id="my-peer-id">...</div>
+          <div style="font-size:11px; color:#a5b4fc; font-weight:900; text-transform:uppercase;">Your Session ID:</div>
+          <div class="my-id" id="my-peer-id">Connecting...</div>
         </div>
         <div style="text-align:right;">
-          <label style="font-size:10px; color:#aaa;">Map:</label><br>
-          <select id="map-select" style="padding:6px; font-size:12px; margin-bottom:4px;">
+          <label style="font-size:10px; color:#aaa; font-weight:bold; text-transform:uppercase;">Map:</label><br>
+          <select id="map-select" style="padding:8px; font-size:12px; margin-bottom:6px;">
             <option value="alley">Cyber Alley</option>
             <option value="dojo">Sunset Dojo</option>
             <option value="mamak">Mamak Street</option>
           </select><br>
-          <label style="font-size:10px; color:#aaa;">Mode:</label><br>
-          <select id="mode-select" style="padding:6px; font-size:12px;">
+          <label style="font-size:10px; color:#aaa; font-weight:bold; text-transform:uppercase;">Mode:</label><br>
+          <select id="mode-select" style="padding:8px; font-size:12px;">
             <option value="1v1">1v1 Street Fight</option>
             <option value="coop">Co-op Survival</option>
           </select>
         </div>
       </div>
 
-      <div class="lobby-row" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+      <div class="lobby-row">
         <div class="input-group" style="flex:2;">
-          <label>2. Or Join a Friend</label>
+          <label>1. Your Nickname (Required)</label>
+          <input type="text" id="player-name" placeholder="e.g. Parv" maxlength="12">
+        </div>
+      </div>
+
+      <div class="lobby-row" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+        <div class="input-group" style="flex:2;">
+          <label>2. Join a Friend (Leave blank to host)</label>
           <input type="text" id="join-id" placeholder="Paste ID to Join" style="text-transform: uppercase;">
         </div>
-        <button onclick="connectToFriend()" style="flex:1; margin-top:19px; background: #10b981;">Join Game</button>
+        <button onclick="connectToFriend()" style="flex:1; margin-top:22px; background: linear-gradient(135deg, #10b981, #059669);">Join Game</button>
       </div>
       <div id="connection-status"></div>
     </div>
     
-    <div class="header"><h2>Choose Fighter</h2></div>
-    <div class="char-grid" id="char-list"></div>
+    <div class="header">
+      <h2>Choose Fighter</h2>
+      <button onclick="pickAI()" style="width:auto; padding:10px 16px; background:rgba(255,255,255,0.1); box-shadow:none;">Solo vs AI</button>
+    </div>
+    <div class="char-grid locked" id="char-list" onclick="checkNameLock()"></div>
   </div>
 
   <div id="arena-screen" class="screen">
     <div id="game-container">
-      
       <div class="hud">
         <div style="width: 40%;"><div id="p1-tag" class="player-tag">Player 1</div><div class="hp-bar-bg"><div id="hp-1" class="hp-bar-fill hp-p1"></div></div><div class="sp-bar-bg"><div id="sp-1" class="sp-bar-fill"></div></div></div>
         <div style="width: 40%; text-align: right;"><div id="p2-tag" class="player-tag">Player 2</div><div class="hp-bar-bg" style="margin-left:auto;"><div id="hp-2" class="hp-bar-fill hp-p2"></div></div><div class="sp-bar-bg" style="margin-left:auto;"><div id="sp-2" class="sp-bar-fill"></div></div></div>
@@ -191,9 +205,8 @@
         
         <div id="p3" class="fighter" style="display:none;">
           <div class="special-label" id="p3-label">SLAM!</div>
-          <div class="f-rig"><div class="f-head" style="background:#450a0a;"></div><div class="f-arm-b f-limb" style="background:#7f1d1d;"></div><div class="f-torso" style="background:#200; border-color:#ef4444;"></div><div class="f-leg-b f-limb" style="background:#7f1d1d;"></div><div class="f-leg-f f-limb" style="background:#b91c1c;"></div><div class="f-arm-f f-limb" style="background:#b91c1c;"></div></div>
+          <div class="f-rig boss-rig"><div class="f-head" style="background:#450a0a;"></div><div class="f-arm-b f-limb" style="background:#7f1d1d;"></div><div class="f-torso" style="background:#200; border-color:#ef4444;"></div><div class="f-leg-b f-limb" style="background:#7f1d1d;"></div><div class="f-leg-f f-limb" style="background:#b91c1c;"></div><div class="f-arm-f f-limb" style="background:#b91c1c;"></div></div>
         </div>
-
       </div>
       <div id="mobile-controls">
         <div class="d-pad"><div class="touch-btn" id="btn-up">↑</div><div class="touch-btn" id="btn-left">←</div><div class="touch-btn" id="btn-right">→</div></div>
@@ -204,16 +217,17 @@
 </div>
 
 <script>
+// THEMED CHARACTER DATA WITH SVG ICONS
 const CHARS = [
-  { id:'karthik', name:'Karthik', power:'67 Burst', skin:'#c79a7b', suit:'#1e1b4b', acc:'#4f46e5' },
-  { id:'andi', name:'Andi', power:'Hulk Out', skin:'#22c55e', suit:'#4c1d95', acc:'#22c55e' },
-  { id:'jz', name:'JZ', power:'Rhythm Dash', skin:'#fbcfe8', suit:'#111827', acc:'#ec4899' },
-  { id:'dexter', name:'Dexter', power:'Acid Spit', skin:'#e2b999', suit:'#3b0764', acc:'#a855f7' },
-  { id:'yiliang', name:'Yi Liang', power:'Smoke Vanish', skin:'#f1f5f9', suit:'#475569', acc:'#94a3b8' },
-  { id:'sherman', name:'Sherman', power:'Drunken Sip', skin:'#fcd34d', suit:'#78350f', acc:'#f59e0b' },
-  { id:'parveer', name:'Parveer', power:'Dhol Wave', skin:'#d2a881', suit:'#ea580c', acc:'#facc15' },
-  { id:'hari', name:'Hari', power:'Sleepwalk', skin:'#93c5fd', suit:'#1e3a8a', acc:'#60a5fa' },
-  { id:'jerell', name:'Jerell', power:'IQ Strike', skin:'#ffffff', suit:'#000000', acc:'#e2e8f0' }
+  { id:'karthik', name:'Karthik', power:'67 Burst', skin:'#c79a7b', suit:'#1e1b4b', acc:'#4f46e5', icon: '<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>' },
+  { id:'andi', name:'Andi', power:'Hulk Out', skin:'#22c55e', suit:'#4c1d95', acc:'#22c55e', icon: '<path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 14a4 4 0 110-8 4 4 0 010 8z"/>' },
+  { id:'jz', name:'JZ', power:'Rhythm Dash', skin:'#fbcfe8', suit:'#111827', acc:'#ec4899', icon: '<path stroke="#fff" stroke-width="2" stroke-linecap="round" d="M12 3v18m-4-14v10m8-10v10m-12-6v2m16-2v2"/>' },
+  { id:'dexter', name:'Dexter', power:'Acid Spit', skin:'#e2b999', suit:'#3b0764', acc:'#a855f7', icon: '<path d="M12 2c0 0-7 7-7 11a7 7 0 0014 0c0-4-7-11-7-11z"/>' },
+  { id:'yiliang', name:'Yi Liang', power:'Smoke Vanish', skin:'#f1f5f9', suit:'#475569', acc:'#94a3b8', icon: '<path d="M19 14.5a3.5 3.5 0 00-6.5-1.7A4.5 4.5 0 005.5 15c0 2 1.6 3.5 3.5 3.5h10a3.5 3.5 0 000-7z"/>' },
+  { id:'sherman', name:'Sherman', power:'Drunken Sip', skin:'#fcd34d', suit:'#78350f', acc:'#f59e0b', icon: '<path d="M7 2h10v3l-3 4v11H10V9L7 5V2z"/>' },
+  { id:'parv', name:'Parv', power:'Dhol Wave', skin:'#d2a881', suit:'#ea580c', acc:'#facc15', icon: '<path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 16a6 6 0 110-12 6 6 0 010 12z"/>' },
+  { id:'hari', name:'Hari', power:'Sleepwalk', skin:'#93c5fd', suit:'#1e3a8a', acc:'#60a5fa', icon: '<path d="M12 3a9 9 0 109 9c-1.6 0-3-1.4-3-3s1.4-3 3-3a9 9 0 00-9-3z"/>' },
+  { id:'jerell', name:'Jerell', power:'IQ Strike', skin:'#ffffff', suit:'#000000', acc:'#e2e8f0', icon: '<path d="M12 15.5C8.5 15.5 5 12 5 12s3.5-3.5 7-3.5 7 3.5 7 3.5-3.5 3.5-7 3.5zm0-5a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"/>' }
 ];
 
 const MAPS = {
@@ -222,7 +236,7 @@ const MAPS = {
   mamak: { bg: 'linear-gradient(180deg, #171717 0%, #404040 100%)', floor: '#262626', grid: '#facc15' }
 };
 
-let peer, conn, myPeerId, isHost = false, onlineMode = false;
+let peer, conn, myPeerId, isHost = true, onlineMode = false;
 let myName = "", oppName = "Opponent";
 let p1Sel=null, p2Sel=null, f1, f2, f3; 
 let keys1 = {}, keys2 = {}, keys = {}, keys3 = {}; 
@@ -234,9 +248,41 @@ function checkMobileUI() {
   }
 }
 
+// THE NAME LOCK LOGIC
+document.getElementById('player-name').addEventListener('input', (e) => {
+  const nameVal = e.target.value.trim();
+  if(nameVal.length > 0) {
+    document.getElementById('char-list').classList.remove('locked');
+  } else {
+    document.getElementById('char-list').classList.add('locked');
+  }
+});
+
+function checkNameLock() {
+  if(document.getElementById('char-list').classList.contains('locked')) {
+    alert("Please type your Nickname first!");
+  }
+}
+
+// AUTO GENERATE ID ON LOAD
 window.onload = () => {
   checkMobileUI();
   renderChars();
+  
+  const randomId = Math.floor(1000 + Math.random() * 9000);
+  myPeerId = `SF-${randomId}`;
+  peer = new Peer(myPeerId);
+  peer.on('open', id => { 
+    document.getElementById('my-peer-id').innerText = id; 
+  });
+  peer.on('connection', c => {
+    conn = c; isHost = true; onlineMode = true;
+    setupDataListeners();
+    showStatus("Opponent Connected!", "success");
+  });
+  peer.on('error', err => {
+    document.getElementById('my-peer-id').innerText = "Failed. Refresh.";
+  });
 };
 
 function showStatus(text, type) {
@@ -247,25 +293,8 @@ function showStatus(text, type) {
 
 function checkName() {
   const n = document.getElementById('player-name').value.trim();
-  if(!n) { alert("Please enter your Nickname first!"); return false; }
+  if(!n) { alert("Please type your Nickname in Step 1!"); return false; }
   myName = n; return true;
-}
-
-function generateID() {
-  if(!checkName()) return;
-  const randomId = Math.floor(1000 + Math.random() * 9000);
-  myPeerId = `SF-${randomId}`;
-  peer = new Peer(myPeerId);
-  peer.on('open', id => { 
-    document.getElementById('my-peer-id').innerText = id; 
-    document.getElementById('host-panel').style.display = 'flex';
-    document.getElementById('gen-btn').style.display = 'none';
-  });
-  peer.on('connection', c => {
-    conn = c; isHost = true; onlineMode = true;
-    setupDataListeners();
-    showStatus("Opponent Connected!", "success");
-  });
 }
 
 function connectToFriend() {
@@ -273,6 +302,8 @@ function connectToFriend() {
   const friendId = document.getElementById('join-id').value.toUpperCase().trim();
   if(!friendId) { showStatus("Paste an ID to join.", "error"); return; }
   
+  // Re-init as joiner
+  peer.destroy();
   peer = new Peer(); 
   peer.on('open', () => {
     showStatus("Searching...", "success");
@@ -292,11 +323,13 @@ function setupDataListeners() {
   conn.on('data', data => {
     if (data.type === 'hello') {
       oppName = data.name; showStatus(`Connected to: ${oppName}! Pick character.`, "success");
-      if(isHost) conn.send({type: 'hello', name: myName});
+      if(isHost) {
+        myName = document.getElementById('player-name').value.trim() || "Host";
+        conn.send({type: 'hello', name: myName});
+      }
     }
     if (data.type === 'ready') { p2Sel = CHARS.find(c => c.id === data.p2); if(p1Sel) sendStart(); }
     
-    // INPUT ROUTING FIX
     if (data.type === 'keys') { if (isHost) keys2 = data.keys; else keys1 = data.keys; }
     
     if (data.type === 'start') { 
@@ -320,8 +353,11 @@ function renderChars(){
   CHARS.forEach(c=>{
     const div = document.createElement('div');
     div.className = 'char-card';
-    div.innerHTML = `<div class="char-preview" style="background:${c.skin}; border: 3px solid ${c.suit}"></div><span class="char-name">${c.name}</span><span class="char-power">${c.power}</span>`;
-    div.onclick = () => selectChar(c, div);
+    div.innerHTML = `<div class="char-icon" style="background-color:${c.suit}"><svg viewBox="0 0 24 24">${c.icon}</svg></div><span class="char-name">${c.name}</span><span class="char-power" style="color:${c.acc}">${c.power}</span>`;
+    div.onclick = () => {
+      if(grid.classList.contains('locked')) return;
+      selectChar(c, div);
+    }
     grid.appendChild(div);
   });
 }
@@ -337,14 +373,15 @@ function selectChar(c, el){
       document.querySelectorAll('.char-card').forEach(x=>x.classList.remove('selected-p2')); el.classList.add('selected-p2'); 
       conn.send({type:'ready', p2: p2Sel.id}); 
     }
-  } else {
-    if(!checkName()) return;
-    p1Sel = c;
-    const others = CHARS.filter(char => char.id !== p1Sel.id);
-    p2Sel = others[Math.floor(Math.random() * others.length)];
-    oppName = "AI Bot";
-    startFight();
   }
+}
+
+function pickAI() {
+  if(!checkName()) return;
+  aiMode = true; onlineMode = false; isHost = true;
+  document.getElementById('char-list').classList.remove('locked');
+  document.querySelectorAll('.char-card').forEach(c => c.classList.add('unlocked'));
+  document.getElementById('lobby-ui').style.display = 'none';
 }
 
 function sendStart() { 
@@ -376,13 +413,13 @@ function startFight(){
   
   applyMap();
 
-  document.getElementById('p1-tag').innerText = isHost ? myName : (onlineMode ? oppName : myName);
-  document.getElementById('p2-tag').innerText = isHost ? oppName : (onlineMode ? myName : oppName);
+  document.getElementById('p1-tag').innerText = isHost ? myName : oppName;
+  document.getElementById('p2-tag').innerText = isHost ? oppName : myName;
 
   const aW = document.getElementById('game-container').offsetWidth;
   
   const team1 = 1;
-  const team2 = activeMode === 'coop' ? 1 : 2;
+  const team2 = activeMode === 'coop' ? 1 : 2; 
 
   f1 = { id:'p1', x:50, y:0, vx:0, vy:0, hp:100, sp:0, dir:1, action:'idle', hit:false, w:40, maxW: aW, isBlocking: false, team: team1 };
   f2 = { id:'p2', x:aW - 90, y:0, vx:0, vy:0, hp:100, sp:0, dir:-1, action:'idle', hit:false, w:40, maxW: aW, isBlocking: false, team: team2 };
@@ -401,13 +438,10 @@ function startFight(){
 function gameLoop(){
   if(!f1 || !f2) return;
   
-  // THE PC CONTROLS FREEZE FIX: Always assign local keys immediately
-  if(onlineMode) {
+  if(onlineMode && conn && conn.open) {
     if(isHost) { keys1 = keys; } else { keys2 = keys; }
-    if(conn && conn.open) conn.send({type: 'keys', keys: keys});
-  } else { 
-    keys1 = keys; 
-  }
+    conn.send({type: 'keys', keys: keys});
+  } else { keys1 = keys; }
   
   updateFighter(f1, f2, keys1, f3);
   updateFighter(f2, f1, keys2, f3);
@@ -462,11 +496,10 @@ function updateFighter(f, opp, k, opp2){
   f.sp = Math.min(100, f.sp + 0.15);
 }
 
-// SCREEN SHAKE TRIGGERED HERE
 function triggerShake() {
   const arena = document.getElementById('game-container');
   arena.classList.remove('shake-anim');
-  void arena.offsetWidth; // Trigger reflow
+  void arena.offsetWidth; 
   arena.classList.add('shake-anim');
 }
 
@@ -507,10 +540,9 @@ function draw(){
   const updateF = (f, el) => {
     if(f.hp <= 0) return;
     
-    // DYNAMIC HULK SCALING LOGIC
     let scale = 1;
     if(f.id === 'p3') scale = 1.6;
-    else if((f.id==='p1'?p1Sel:p2Sel).id === 'andi' && f.buff > 0) scale = 1.4; // Andi grows 40% when buffed!
+    else if((f.id==='p1'?p1Sel:p2Sel).id === 'andi' && f.buff > 0) scale = 1.4;
 
     el.style.transform = `translate(${f.x}px, ${f.y}px) scaleX(${f.dir * scale}) scaleY(${scale})`;
     let aF = 0, aB = 0, lF = 0, lB = 0;
