@@ -21,14 +21,15 @@
   .lobby-row { display: flex; gap: 15px; margin-bottom: 15px; text-align: left; align-items: flex-end;}
   .input-group { flex: 1; display: flex; flex-direction: column; }
   .input-group label { font-size: 11px; color: #cbd5e1; margin-bottom: 6px; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; }
-  input, select { padding: 14px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff; font-size: 14px; outline: none; transition: border 0.2s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
+  input, select { padding: 14px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff; font-size: 14px; outline: none; transition: border 0.2s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); text-transform: uppercase;}
   input:focus { border-color: #6366f1; }
+  input::placeholder { text-transform: none; }
   select { cursor: pointer; }
   button { padding: 14px; background: linear-gradient(135deg, #4f46e5, #6366f1); color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 900; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4); text-transform: uppercase; letter-spacing: 1px; }
   button:active { transform: scale(0.96); }
   
   .id-box { background: rgba(79, 70, 229, 0.1); border: 1px dashed #6366f1; padding: 15px; border-radius: 8px; margin: 15px 0; display: flex; justify-content: space-between; align-items: center; box-shadow: inset 0 0 20px rgba(79, 70, 229, 0.1); }
-  .my-id { font-family: monospace; color: #a5b4fc; font-weight: bold; font-size: 24px; letter-spacing: 2px; text-shadow: 0 0 10px rgba(99, 102, 241, 0.5); }
+  .my-id { font-family: monospace; color: #a5b4fc; font-weight: bold; font-size: 28px; letter-spacing: 4px; text-shadow: 0 0 10px rgba(99, 102, 241, 0.5); }
   #connection-status { font-size: 14px; margin-top: 15px; padding: 10px; border-radius: 6px; display: none; font-weight: bold; }
 
   /* CHAR SELECT */
@@ -59,41 +60,30 @@
   #arena { position: absolute; width: 100%; height: 100%; perspective: 1000px; overflow: hidden; }
   .floor { position: absolute; bottom: 0; width: 120%; left: -10%; height: 40%; transform: rotateX(75deg); transform-origin: top; box-shadow: 0 -30px 60px rgba(0,0,0,0.9); }
   
-  /* NEW HIGH-END VFX ENGINE */
   #vfx-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 15; overflow: hidden;}
   .vfx-base { position: absolute; bottom: 25%; pointer-events: none; z-index: 15; }
-  
   .vfx-ring { border-radius: 50%; opacity: 1; animation: explodeRing 0.4s ease-out forwards; }
   @keyframes explodeRing { 0% { transform: translate(var(--vx), var(--vy)) scale(0); border-width: 15px; } 100% { transform: translate(var(--vx), var(--vy)) scale(3.5); opacity: 0; border-width: 0px; } }
-  
   .vfx-acid { background: rgba(34, 197, 94, 0.5); border-radius: 50%; transform: translate(var(--vx), calc(var(--vy) + 60px)) rotateX(70deg); box-shadow: 0 0 30px #22c55e, inset 0 0 30px #22c55e; filter: blur(2px); width: 180px; height: 50px; }
   .vfx-smoke { width: 180px; height: 180px; background: radial-gradient(circle, rgba(148,163,184,1) 0%, rgba(71,85,105,0.8) 40%, transparent 70%); border-radius: 50%; opacity: 1; animation: smokePoof 0.8s ease-out forwards; filter: blur(10px); mix-blend-mode: screen; }
   @keyframes smokePoof { 0% { transform: translate(var(--vx), var(--vy)) scale(0.2); opacity: 1; } 100% { transform: translate(var(--vx), var(--vy)) scale(2.5); opacity: 0; } }
-
   .vfx-crosshair { width: 80px; height: 80px; border: 6px solid #dc2626; border-radius: 50%; opacity: 0; animation: lockOn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; box-shadow: 0 0 15px #dc2626, inset 0 0 15px #dc2626;}
   .vfx-crosshair::before, .vfx-crosshair::after { content: ''; position: absolute; background: #dc2626; box-shadow: 0 0 8px #dc2626;}
   .vfx-crosshair::before { top: 50%; left: -20px; right: -20px; height: 6px; margin-top: -3px; }
   .vfx-crosshair::after { left: 50%; top: -20px; bottom: -20px; width: 6px; margin-left: -3px; }
   @keyframes lockOn { 0% { transform: translate(var(--vx), var(--vy)) scale(4) rotate(90deg); opacity: 0; } 100% { transform: translate(var(--vx), var(--vy)) scale(1) rotate(0deg); opacity: 1; } }
-
-  /* Projectiles & Texts */
   .vfx-projectile { width: 25px; height: 25px; border-radius: 50%; animation: flyAcross 0.4s linear forwards; }
   @keyframes flyAcross { 0% { transform: translate(var(--start-x), var(--start-y)); } 100% { transform: translate(var(--end-x), var(--end-y)); } }
-
   .vfx-text { font-family: monospace; font-weight: bold; font-size: 24px; animation: floatUp 1s ease-out forwards; text-shadow: 0 0 10px currentColor; }
   @keyframes floatUp { 0% { transform: translate(var(--vx), var(--vy)) scale(0.5); opacity: 1; } 100% { transform: translate(var(--vx), calc(var(--vy) - 80px)) scale(1.5); opacity: 0; } }
-  
-  /* COMIC TEXT FOR KARTHIK */
   .vfx-comic { font-family: Impact, sans-serif; font-weight: 900; font-size: 60px; font-style: italic; letter-spacing: 2px; text-transform: uppercase; animation: kapow 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; text-shadow: 4px 4px 0px #fff, 0 0 20px currentColor; }
   @keyframes kapow { 0% { transform: translate(var(--vx), var(--vy)) scale(0) rotate(-20deg); opacity: 1; } 80% { transform: translate(var(--vx), var(--vy)) scale(1.2) rotate(10deg); opacity: 1; } 100% { transform: translate(var(--vx), calc(var(--vy) + 20px)) scale(1) rotate(0deg); opacity: 0; } }
-
   .vfx-paper { width: 80px; height: 100px; background: white; border: 2px solid #ccc; font-family: impact; color: red; font-size: 40px; text-align: center; line-height: 100px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); animation: dropDown 0.4s ease-in forwards; }
   @keyframes dropDown { 0% { transform: translate(var(--vx), -200px) rotate(45deg); } 100% { transform: translate(var(--vx), var(--vy)) rotate(0deg); } }
 
   /* DYNAMIC HUD WITH SCOREBOARD */
   .hud { position: absolute; top: 0; width: 100%; padding: 12px 15px; display: flex; justify-content: space-between; z-index: 10; background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, transparent 100%); align-items: flex-start;}
   
-  /* SCOREBOARD DISPLAY */
   .scoreboard { display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 10px; background: rgba(0,0,0,0.6); padding: 5px 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); }
   .score-title { font-size: 9px; color: #fbbf24; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }
   .score-numbers { font-size: 20px; font-weight: 900; font-family: monospace; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
@@ -120,7 +110,6 @@
   .fighter { position: absolute; bottom: 25%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
   .f-rig { position: relative; width: 40px; height: 80px; transition: transform 0.05s, width 0.3s; }
   
-  /* HULK OUT CSS */
   .hulk-mode { transform: scale(1.3) !important; transform-origin: bottom center; filter: drop-shadow(0 0 10px #22c55e); }
   .hulk-mode .f-limb { width: 14px; border-radius: 7px; }
   .hulk-mode .f-torso { width: 36px; margin-left: -18px; border-radius: 10px 10px 4px 4px; }
@@ -169,14 +158,14 @@
 <body>
 
 <div id="app">
-  <div class="version-badge">v0.5.5 (Scoreboard & Custom Powers)</div>
+  <div class="version-badge">v0.5.6 (Networking & ID Update)</div>
 
   <div id="select-screen" class="screen active">
     <div id="lobby-ui">
       <div class="id-box" id="host-panel">
         <div>
           <div style="font-size:11px; color:#a5b4fc; font-weight:900; text-transform:uppercase;">Your Session ID:</div>
-          <div class="my-id" id="my-peer-id">Connecting...</div>
+          <div class="my-id" id="my-peer-id">Generating...</div>
         </div>
         <div style="text-align:right;">
           <label style="font-size:10px; color:#aaa; font-weight:bold; text-transform:uppercase;">Map:</label><br>
@@ -203,7 +192,7 @@
       <div class="lobby-row" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
         <div class="input-group" style="flex:2;">
           <label>2. Join a Friend (Leave blank to host)</label>
-          <input type="text" id="join-id" placeholder="Paste ID to Join" style="text-transform: uppercase;">
+          <input type="text" id="join-id" placeholder="Paste 5-Letter ID" style="text-transform: uppercase;" maxlength="5">
         </div>
         <button onclick="connectToFriend()" style="flex:1; margin-top:22px; background: linear-gradient(135deg, #10b981, #059669);">Join Game</button>
       </div>
@@ -294,12 +283,13 @@ const MAPS = {
 
 let peer, conn, myPeerId, isHost = true, onlineMode = false;
 let myName = "", oppName = "Opponent";
-let p1Score = 0, p2Score = 0; // SCOREBOARD TRACKERS
+let p1Score = 0, p2Score = 0; 
 let p1Sel=null, p2Sel=null, f1, f2, f3; 
 let keys1 = {}, keys2 = {}, keys = {}, keys3 = {}; 
 let activeMode = '1v1', activeMap = 'alley';
 let hitStopFrames = 0;
 let isGameOver = false;
+let connTimeout; // To clear timeout if successful
 
 function checkMobileUI() { if ('ontouchstart' in window || navigator.maxTouchPoints > 0) document.getElementById('mobile-controls').style.display = 'flex'; }
 
@@ -310,16 +300,25 @@ document.getElementById('player-name').addEventListener('input', (e) => {
 
 function checkNameLock() { if(document.getElementById('char-list').classList.contains('locked')) alert("Please type your Nickname first!"); }
 
+// NEW 5-CHARACTER ALPHANUMERIC ID GENERATOR
+const generateIDStr = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let res = '';
+    for(let i=0; i<5; i++) res += chars.charAt(Math.floor(Math.random() * chars.length));
+    return res;
+};
+
 window.onload = () => {
   checkMobileUI(); renderChars();
-  const randomId = Math.floor(1000 + Math.random() * 9000);
-  myPeerId = `SF-${randomId}`; peer = new Peer(myPeerId);
+  
+  myPeerId = generateIDStr(); 
+  peer = new Peer(myPeerId);
   peer.on('open', id => { document.getElementById('my-peer-id').innerText = id; });
   
   peer.on('connection', c => { 
     if(conn && conn.open) conn.close(); 
     conn = c; isHost = true; onlineMode = true; 
-    p1Score = 0; p2Score = 0; updateScoreboard(); // Reset scores on new connection
+    p1Score = 0; p2Score = 0; updateScoreboard(); 
     setupDataListeners(); showStatus("Opponent Connected!", "success"); 
   });
   peer.on('error', err => { document.getElementById('my-peer-id').innerText = "Failed. Refresh."; });
@@ -344,11 +343,23 @@ function connectToFriend() {
   
   if(peer) peer.destroy(); 
   peer = new Peer(); 
+  
+  showStatus("Initiating Handshake...", "success");
+
   peer.on('open', () => {
-    showStatus("Searching...", "success");
+    showStatus("Routing Connection...", "success");
     conn = peer.connect(friendId);
     isHost = false; onlineMode = true;
     p1Score = 0; p2Score = 0; updateScoreboard();
+    
+    // CONNECTION TIMEOUT LOGIC
+    connTimeout = setTimeout(() => {
+        if(conn && !conn.open) {
+            showStatus("Connection Timed Out. Check ID.", "error");
+            peer.destroy();
+        }
+    }, 7000);
+
     setupDataListeners();
   });
   peer.on('error', err => showStatus("Session not found. Try again.", "error"));
@@ -356,6 +367,7 @@ function connectToFriend() {
 
 function setupDataListeners() {
   conn.on('open', () => {
+    clearTimeout(connTimeout); // Clear the timeout if successful
     conn.send({type: 'hello', name: myName});
     document.querySelectorAll('.char-card').forEach(c => c.classList.add('unlocked'));
   });
@@ -367,7 +379,6 @@ function setupDataListeners() {
     }
     if (data.type === 'ready') { p2Sel = CHARS.find(c => c.id === data.p2); if(p1Sel) sendStart(); }
     
-    // HOST AUTHORITY & SCORE SYNC
     if (data.type === 'sync' && !isHost) {
       if(f1) f1.hp = data.hp1; if(f2) f2.hp = data.hp2; if(f3) f3.hp = data.hp3;
       if(f1 && Math.abs(f1.x - data.x1) > 25) f1.x = data.x1;
@@ -391,11 +402,8 @@ function setupDataListeners() {
 function updateScoreboard() {
     if(activeMode === '1v1') {
         document.getElementById('hud-score').style.display = 'flex';
-        // Display P1 score first on the left, P2 score on the right.
         document.getElementById('score-display').innerText = `${p1Score} - ${p2Score}`;
-    } else {
-        document.getElementById('hud-score').style.display = 'none';
-    }
+    } else { document.getElementById('hud-score').style.display = 'none'; }
 }
 
 function renderChars(){
@@ -463,7 +471,6 @@ function resetToLobby() {
   p1Sel = null; p2Sel = null; keys = {}; keys1 = {}; keys2 = {};
   document.querySelectorAll('.char-card').forEach(c => { c.classList.remove('selected-p1', 'selected-p2'); });
   document.getElementById('vfx-layer').innerHTML = ''; 
-  // Reset Hulk CSS
   document.getElementById('p1').querySelector('.f-rig').classList.remove('hulk-mode');
   document.getElementById('p2').querySelector('.f-rig').classList.remove('hulk-mode');
 }
@@ -505,7 +512,6 @@ function triggerKO(winnerText, sendSignal = true) {
   if(isGameOver) return;
   isGameOver = true;
   
-  // Parse winner for scoreboard updating
   if(isHost || !onlineMode) {
       let p1N = isHost ? myName : oppName;
       let p2N = isHost ? oppName : myName;
@@ -564,7 +570,6 @@ function gameLoop(){
 function updateFighter(f, opp, k, opp2){
   f.maxW = document.getElementById('game-container').offsetWidth;
 
-  // Don't interrupt hardcoded special actions (like Karthik's run)
   if(f.action !== 'special_active') {
       f.action = 'idle';
       if(k['b']) { f.isBlocking = true; f.vx *= 0.5; } 
@@ -572,7 +577,6 @@ function updateFighter(f, opp, k, opp2){
         f.isBlocking = false;
         if(k['a']) { f.vx = -6; f.action = 'walk'; } else if(k['d']) { f.vx = 6; f.action = 'walk'; } else f.vx *= 0.8;
       }
-    
       if(k['w'] && f.y === 0 && !f.isBlocking) { f.vy = -16; f.action = 'jump'; }
   }
 
@@ -618,7 +622,6 @@ function spawnParticles(x, y, dir, color = '#fbbf24') {
   }
 }
 
-// ADVANCED VFX ENGINE (PROJECTILES & MEMES)
 function createVFX(type, x, y, color, text = '', dir = 1, destX = 0) {
   const layer = document.getElementById('vfx-layer');
   const vfx = document.createElement('div');
@@ -631,9 +634,7 @@ function createVFX(type, x, y, color, text = '', dir = 1, destX = 0) {
     vfx.style.setProperty('--vx', `${x - 30}px`); vfx.style.setProperty('--vy', `${y - 90}px`);
   } else if (type === 'acid') {
     vfx.style.setProperty('--vx', `${x - 70}px`);
-  } else if (type === 'text') {
-    vfx.style.color = color; vfx.innerText = text;
-  } else if (type === 'comic') {
+  } else if (type === 'text' || type === 'comic') {
     vfx.style.color = color; vfx.innerText = text;
   } else if (type === 'projectile') {
     vfx.style.background = color; vfx.style.boxShadow = `0 0 20px ${color}`;
@@ -648,10 +649,9 @@ function createVFX(type, x, y, color, text = '', dir = 1, destX = 0) {
   setTimeout(() => { if(layer.contains(vfx)) vfx.remove(); }, type === 'projectile' ? 400 : 1500);
 }
 
-// UNIFIED BLOCK/DAMAGE LOGIC (EXACTLY 40 DAMAGE FOR SPECIALS)
 function applyDamage(opp, dmg, dir, isSpecial = false) {
     if(opp.isBlocking) {
-        opp.hp -= 10; // ALL blocked specials do exactly 10 damage
+        opp.hp -= 10; 
         showLabel(opp.id, "BLOCKED!", "#a1a1aa");
     } else {
         opp.hp -= dmg; 
@@ -679,14 +679,13 @@ function attack(f, o1, o2, dmg, range){
   });
 }
 
-// 40-DAMAGE BALANCED SPECIAL MOVES
 function doSpecial(f, opp){
   if(!opp) return; f.sp = 0; 
   const charId = (f.id === 'p1' ? p1Sel : p2Sel).id;
   
-  if (charId === 'karthik') { // 6 7 MEME (15 + 25 = 40)
+  if (charId === 'karthik') { 
     showLabel(f.id, "WAIT FOR IT...", "#4f46e5");
-    f.action = 'special_active'; // Forces arm flapping animation
+    f.action = 'special_active'; 
     let count = 0;
     const runInt = setInterval(() => {
         f.x += f.dir * 10; count++;
@@ -704,13 +703,13 @@ function doSpecial(f, opp){
         }
     }, 50);
   } 
-  else if (charId === 'andi') { // HULK OUT (40 dmg AoE + Size Increase)
+  else if (charId === 'andi') { 
     showLabel(f.id, "HULK SMASH!", "#22c55e"); document.getElementById(f.id).querySelector('.f-rig').classList.add('hulk-mode');
     createVFX('ring', f.x, f.y, '#22c55e'); hitStopFrames = 10;
     if(Math.abs(f.x - opp.x) < 150) { applyDamage(opp, 40, f.dir, true); }
     spawnParticles(f.x, f.y, 1, '#22c55e'); spawnParticles(f.x, f.y, -1, '#22c55e');
   } 
-  else if (charId === 'dexter') { // SPITBALL (40 dmg projectile)
+  else if (charId === 'dexter') { 
     showLabel(f.id, "SPITBALL!", "#22c55e");
     createVFX('projectile', f.x, f.y, '#22c55e', '', f.dir, opp.x);
     setTimeout(() => {
@@ -719,16 +718,16 @@ function doSpecial(f, opp){
         spawnParticles(opp.x, opp.y, f.dir, '#22c55e');
     }, 400);
   }
-  else if (charId === 'sherman') { // BEER BURP (40 dmg)
+  else if (charId === 'sherman') { 
     showLabel(f.id, "BEER BURP!", "#f59e0b");
-    f.action = 'special_active'; // Stumble forward
-    f.vx = f.dir * 15; // Lunge
+    f.action = 'special_active'; 
+    f.vx = f.dir * 15; 
     setTimeout(() => {
         createVFX('smoke', f.x + (f.dir*50), f.y, '#f59e0b'); f.action = 'idle';
         if(Math.abs(f.x - opp.x) < 100) applyDamage(opp, 40, f.dir, true);
     }, 300);
   }
-  else if (charId === 'parv') { // 3-BEAT DHOL (13+13+14 = 40)
+  else if (charId === 'parv') { 
     showLabel(f.id, "DHOL BEAT!", "#ea580c");
     let beat = 0;
     const dholInt = setInterval(() => {
@@ -737,7 +736,7 @@ function doSpecial(f, opp){
         if(++beat > 2) clearInterval(dholInt);
     }, 300);
   }
-  else if (charId === 'hari') { // SLEEPWALK ZZZ (40 total)
+  else if (charId === 'hari') { 
     showLabel(f.id, "ZZZ...", "#60a5fa");
     let z = 0;
     const zInt = setInterval(() => {
@@ -746,26 +745,26 @@ function doSpecial(f, opp){
         if(++z > 2) clearInterval(zInt);
     }, 200);
   }
-  else if (charId === 'jerell') { // A+ PAPER DROP (40)
+  else if (charId === 'jerell') { 
     showLabel(f.id, "CALCULATED.", "#e2e8f0"); createVFX('text', f.x, f.y, '#e2e8f0', 'E=MC^2');
     setTimeout(() => { 
         createVFX('paper', opp.x, opp.y, '#fff'); 
-        setTimeout(() => { applyDamage(opp, 40, f.dir, true); }, 400); // Wait for paper to drop
+        setTimeout(() => { applyDamage(opp, 40, f.dir, true); }, 400); 
     }, 200);
   }
-  else if (charId === 'sham') { // DEADEYE (40)
+  else if (charId === 'sham') { 
     showLabel(f.id, "DEADEYE", "#dc2626"); createVFX('crosshair', opp.x, opp.y, '#dc2626');
     hitStopFrames = 25; 
     setTimeout(() => { createVFX('ring', opp.x, opp.y, '#dc2626'); applyDamage(opp, 40, f.dir, true); spawnParticles(opp.x, opp.y, f.dir, '#dc2626'); }, 400); 
   }
-  else if (charId === 'jz') { // RHYTHM DASH (13+13+14 = 40)
+  else if (charId === 'jz') { 
     showLabel(f.id, "RHYTHM DASH!", "#ec4899"); let count = 0;
     const dash = setInterval(() => {
       f.x += f.dir * 45; spawnParticles(f.x, f.y, f.dir * -1, '#ec4899'); triggerShake('heavy');
       if(Math.abs(f.x - opp.x) < 70) { if(!opp.isBlocking){ opp.hp -= (count===2 ? 14 : 13); opp.vx = f.dir * 10; } else { opp.hp-=3;} }
       if(++count > 2) clearInterval(dash);
     }, 180);
-  } else if (charId === 'yiliang') { // SMOKE VANISH (40)
+  } else if (charId === 'yiliang') { 
     showLabel(f.id, "SMOKE VANISH!", "#94a3b8"); createVFX('smoke', f.x, f.y, '#94a3b8');
     f.x = opp.x - (opp.dir * 60); createVFX('smoke', f.x, f.y, '#94a3b8');
     setTimeout(() => { applyDamage(opp, 40, f.dir, true); }, 300);
@@ -781,7 +780,6 @@ function draw(){
     let aF = 20, aB = -10, lF = 10, lB = -10, j_aF = -40, j_aB = -30, j_lF = 20, j_lB = 10; 
     
     if(f.action === 'special_active') {
-       // KARTHIK WILD ARM FLAP & SHERMAN STUMBLE
        aF = Math.sin(t*5) * 180; aB = -Math.sin(t*5) * 180; j_aF = 0; j_aB = 0;
        lF = Math.sin(t*2) * 50; lB = -Math.sin(t*2) * 50;
     }
