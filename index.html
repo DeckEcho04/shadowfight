@@ -7,15 +7,14 @@
 <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body, html { background: radial-gradient(circle at top, #1a1a2e 0%, #05050a 100%); color: #fff; font-family: -apple-system, BlinkMacSystemFont, sans-serif; min-height: 100dvh; width: 100vw; overflow-x: hidden; overflow-y: auto; touch-action: pan-y; }
+  body, html { background: #05050a; color: #fff; font-family: -apple-system, BlinkMacSystemFont, sans-serif; min-height: 100dvh; width: 100vw; overflow-x: hidden; overflow-y: auto; touch-action: pan-y; }
   
   #app { min-height: 100dvh; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 20px 10px; position: relative; }
   .version-badge { position: absolute; top: 10px; right: 10px; font-size: 10px; color: rgba(255,255,255,0.3); z-index: 100; }
 
   .screen { display: none; width: 100%; max-width: 900px; }
   .screen.active { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
-
-  #arena-screen.active { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; padding: 0; background: #05050a; overflow: hidden; touch-action: none; justify-content: center; z-index: 999;}
+  #arena-screen.active { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; padding: 0; background: #000; overflow: hidden; touch-action: none; justify-content: center; z-index: 999;}
 
   /* LOBBY UI */
   #lobby-ui { background: rgba(17, 17, 34, 0.85); padding: 20px; border-radius: 16px; margin: 0 auto 20px; border: 1px solid rgba(255,255,255,0.1); border-top: 1px solid rgba(255,255,255,0.2); text-align: center; max-width: 600px; width: 100%; box-shadow: 0 15px 35px rgba(0,0,0,0.8); backdrop-filter: blur(10px); }
@@ -50,34 +49,29 @@
   @keyframes shake { 0%{transform:translate(6px,3px);} 25%{transform:translate(-5px,-6px);} 50%{transform:translate(-8px,0px);} 75%{transform:translate(5px,6px);} 100%{transform:translate(0,0);} }
   .shake-anim { animation: shake 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
 
-  #game-container { position: relative; width: 100%; flex: 1; border-radius: 12px; overflow: hidden; border: 2px solid #2a2a4a; display: flex; flex-direction: column; max-height: 800px; }
-  #arena { position: absolute; width: 100%; height: 100%; perspective: 800px; overflow: hidden; }
-  .floor { position: absolute; bottom: 0; width: 120%; left: -10%; height: 40%; transform: rotateX(75deg); transform-origin: top; box-shadow: 0 -20px 50px rgba(0,0,0,0.8); }
+  #game-container { position: relative; width: 100%; flex: 1; overflow: hidden; display: flex; flex-direction: column; max-height: 800px; background-size: cover; background-position: center bottom; }
+  #arena { position: absolute; width: 100%; height: 100%; perspective: 1000px; overflow: hidden; }
+  .floor { position: absolute; bottom: 0; width: 120%; left: -10%; height: 40%; transform: rotateX(75deg); transform-origin: top; box-shadow: 0 -30px 60px rgba(0,0,0,0.9); }
   
-  /* VFX LAYER FOR SPECIAL MOVES */
   #vfx-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 15; overflow: hidden;}
-  
   .vfx-ring { position: absolute; border-radius: 50%; transform: translate(-50%, -50%) scale(0); opacity: 1; animation: explodeRing 0.5s ease-out forwards; }
   @keyframes explodeRing { to { transform: translate(-50%, -50%) scale(3); opacity: 0; border-width: 0px; } }
-
   .vfx-acid { position: absolute; background: rgba(34, 197, 94, 0.5); border-radius: 50%; transform: rotateX(70deg) translate(-50%, -50%); box-shadow: 0 0 20px #22c55e, inset 0 0 20px #22c55e; filter: blur(2px); }
-  
   .vfx-text { position: absolute; font-family: monospace; font-weight: bold; font-size: 20px; animation: floatUp 1s ease-out forwards; }
   @keyframes floatUp { to { transform: translateY(-50px); opacity: 0; } }
 
-  /* HUD */
-  .hud { position: absolute; top: 0; width: 100%; padding: 12px 15px; display: flex; justify-content: space-between; z-index: 10; background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%); }
-  .player-tag { font-size: 12px; font-weight: 900; text-transform: uppercase; margin-bottom: 4px; text-shadow: 0 2px 4px black; letter-spacing: 1px; }
-  .hp-bar-bg { width: 35vw; max-width: 280px; height: 16px; background: rgba(0,0,0,0.7); border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); }
-  .hp-bar-fill { height: 100%; border-radius: 8px; transition: width 0.15s ease-out;}
-  .hp-p1 { background: linear-gradient(90deg, #4f46e5, #a5b4fc); }
-  .hp-p2 { background: linear-gradient(90deg, #ef4444, #fca5a5); }
+  /* DYNAMIC HUD */
+  .hud { position: absolute; top: 0; width: 100%; padding: 12px 15px; display: flex; justify-content: space-between; z-index: 10; background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, transparent 100%); }
+  .player-tag { font-size: 14px; font-weight: 900; text-transform: uppercase; margin-bottom: 6px; text-shadow: 0 2px 4px black; letter-spacing: 1px; display: flex; align-items: baseline; gap: 6px;}
+  .char-tag { font-size: 10px; color: #a1a1aa; font-weight: 800; letter-spacing: 0.5px; }
+  .hp-bar-bg { width: 35vw; max-width: 280px; height: 18px; background: rgba(0,0,0,0.8); border-radius: 9px; border: 2px solid rgba(255,255,255,0.2); box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+  .hp-bar-fill { height: 100%; border-radius: 6px; transition: width 0.15s ease-out; box-shadow: inset 0 0 8px rgba(255,255,255,0.4); }
   .hp-boss { background: linear-gradient(90deg, #7f1d1d, #ef4444); width: 100%; }
-  .sp-bar-bg { width: 35vw; max-width: 280px; height: 6px; background: rgba(0,0,0,0.7); border-radius: 3px; margin-top: 4px; }
+  .sp-bar-bg { width: 35vw; max-width: 280px; height: 6px; background: rgba(0,0,0,0.7); border-radius: 3px; margin-top: 6px; }
   .sp-bar-fill { height: 100%; width: 0%; background: #fbbf24; transition: width 0.2s; box-shadow: 0 0 5px #fbbf24; }
   #boss-hud { position: absolute; top: 60px; left: 50%; transform: translateX(-50%); width: 60vw; max-width: 400px; text-align: center; display: none; z-index: 9; }
 
-  /* K.O. VICTORY SCREEN */
+  /* K.O. SCREEN */
   #victory-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; backdrop-filter: blur(5px); }
   #victory-ko { font-size: 120px; color: #ef4444; font-style: italic; font-weight: 900; text-shadow: 0 0 30px red, 5px 5px 0px #7f1d1d; margin-bottom: -10px; line-height: 1; }
   #winner-name { font-size: 35px; font-weight: 900; color: #fff; text-transform: uppercase; letter-spacing: 3px; text-shadow: 0 4px 10px rgba(0,0,0,0.8); }
@@ -85,13 +79,11 @@
 
   .particle { position: absolute; width: 6px; height: 6px; background: #fbbf24; border-radius: 50%; pointer-events: none; z-index: 50; box-shadow: 0 0 10px #ef4444, 0 0 20px #fbbf24; }
 
-  /* SKELETAL FIGHTERS WITH INVERSE KINEMATICS */
+  /* SKELETAL FIGHTERS */
   .fighter { position: absolute; bottom: 25%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
   .f-rig { position: relative; width: 40px; height: 80px; transition: transform 0.05s; }
-  
   .f-head { position: absolute; top: -20px; left: 50%; width: 22px; height: 26px; margin-left: -11px; border-radius: 40% 40% 50% 50%; z-index: 5; box-shadow: inset -2px -2px 6px rgba(0,0,0,0.6);}
   .f-torso { position: absolute; top: 5px; left: 50%; width: 26px; height: 35px; margin-left: -13px; border-radius: 6px 6px 4px 4px; z-index: 4; box-shadow: inset 0 0 10px rgba(0,0,0,0.7); clip-path: polygon(10% 0, 90% 0, 100% 100%, 0 100%); }
-  
   .f-limb { position: absolute; width: 8px; border-radius: 4px; transform-origin: top center; box-shadow: inset -1px -1px 4px rgba(0,0,0,0.6); }
   .f-limb::after { content: ''; position: absolute; top: calc(100% - 4px); left: 0; width: 100%; height: 100%; background: inherit; border-radius: inherit; transform-origin: top center; box-shadow: inherit; transform: rotate(var(--joint, 0deg)); transition: transform 0.05s; }
   
@@ -99,14 +91,10 @@
   .f-arm-f { top: 7px; left: 24px; height: 16px; z-index: 6; }
   .f-leg-b { top: 35px; left: 10px; height: 20px; z-index: 1; filter: brightness(0.5); }
   .f-leg-f { top: 35px; left: 22px; height: 20px; z-index: 3; }
-
   .boss-rig { transform: scale(1.6); transform-origin: bottom center; filter: drop-shadow(0 0 15px rgba(255,0,0,0.5)); }
 
-  /* States */
   .hurt .f-head, .hurt .f-torso, .hurt .f-limb { filter: brightness(2) drop-shadow(0 0 10px red) !important; background: #fff !important; }
   .hurt .f-head { transform: rotate(-20deg) translate(-5px, -5px); }
-  
-  /* Dynamic Blocking Posture */
   .blocking .f-arm-f { transform: rotate(-140deg) translate(5px, -5px) !important; }
   .blocking .f-arm-f::after { transform: rotate(90deg) !important; }
   .blocking .f-arm-b { transform: rotate(140deg) !important; }
@@ -117,15 +105,13 @@
   .special-label.show { opacity: 1; top: -80px; }
 
   /* OVERLAY CONTROLS */
-  #pc-controls { position: absolute; bottom: 5px; width: 100%; text-align: center; color: rgba(255,255,255,0.4); font-size: 12px; z-index: 5; pointer-events: none; font-weight: bold; }
+  #pc-controls { position: absolute; bottom: 5px; width: 100%; text-align: center; color: rgba(255,255,255,0.4); font-size: 12px; z-index: 5; pointer-events: none; font-weight: bold; text-shadow: 0 2px 4px black;}
   #mobile-controls { position: absolute; bottom: 15px; left: 0; width: 100%; height: 140px; display: none; justify-content: space-between; padding: 0 20px; z-index: 50; pointer-events: none; }
   @media (max-width: 768px) { #pc-controls { display: none; } }
   
   .d-pad { pointer-events: auto; display: grid; gap: 8px; grid-template-columns: 55px 55px 55px; grid-template-rows: 55px 55px; }
   .action-pad { pointer-events: auto; display: grid; gap: 10px; grid-template-columns: 55px 55px; grid-template-rows: 55px 55px; }
   #btn-up { grid-column: 2; grid-row: 1; } #btn-left { grid-column: 1; grid-row: 2; } #btn-right { grid-column: 3; grid-row: 2; }
-  
-  /* 4-Button layout */
   #btn-sp { grid-column: 1; grid-row: 1; } #btn-block { grid-column: 2; grid-row: 1; }
   #btn-punch { grid-column: 1; grid-row: 2; } #btn-kick { grid-column: 2; grid-row: 2; }
 
@@ -138,7 +124,7 @@
 <body>
 
 <div id="app">
-  <div class="version-badge">v0.4.0 (Sync, Details & Maps)</div>
+  <div class="version-badge">v0.4.1 (Sync Authority & Realism Map Update)</div>
 
   <div id="select-screen" class="screen active">
     <div id="lobby-ui">
@@ -197,11 +183,19 @@
     <div id="game-container">
       <div id="vfx-layer"></div>
       <div class="hud">
-        <div style="width: 40%;"><div id="p1-tag" class="player-tag">Player 1</div><div class="hp-bar-bg"><div id="hp-1" class="hp-bar-fill hp-p1"></div></div><div class="sp-bar-bg"><div id="sp-1" class="sp-bar-fill"></div></div></div>
-        <div style="width: 40%; text-align: right;"><div id="p2-tag" class="player-tag">Player 2</div><div class="hp-bar-bg" style="margin-left:auto;"><div id="hp-2" class="hp-bar-fill hp-p2"></div></div><div class="sp-bar-bg" style="margin-left:auto;"><div id="sp-2" class="sp-bar-fill"></div></div></div>
+        <div style="width: 40%;">
+          <div id="p1-tag" class="player-tag">P1 <span id="p1-char" class="char-tag"></span></div>
+          <div class="hp-bar-bg"><div id="hp-1" class="hp-bar-fill"></div></div>
+          <div class="sp-bar-bg"><div id="sp-1" class="sp-bar-fill"></div></div>
+        </div>
+        <div style="width: 40%; text-align: right;">
+          <div id="p2-tag" class="player-tag" style="justify-content: flex-end;">P2 <span id="p2-char" class="char-tag"></span></div>
+          <div class="hp-bar-bg" style="margin-left:auto;"><div id="hp-2" class="hp-bar-fill"></div></div>
+          <div class="sp-bar-bg" style="margin-left:auto;"><div id="sp-2" class="sp-bar-fill"></div></div>
+        </div>
       </div>
       <div id="boss-hud">
-        <div class="player-tag" style="color:#f87171;">THE BOSS</div>
+        <div class="player-tag" style="color:#f87171; justify-content: center;">THE BOSS</div>
         <div class="hp-bar-bg" style="width:100%; height:20px; margin:0 auto; border-color:#ef4444;"><div id="hp-3" class="hp-bar-fill hp-boss"></div></div>
       </div>
 
@@ -242,9 +236,9 @@ const CHARS = [
 
 // HIGH DETAIL MAP CSS
 const MAPS = {
-  alley: { bg: 'radial-gradient(circle at top right, #312e81, #0f172a 60%)', floor: '#0c0a20', grid: '#4f46e5' },
-  dojo:  { bg: 'radial-gradient(circle at center 40%, #fca5a5 5%, #ef4444 15%, transparent 16%), linear-gradient(180deg, #7c2d12 0%, #f59e0b 60%, #000 100%)', floor: '#451a03', grid: '#fcd34d' },
-  mamak: { bg: 'radial-gradient(circle at 80% 20%, #fef08a 8%, transparent 10%), linear-gradient(180deg, #38bdf8 0%, #bae6fd 45%, #4ade80 45%, #166534 55%, #262626 55%)', floor: '#171717', grid: '#facc15' }
+  alley: { bg: 'radial-gradient(circle at 50% 10%, #312e81 0%, #0f172a 60%)', floor: '#0c0a20', grid: '#4f46e5' },
+  dojo:  { bg: 'radial-gradient(circle at 50% 60%, #ef4444 20%, transparent 21%), linear-gradient(180deg, #7c2d12 0%, #b45309 60%, #000 60%)', floor: '#451a03', grid: '#fcd34d' },
+  mamak: { bg: 'radial-gradient(circle at 80% 30%, #fde047 10%, transparent 12%), linear-gradient(180deg, #38bdf8 0%, #7dd3fc 45%, #22c55e 45%, #14532d 50%, #171717 50%)', floor: '#262626', grid: '#facc15' }
 };
 
 let peer, conn, myPeerId, isHost = true, onlineMode = false;
@@ -253,7 +247,7 @@ let p1Sel=null, p2Sel=null, f1, f2, f3;
 let keys1 = {}, keys2 = {}, keys = {}, keys3 = {}; 
 let activeMode = '1v1', activeMap = 'alley';
 let hitStopFrames = 0;
-let isGameOver = false; // THE FIX: Synchronized KO state
+let isGameOver = false;
 
 function checkMobileUI() { if ('ontouchstart' in window || navigator.maxTouchPoints > 0) document.getElementById('mobile-controls').style.display = 'flex'; }
 
@@ -318,12 +312,22 @@ function setupDataListeners() {
       if(isHost) { myName = document.getElementById('player-name').value.trim() || "Host"; conn.send({type: 'hello', name: myName}); }
     }
     if (data.type === 'ready') { p2Sel = CHARS.find(c => c.id === data.p2); if(p1Sel) sendStart(); }
+    
+    // HOST AUTHORITY HP SYNC
+    if (data.type === 'sync' && !isHost) {
+      if(f1) f1.hp = data.hp1;
+      if(f2) f2.hp = data.hp2;
+      if(f3) f3.hp = data.hp3;
+      // Soft drift correct to prevent rubberbanding but keep boxes aligned
+      if(f1 && Math.abs(f1.x - data.x1) > 25) f1.x = data.x1;
+      if(f2 && Math.abs(f2.x - data.x2) > 25) f2.x = data.x2;
+    }
+
     if (data.type === 'keys') { if (isHost) keys2 = data.keys; else keys1 = data.keys; }
     if (data.type === 'start') { 
       p1Sel = CHARS.find(c => c.id === data.p1); p2Sel = CHARS.find(c => c.id === data.p2); 
       activeMap = data.map; activeMode = data.mode; startFight(); 
     }
-    // SYNCED KO SCREEN LOGIC
     if (data.type === 'gameover') { triggerKO(data.winner, false); }
     if (data.type === 'rematch') { resetToLobby(); }
   });
@@ -387,7 +391,7 @@ function resetToLobby() {
   document.getElementById('select-screen').classList.add('active');
   p1Sel = null; p2Sel = null; keys = {}; keys1 = {}; keys2 = {};
   document.querySelectorAll('.char-card').forEach(c => { c.classList.remove('selected-p1', 'selected-p2'); });
-  document.getElementById('vfx-layer').innerHTML = ''; // Clear VFX
+  document.getElementById('vfx-layer').innerHTML = ''; 
 }
 
 function handleRematch() {
@@ -401,8 +405,12 @@ function startFight(){
   document.getElementById('arena-screen').classList.add('active');
   
   applyMap();
-  document.getElementById('p1-tag').innerText = isHost ? myName : oppName;
-  document.getElementById('p2-tag').innerText = isHost ? oppName : myName;
+  
+  // DYNAMIC PERSONALIZED UI & HEALTH BARS
+  document.getElementById('p1-tag').innerHTML = `${isHost ? myName : oppName} <span class="char-tag">(${p1Sel.name})</span>`;
+  document.getElementById('p2-tag').innerHTML = `<span class="char-tag">(${p2Sel.name})</span> ${isHost ? oppName : myName}`;
+  document.getElementById('hp-1').style.background = `linear-gradient(90deg, ${p1Sel.suit}, ${p1Sel.skin})`;
+  document.getElementById('hp-2').style.background = `linear-gradient(90deg, ${p2Sel.suit}, ${p2Sel.skin})`;
 
   const aW = document.getElementById('game-container').offsetWidth;
   f1 = { id:'p1', x:50, y:0, vx:0, vy:0, hp:100, sp:0, dir:1, action:'idle', hit:false, w:40, maxW: aW, isBlocking: false, team: 1, buff: 0 };
@@ -412,14 +420,13 @@ function startFight(){
 
   if(activeMode === 'coop') {
     document.getElementById('boss-hud').style.display = 'block'; document.getElementById('p3').style.display = 'flex';
-    f3 = { id:'p3', x: aW/2, y:0, vx:0, vy:0, hp:200, maxHp:200, sp:0, dir:-1, action:'idle', hit:false, w:60, maxW: aW, isBlocking: false, team: 2, buff: 0 }; // BOSS NERFED
+    f3 = { id:'p3', x: aW/2, y:0, vx:0, vy:0, hp:200, maxHp:200, sp:0, dir:-1, action:'idle', hit:false, w:60, maxW: aW, isBlocking: false, team: 2, buff: 0 }; 
   } else {
     document.getElementById('boss-hud').style.display = 'none'; document.getElementById('p3').style.display = 'none'; f3 = null;
   }
   requestAnimationFrame(gameLoop);
 }
 
-// SYNC FIX: Dedicated function to force KO across both browsers
 function triggerKO(winnerText, sendSignal = true) {
   if(isGameOver) return;
   isGameOver = true;
@@ -436,7 +443,13 @@ function gameLoop(){
   if(!f1 || !f2) return;
 
   if(onlineMode && conn && conn.open) {
-    if(isHost) { keys1 = keys; } else { keys2 = keys; }
+    if(isHost) { 
+      keys1 = keys; 
+      // HOST IS GOD: Send Absolute State
+      conn.send({type: 'sync', hp1: f1.hp, hp2: f2.hp, hp3: f3?f3.hp:0, x1: f1.x, x2: f2.x});
+    } else { 
+      keys2 = keys; 
+    }
     conn.send({type: 'keys', keys: keys});
   } else { keys1 = keys; }
   
@@ -450,14 +463,17 @@ function gameLoop(){
   }
   draw();
 
-  // SYNCED VICTORY CHECKS (Only Host calculates to prevent desync logic, but offline calculates too)
+  // SYNCED VICTORY CHECKS (Host dictates Game Over logic)
   if(isHost || !onlineMode) {
     if(activeMode === 'coop') {
       if(f3 && f3.hp <= 0) { triggerKO("PLAYERS WIN!"); }
       else if(f1.hp <= 0 && f2.hp <= 0) { triggerKO("BOSS WINS!"); }
     } else {
       if(f1.hp <= 0 || f2.hp <= 0) { 
-        const winner = f1.hp <= 0 ? document.getElementById('p2-tag').innerText : document.getElementById('p1-tag').innerText;
+        // Get name without the character tag
+        let p1Name = isHost ? myName : oppName;
+        let p2Name = isHost ? oppName : myName;
+        const winner = f1.hp <= 0 ? p2Name : p1Name;
         triggerKO(`${winner} WINS!`); 
       }
     }
@@ -467,14 +483,13 @@ function gameLoop(){
 }
 
 function updateFighter(f, opp, k, opp2){
-  if(f.hp <= 0) { document.getElementById(f.id).style.display = 'none'; return; }
-  else { document.getElementById(f.id).style.display = 'flex'; }
   f.action = 'idle';
   
-  // DEDICATED BLOCK BUTTON (B Key)
+  // DYNAMIC BOUNDARY CHECK FOR PHONE ROTATION
+  f.maxW = document.getElementById('game-container').offsetWidth;
+
   if(k['b']) {
-    f.isBlocking = true;
-    f.vx *= 0.5; // Slow movement while blocking
+    f.isBlocking = true; f.vx *= 0.5; 
   } else {
     f.isBlocking = false;
     if(k['a']) { f.vx = -6; f.action = 'walk'; } else if(k['d']) { f.vx = 6; f.action = 'walk'; } else f.vx *= 0.8;
@@ -522,7 +537,6 @@ function spawnParticles(x, y, dir, color = '#fbbf24') {
   }
 }
 
-// VFX HELPER FOR SPECIALS
 function createVFX(type, x, y, color) {
   const layer = document.getElementById('vfx-layer');
   const vfx = document.createElement('div');
@@ -558,17 +572,16 @@ function attack(f, o1, o2, dmg, range){
   });
 }
 
-// HIGHLY DETAILED SPECIAL MOVES
 function doSpecial(f, opp){
   if(!opp) return; f.sp = 0; hitStopFrames = 8;
   const charId = (f.id === 'p1' ? p1Sel : p2Sel).id;
   
-  if(charId === 'parv') { // Dhol Wave
+  if(charId === 'parv') { 
     showLabel(f.id, "DHOL WAVE!", "#ea580c"); createVFX('ring', f.x, f.y, '#ea580c');
     setTimeout(() => { if(!opp.isBlocking) { opp.hp -= 25; opp.vx = f.dir * 25; } triggerShake(); }, 200);
-  } else if (charId === 'andi') { // Hulk Out
+  } else if (charId === 'andi') { 
     showLabel(f.id, "HULK OUT!", "#22c55e"); f.buff = 300; f.hp = Math.min(100, f.hp + 15); triggerShake(); spawnParticles(f.x, f.y, 1, '#22c55e');
-  } else if (charId === 'jz') { // Rhythm Dash
+  } else if (charId === 'jz') { 
     showLabel(f.id, "RHYTHM DASH!", "#ec4899");
     let count = 0;
     const dash = setInterval(() => {
@@ -576,24 +589,24 @@ function doSpecial(f, opp){
       if(Math.abs(f.x - opp.x) < 50 && !opp.isBlocking) { opp.hp -= 8; opp.vx = f.dir * 5; triggerShake(); }
       if(++count > 2) clearInterval(dash);
     }, 150);
-  } else if (charId === 'yiliang') { // Smoke Vanish
+  } else if (charId === 'yiliang') { 
     showLabel(f.id, "SMOKE VANISH!", "#94a3b8"); spawnParticles(f.x, f.y, 0, '#94a3b8');
-    f.x = opp.x + (opp.dir * 40); // Teleport behind
+    f.x = opp.x + (opp.dir * 40); 
     setTimeout(() => { if(!opp.isBlocking) { opp.hp -= 30; opp.vx = f.dir * 15; } triggerShake(); }, 300);
-  } else if (charId === 'dexter') { // Acid Spit
+  } else if (charId === 'dexter') { 
     showLabel(f.id, "ACID SPIT!", "#22c55e"); createVFX('acid', opp.x, opp.y, '#22c55e');
     if(!opp.isBlocking) { opp.hp -= 20; opp.vx = f.dir * 5; }
-  } else if (charId === 'karthik') { // 67 Burst
+  } else if (charId === 'karthik') { 
     showLabel(f.id, "67 BURST!", "#4f46e5");
     let count = 0;
     const flurry = setInterval(() => {
       if(!opp.isBlocking) opp.hp -= 2; triggerShake(); spawnParticles(opp.x, opp.y, f.dir, '#4f46e5');
       if(++count > 5) { clearInterval(flurry); if(!opp.isBlocking){ opp.hp -= 15; opp.vx = f.dir * 20;} createVFX('ring', opp.x, opp.y, '#4f46e5'); }
     }, 100);
-  } else if (charId === 'jerell') { // IQ Strike
+  } else if (charId === 'jerell') { 
     showLabel(f.id, "CALCULATED.", "#22c55e"); createVFX('text', f.x, f.y, '#22c55e');
     setTimeout(() => { if(!opp.isBlocking) { opp.hp -= 28; opp.vx = f.dir * 10; } triggerShake(); }, 400);
-  } else { // Generic Fallback (Sherman/Hari)
+  } else { 
     showLabel(f.id, "SPECIAL!", "#fbbf24"); if(!opp.isBlocking) { opp.hp -= 20; opp.vx = f.dir * 20; } triggerShake(); spawnParticles(opp.x, opp.y, f.dir);
   }
 }
@@ -606,8 +619,10 @@ function showLabel(pid, txt, color){
 function draw(){
   const t = Date.now() / 100;
   const updateF = (f, el) => {
-    if(f.hp <= 0) return;
+    if(f.hp <= 0 && !isGameOver) { el.style.opacity = '0.3'; } else { el.style.opacity = '1'; } // Instead of display:none, just grey out dead bodies.
+    
     let scale = f.id === 'p3' ? 1.6 : (((f.id==='p1'?p1Sel:p2Sel).id === 'andi' && f.buff > 0) ? 1.4 : 1);
+    
     el.style.transform = `translate(${f.x}px, ${f.y}px)`; el.querySelector('.f-rig').style.transform = `scaleX(${f.dir * scale}) scaleY(${scale})`;
     
     let aF = 20, aB = -10, lF = 10, lB = -10, j_aF = -40, j_aB = -30, j_lF = 20, j_lB = 10; 
@@ -623,14 +638,10 @@ function draw(){
     el.querySelector('.f-arm-f').style.setProperty('--joint', `${j_aF}deg`); el.querySelector('.f-arm-b').style.setProperty('--joint', `${j_aB}deg`);
     el.querySelector('.f-leg-f').style.setProperty('--joint', `${j_lF}deg`); el.querySelector('.f-leg-b').style.setProperty('--joint', `${j_lB}deg`);
 
-    // VISUAL BLOCKING FEEDBACK
     if(f.isBlocking) {
-      el.querySelector('.f-arm-f').style.transform = `rotate(-140deg) translate(5px, -5px)`;
-      el.querySelector('.f-arm-b').style.transform = `rotate(140deg)`;
+      el.querySelector('.f-arm-f').style.transform = `rotate(-140deg) translate(5px, -5px)`; el.querySelector('.f-arm-b').style.transform = `rotate(140deg)`;
       el.querySelector('.f-torso').classList.add('block-aura');
-    } else {
-      el.querySelector('.f-torso').classList.remove('block-aura');
-    }
+    } else { el.querySelector('.f-torso').classList.remove('block-aura'); }
 
     if(f.hit) el.classList.add('hurt'); else el.classList.remove('hurt');
   };
@@ -644,7 +655,7 @@ function doBossAI(){
   if(f1.hp <= 0) target = f2; else if(f2.hp > 0 && Math.abs(f3.x - f2.x) < Math.abs(f3.x - f1.x)) target = f2;
   const dist = Math.abs(f3.x - target.x);
   if (dist > 80) { keys3['a'] = f3.x > target.x; keys3['d'] = f3.x < target.x; } 
-  else { keys3['a'] = false; keys3['d'] = false; keys3['j'] = Math.random() < 0.03; keys3['k'] = Math.random() < 0.02; } // NERFED
+  else { keys3['a'] = false; keys3['d'] = false; keys3['j'] = Math.random() < 0.03; keys3['k'] = Math.random() < 0.02; } 
 }
 
 document.addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; }); document.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
