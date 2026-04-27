@@ -56,17 +56,16 @@
   #game-container { position: relative; width: 100%; flex: 1; overflow: hidden; display: flex; flex-direction: column; max-height: 800px; background-size: cover; background-position: center bottom; }
   #arena { position: absolute; width: 100%; height: 100%; perspective: 1000px; }
   
-  /* VIVID MAP ELEMENTS */
-  .bg-sun { position: absolute; border-radius: 50%; display: none; }
-  .bg-horizon { position: absolute; bottom: 35%; width: 100%; height: 20%; display: none; }
+  .bg-sun { position: absolute; border-radius: 50%; display: none; z-index: 1;}
+  .bg-horizon { position: absolute; bottom: 35%; width: 100%; height: 20%; display: none; z-index: 2;}
   
-  /* Floor is now an infinitely wide element inside the scrolling arena */
-  #scroll-world { position: absolute; width: 10000px; height: 100%; top: 0; left: 0; transform-origin: left; }
+  #scroll-world { position: absolute; width: 10000px; height: 100%; top: 0; left: 0; transform-origin: left; z-index: 5;}
   .floor { position: absolute; bottom: 0; width: 100%; height: 40%; transform: rotateX(75deg); transform-origin: top; box-shadow: 0 -30px 60px rgba(0,0,0,0.9); }
   
-  /* PARKOUR OBSTACLES */
-  .pit { position: absolute; bottom: 0; height: 45%; background: #000; z-index: 1; border-top: 10px solid #111; box-shadow: inset 0 20px 20px rgba(0,0,0,1); }
-  .finish-line { position: absolute; bottom: 40%; width: 20px; height: 300px; background: repeating-linear-gradient(45deg, #fff, #fff 10px, #000 10px, #000 20px); z-index: 10; }
+  /* PARKOUR PITS */
+  #pits-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 6; pointer-events: none;}
+  .pit { position: absolute; bottom: 0; height: 40%; background: #000; z-index: 6; border-top: 10px solid #05050a; box-shadow: inset 0 30px 30px rgba(0,0,0,1); }
+  .finish-line { position: absolute; bottom: 40%; width: 30px; height: 300px; background: repeating-linear-gradient(45deg, #fff, #fff 15px, #000 15px, #000 30px); z-index: 10; box-shadow: 0 0 20px rgba(255,255,255,0.5);}
 
   #vfx-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 15; overflow: hidden;}
   .vfx-base { position: absolute; bottom: 25%; pointer-events: none; z-index: 15; }
@@ -76,7 +75,7 @@
   .vfx-smoke { width: 180px; height: 180px; background: radial-gradient(circle, rgba(148,163,184,1) 0%, rgba(245, 158, 11,0.8) 40%, transparent 70%); border-radius: 50%; opacity: 1; animation: smokePoof 0.8s ease-out forwards; filter: blur(10px); mix-blend-mode: screen; }
   @keyframes smokePoof { 0% { transform: translate(var(--vx), var(--vy)) scale(0.2); opacity: 1; } 100% { transform: translate(var(--vx), var(--vy)) scale(2.5); opacity: 0; } }
   .vfx-crosshair { width: 80px; height: 80px; border: 6px solid #dc2626; border-radius: 50%; opacity: 0; animation: lockOn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; box-shadow: 0 0 15px #dc2626, inset 0 0 15px #dc2626;}
-  .vfx-crosshair::before, .vfx-crosshair::after { content: ''; position: absolute; background: #dc2626; box-shadow: 0 0 8px #dc2626;}
+  .vfx-crosshair::before, .vfx-crosshair::after { content: absolute; background: #dc2626; box-shadow: 0 0 8px #dc2626;}
   .vfx-crosshair::before { top: 50%; left: -20px; right: -20px; height: 6px; margin-top: -3px; }
   .vfx-crosshair::after { left: 50%; top: -20px; bottom: -20px; width: 6px; margin-left: -3px; }
   @keyframes lockOn { 0% { transform: translate(var(--vx), var(--vy)) scale(4) rotate(90deg); opacity: 0; } 100% { transform: translate(var(--vx), var(--vy)) scale(1) rotate(0deg); opacity: 1; } }
@@ -84,13 +83,14 @@
   @keyframes flyAcross { 0% { transform: translate(var(--start-x), var(--start-y)) rotate(0deg); } 100% { transform: translate(var(--end-x), var(--end-y)) rotate(360deg); } }
   .vfx-text { font-family: monospace; font-weight: bold; font-size: 24px; animation: floatUp 1s ease-out forwards; text-shadow: 0 0 10px currentColor; }
   @keyframes floatUp { 0% { transform: translate(var(--vx), var(--vy)) scale(0.5); opacity: 1; } 100% { transform: translate(var(--vx), calc(var(--vy) - 80px)) scale(1.5); opacity: 0; } }
+  
   .vfx-comic { position: absolute; font-family: Impact, sans-serif; font-weight: 900; font-size: 80px; font-style: italic; letter-spacing: 2px; text-transform: uppercase; animation: kapow 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; text-shadow: 4px 4px 0px #fff, 0 0 20px currentColor; z-index: 100; white-space: nowrap; }
   @keyframes kapow { 0% { transform: translate(var(--vx), var(--vy)) scale(0) rotate(-15deg); opacity: 1; } 80% { transform: translate(var(--vx), var(--vy)) scale(1) rotate(5deg); opacity: 1; } 100% { transform: translate(var(--vx), calc(var(--vy) + 20px)) scale(0.8) rotate(0deg); opacity: 0; } }
   .vfx-paper { width: 80px; height: 100px; background: white; border: 2px solid #ccc; font-family: impact; color: red; font-size: 40px; text-align: center; line-height: 100px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); animation: dropDown 0.4s ease-in forwards; }
   @keyframes dropDown { 0% { transform: translate(var(--vx), -200px) rotate(45deg); } 100% { transform: translate(var(--vx), var(--vy)) rotate(0deg); } }
 
-  /* DYNAMIC HUD WITH SCOREBOARD */
-  .hud { position: absolute; top: 0; width: 100%; padding: 12px 15px; display: flex; justify-content: space-between; z-index: 10; background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, transparent 100%); align-items: flex-start;}
+  /* DYNAMIC HUD WITH RESTORED SP BAR */
+  .hud { position: absolute; top: 0; width: 100%; padding: 12px 15px; display: flex; justify-content: space-between; z-index: 20; background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, transparent 100%); align-items: flex-start;}
   
   .scoreboard { display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 10px; background: rgba(0,0,0,0.6); padding: 5px 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); }
   .score-title { font-size: 9px; color: #fbbf24; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }
@@ -99,11 +99,15 @@
   .player-info { width: 35vw; max-width: 250px; }
   .player-tag { font-size: 14px; font-weight: 900; text-transform: uppercase; margin-bottom: 6px; text-shadow: 0 2px 4px black; letter-spacing: 1px; display: flex; align-items: baseline; gap: 6px;}
   .char-tag { font-size: 10px; color: #a1a1aa; font-weight: 800; letter-spacing: 0.5px; }
+  
   .hp-bar-bg { width: 100%; height: 18px; background: rgba(0,0,0,0.8); border-radius: 9px; border: 2px solid rgba(255,255,255,0.2); box-shadow: 0 0 10px rgba(0,0,0,0.5); }
   .hp-bar-fill { height: 100%; border-radius: 6px; transition: width 0.15s ease-out; box-shadow: inset 0 0 8px rgba(255,255,255,0.4); }
   
-  /* STAGE PROGRESS (FOR PARKOUR) */
-  #stage-progress { display: none; position: absolute; top: 70px; left: 50%; transform: translateX(-50%); font-weight: 900; font-style: italic; color: #fbbf24; text-shadow: 0 2px 5px black; font-size: 18px; z-index: 10; letter-spacing: 2px; }
+  /* FIXED SP BAR CSS */
+  .sp-bar-bg { width: 100%; height: 10px; background: rgba(0,0,0,0.8); border-radius: 5px; margin-top: 8px; border: 1px solid rgba(255,255,255,0.3); box-shadow: inset 0 0 5px rgba(0,0,0,0.8); overflow: hidden; }
+  .sp-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #f59e0b, #fef08a); transition: width 0.1s linear; box-shadow: 0 0 10px #facc15; border-radius: 3px;}
+  
+  #stage-progress { display: none; position: absolute; top: 70px; left: 50%; transform: translateX(-50%); font-weight: 900; font-style: italic; color: #fbbf24; text-shadow: 0 2px 5px black; font-size: 22px; z-index: 20; letter-spacing: 2px; }
 
   /* K.O. SCREEN */
   #victory-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; backdrop-filter: blur(5px); }
@@ -114,7 +118,7 @@
   .particle { position: absolute; width: 8px; height: 8px; background: #fbbf24; border-radius: 50%; pointer-events: none; z-index: 50; box-shadow: 0 0 15px #ef4444, 0 0 25px #fbbf24; }
 
   /* SKELETAL FIGHTERS */
-  .fighter { position: absolute; bottom: 25%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
+  .fighter { position: absolute; bottom: 25%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; z-index: 10;}
   .f-rig { position: relative; width: 40px; height: 80px; transition: transform 0.05s, width 0.3s; z-index: 10;}
   
   .hulk-mode { transform: scale(1.3) !important; transform-origin: bottom center; filter: drop-shadow(0 0 10px #22c55e); }
@@ -162,7 +166,7 @@
 <body>
 
 <div id="app">
-  <div class="version-badge">v0.7.0 (Parkour Race & Prop Update)</div>
+  <div class="version-badge">v0.7.5 (Parkour Fix & SP Bar Restore)</div>
 
   <div id="select-screen" class="screen active">
     <div id="lobby-ui">
@@ -454,22 +458,27 @@ function applyMap() {
     sun.style.display = 'block'; sun.style.background = m.sunColor; sun.style.width = '200px'; sun.style.height = '200px'; 
     sun.style.left = '50%'; sun.style.marginLeft = '-100px'; sun.style.bottom = '30%'; sun.style.boxShadow = `0 0 50px ${m.sunColor}`;
   } else { sun.style.display = 'none'; }
+  
+  const horizon = document.getElementById('map-horizon');
+  if(m.horizon !== 'none') {
+    horizon.style.display = 'block'; horizon.style.background = m.horizonColor;
+    horizon.style.boxShadow = `0 -5px 20px ${m.horizonColor}`;
+  } else { horizon.style.display = 'none'; }
 }
 
 function buildPits() {
   const container = document.getElementById('pits-container');
+  if(!container) return;
   container.innerHTML = '';
   if(activeMode !== 'parkour') return;
   const stageData = STAGES[currentStage];
   
-  // Render Pits
   stageData.pits.forEach(p => {
     const pit = document.createElement('div'); pit.className = 'pit';
     pit.style.left = p[0] + 'px'; pit.style.width = p[1] + 'px';
     container.appendChild(pit);
   });
   
-  // Render Finish Line
   const finish = document.createElement('div'); finish.className = 'finish-line';
   finish.style.left = (stageData.w - 50) + 'px';
   container.appendChild(finish);
@@ -515,8 +524,8 @@ function startFight(){
   } else { document.getElementById('stage-progress').style.display = 'none'; }
 
   const aW = activeMode === 'parkour' ? STAGES[currentStage].w : document.getElementById('game-container').offsetWidth;
-  f1 = { id:'p1', x:50, y:0, vx:0, vy:0, hp:100, sp:0, dir:1, action:'idle', hit:false, w:40, maxW: aW, isBlocking: false, buff: 0 };
-  f2 = { id:'p2', x: activeMode === 'parkour' ? 100 : aW - 90, y:0, vx:0, vy:0, hp:100, sp:0, dir:-1, action:'idle', hit:false, w:40, maxW: aW, isBlocking: false, buff: 0 };
+  f1 = { id:'p1', x:50, y:0, vx:0, vy:0, hp:100, sp:0, dir:1, action:'idle', hit:false, jump:false, w:40, maxW: aW, isBlocking: false, buff: 0 };
+  f2 = { id:'p2', x: activeMode === 'parkour' ? 100 : aW - 90, y:0, vx:0, vy:0, hp:100, sp:0, dir:-1, action:'idle', hit:false, jump:false, w:40, maxW: aW, isBlocking: false, buff: 0 };
   
   applySkin(f1, p1Sel); applySkin(f2, p2Sel);
 
@@ -545,7 +554,8 @@ function triggerKO(winnerText, sendSignal = true) {
 }
 
 function triggerStageWin(winnerText, sendSignal = true) {
-    isGameOver = true; // Pause physics
+    if(isGameOver) return;
+    isGameOver = true; 
     document.getElementById('victory-ko').innerText = "FINISH!";
     document.getElementById('winner-name').innerText = winnerText;
     document.getElementById('victory-screen').style.display = 'flex';
@@ -561,26 +571,27 @@ function triggerStageWin(winnerText, sendSignal = true) {
         try { conn.send({type: 'stage_win', winner: winnerText}); } catch(e){}
     }
 
-    // Auto progress after 2 seconds
+    // Auto progress stage
     setTimeout(() => {
         currentStage++;
         if(currentStage >= 5 || p1Score === 3 || p2Score === 3) {
             let overall = p1Score > p2Score ? (isHost?myName:oppName) : (isHost?oppName:myName);
+            isGameOver = false; // Reset to allow triggerKO
             triggerKO(`${overall} WINS THE RACE!`, true);
         } else {
             isGameOver = false;
             document.getElementById('victory-screen').style.display = 'none';
             document.getElementById('stage-progress').innerText = `STAGE ${currentStage+1}/5`;
             f1.maxW = STAGES[currentStage].w; f2.maxW = STAGES[currentStage].w;
-            f1.x = 50; f1.y = 0; f1.hp = 100; f1.sp = 0;
-            f2.x = 100; f2.y = 0; f2.hp = 100; f2.sp = 0;
+            f1.x = 50; f1.y = 0; f1.hp = 100; f1.sp = 0; f1.vy = 0; f1.jump = false;
+            f2.x = 100; f2.y = 0; f2.hp = 100; f2.sp = 0; f2.vy = 0; f2.jump = false;
             cameraX = 0; buildPits();
         }
-    }, 2000);
+    }, 3000);
 }
 
 function gameLoop(timestamp){
-  if(isGameOver && activeMode !== 'parkour') return; // In parkour, we still want to draw but not update physics if loading next stage
+  if(isGameOver && activeMode !== 'parkour') return; 
   requestAnimationFrame(gameLoop); 
   
   if(!lastTime) lastTime = timestamp;
@@ -604,20 +615,24 @@ function gameLoop(timestamp){
           updateFighter(f2, f1, keys2);
           if(aiMode) doAI();
 
-          // SCROLLING CAMERA FOR PARKOUR
           if(activeMode === 'parkour') {
               const sw = document.getElementById('game-container').offsetWidth;
               const leaderX = Math.max(f1.x, f2.x);
               cameraX = Math.max(0, leaderX - sw/2);
+              document.getElementById('scroll-world').style.transform = `translateX(${-cameraX}px)`;
               
               // Death wall penalty
               [f1, f2].forEach(f => {
-                  if(f.x < cameraX - 50) { f.hp -= 20; f.x = leaderX - 100; f.y = -100; triggerShake(); }
+                  if(f.x < cameraX - 50) { f.hp -= 2; f.x = cameraX - 40; } // Sucked into the void
               });
 
-              // Check Finish Line
               if(isHost || !onlineMode) {
-                  if(f1.x >= STAGES[currentStage].w - 50) triggerStageWin(`${isHost ? myName : oppName} TAKES THE STAGE!`);
+                  if(f1.hp <= 0 || f2.hp <= 0) {
+                      let p1Name = isHost ? myName : oppName; let p2Name = isHost ? oppName : myName;
+                      const winner = f1.hp <= 0 ? p2Name : p1Name;
+                      triggerStageWin(`${winner} TAKES THE STAGE!`); 
+                  }
+                  else if(f1.x >= STAGES[currentStage].w - 50) triggerStageWin(`${isHost ? myName : oppName} TAKES THE STAGE!`);
                   else if (f2.x >= STAGES[currentStage].w - 50) triggerStageWin(`${isHost ? oppName : myName} TAKES THE STAGE!`);
               }
           }
@@ -642,30 +657,41 @@ function updateFighter(f, opp, k){
       else {
         f.isBlocking = false;
         let speed = 6;
-        if(activeMode === 'parkour' && (f.id==='p1'?p1Sel:p2Sel).id === 'jz') speed = 8; // JZ runs faster in parkour
+        if(activeMode === 'parkour' && (f.id==='p1'?p1Sel:p2Sel).id === 'jz') speed = 8; 
         if(k['a']) { f.vx = -speed; f.action = 'walk'; } else if(k['d']) { f.vx = speed; f.action = 'walk'; } else f.vx *= 0.8;
-      }
-    
-      if(k['w'] && f.y === 0 && !f.isBlocking) { 
-          f.vy = -16; 
-          if(activeMode === 'parkour' && (f.id==='p1'?p1Sel:p2Sel).id === 'andi' && f.buff > 0) f.vy = -22; // Andi super jump
-          f.action = 'jump'; 
       }
   }
 
   f.x += f.vx; f.y += f.vy; 
-  f.vy += (activeMode === 'parkour' && (f.id==='p1'?p1Sel:p2Sel).id === 'hari') ? 0.6 : 0.9; // Hari low gravity
+  f.vy += (activeMode === 'parkour' && (f.id==='p1'?p1Sel:p2Sel).id === 'hari') ? 0.6 : 0.9;
 
-  // FLOOR & PIT COLLISION
   let inPit = false;
   if (activeMode === 'parkour' && STAGES[currentStage]) {
       const cx = f.x + f.w/2;
-      for(let p of STAGES[currentStage].pits) { if(cx > p[0] && cx < p[0]+p[1]) { inPit = true; break; } }
+      for(let p of STAGES[currentStage].pits) {
+          if(cx > p[0] && cx < p[0]+p[1]) { inPit = true; break; }
+      }
   }
 
-  if(f.y >= 0 && !inPit){ f.y=0; f.vy=0; }
-  if(inPit && f.y >= 0) f.vy += 0.9; // Fall into pit
-  if(f.y > 600) { f.hp -= 20; f.x -= 200; f.y = -100; triggerShake(); } // Pit death penalty
+  if(f.y >= 0 && !inPit){ f.y=0; f.vy=0; f.jump=false; }
+  if(inPit && f.y >= 0) { f.vy += 0.9; } // Fall in
+
+  // JUMP Logic
+  if(k['w'] && f.y === 0 && !f.isBlocking && !inPit && !f.jump && f.action !== 'special_active' && f.action !== 'karthik_meme') { 
+      f.vy = -16; 
+      f.jump = true;
+      if(activeMode === 'parkour' && (f.id==='p1'?p1Sel:p2Sel).id === 'andi' && f.buff > 0) f.vy = -22; 
+      f.action = 'jump'; 
+  }
+
+  // Pit Death Penalty
+  if(f.y > 600) { 
+      f.hp -= 20; 
+      f.x -= 300; 
+      if(f.x < cameraX) f.x = cameraX + 50; // Don't respawn behind camera wall
+      f.y = -200; f.vy = 0; 
+      triggerShake('heavy'); 
+  }
 
   if(f.x < 0) f.x=0; if(f.x > f.maxW - f.w) f.x = f.maxW - f.w;
   
@@ -675,8 +701,8 @@ function updateFighter(f, opp, k){
     if(k['j']) { attack(f, opp, 6, 45); f.action = 'punch'; }
     else if(k['k']) { attack(f, opp, 9, 55); f.action = 'kick'; }
     else if(k['l'] && f.sp >= 100) doSpecial(f, opp);
-  } else if (activeMode === 'parkour' && k['l'] && f.sp >= 100) {
-    doSpecial(f, opp); // Can still use specials in parkour for mobility
+  } else if (activeMode === 'parkour' && k['l'] && f.sp >= 100 && !f.isBlocking && f.action !== 'special_active' && f.action !== 'karthik_meme') {
+    doSpecial(f, opp); 
   }
   
   f.sp = Math.min(100, f.sp + 0.15);
@@ -708,7 +734,6 @@ function createVFX(type, x, y, color, text = '', dir = 1, destX = 0) {
   const vfx = document.createElement('div');
   vfx.classList.add('vfx-base', `vfx-${type}`);
   
-  // Convert world X to screen X for the VFX layer
   let screenX = activeMode === 'parkour' ? x - cameraX : x;
 
   vfx.style.setProperty('--vx', `${screenX + 20}px`);
@@ -722,7 +747,6 @@ function createVFX(type, x, y, color, text = '', dir = 1, destX = 0) {
   } else if (type === 'text') {
     vfx.style.color = color; vfx.innerText = text;
   } else if (type === 'comic') {
-    // BOUNDARY CLAMPING LOGIC FOR MEME TEXT
     let sw = document.getElementById('game-container').offsetWidth;
     let safeX = Math.max(80, Math.min(screenX + 20, sw - 200)); 
     vfx.style.setProperty('--vx', `${safeX}px`);
@@ -747,7 +771,7 @@ function createVFX(type, x, y, color, text = '', dir = 1, destX = 0) {
 }
 
 function applyDamage(opp, dmg, dir, isSpecial = false) {
-    if(activeMode === 'parkour') return; // No damage in race
+    if(activeMode === 'parkour') return; 
     if(opp.isBlocking) {
         opp.hp -= 10; 
         showLabel(opp.id, "BLOCKED!", "#a1a1aa");
@@ -785,7 +809,7 @@ function doSpecial(f, opp){
     const runInt = setInterval(() => {
         if(isGameOver && activeMode !== 'parkour') { clearInterval(runInt); return; }
         count++;
-        f.x += f.dir * 15; // Sprint boost!
+        f.x += f.dir * 15; 
         if((Math.abs(f.x - opp.x) < 60 && activeMode === '1v1') || count > 25) {
             clearInterval(runInt); f.action = 'idle'; hitStopFrames = 10;
             createVFX('comic', opp.x, opp.y, '#4f46e5', 'SIX!');
@@ -793,7 +817,7 @@ function doSpecial(f, opp){
             triggerShake(); spawnParticles(opp.x, opp.y, f.dir, '#4f46e5');
             setTimeout(() => {
                 hitStopFrames = 15;
-                createVFX('comic', opp.x, opp.y - 30, '#ef4444', 'SEVENN!');
+                createVFX('comic', opp.x, opp.y - 30, '#ef4444', 'SEVEN!');
                 if(activeMode === '1v1') { if(!opp.isBlocking) { opp.hp -= 25; opp.vx = f.dir * 30; } else { opp.hp -= 5; } }
                 triggerShake('heavy'); spawnParticles(opp.x, opp.y, f.dir, '#ef4444');
             }, 400);
@@ -832,7 +856,7 @@ function doSpecial(f, opp){
     const dholInt = setInterval(() => {
         if(isGameOver && activeMode !== 'parkour') { clearInterval(dholInt); return; }
         createVFX('ring', f.x, f.y, '#facc15'); triggerShake();
-        if(activeMode === 'parkour') f.x += f.dir * 40; // Forward momentum in race
+        if(activeMode === 'parkour') f.x += f.dir * 40; 
         if(activeMode === '1v1') { if(!opp.isBlocking) { opp.hp -= (beat===2 ? 14 : 13); opp.vx = f.dir * 10; } else { opp.hp -= 3; } }
         if(++beat > 2) { clearInterval(dholInt); setTimeout(() => f.action = 'idle', 300); }
     }, 400);
@@ -884,15 +908,11 @@ function showLabel(pid, txt, color){
 function draw(){
   const t = Date.now() / 100;
   
-  if(activeMode === 'parkour') {
-      document.getElementById('scroll-world').style.transform = `translateX(${-cameraX}px)`;
-  } else { document.getElementById('scroll-world').style.transform = `none`; }
-
   const updateF = (f, el) => {
     if(f.hp <= 0 && !isGameOver) { el.style.opacity = '0.3'; } else { el.style.opacity = '1'; } 
     
-    // Position within scroll world
-    el.style.transform = `translate(${f.x}px, ${f.y}px)`; 
+    let screenX = activeMode === 'parkour' ? f.x - cameraX : f.x;
+    el.style.transform = `translate(${screenX}px, ${f.y}px)`; 
     
     let scale = (((f.id==='p1'?p1Sel:p2Sel).id === 'andi' && f.buff > 0) ? 1.4 : 1);
     el.querySelector('.f-rig').style.transform = `scaleX(${f.dir * scale}) scaleY(${scale})`;
@@ -900,8 +920,7 @@ function draw(){
     let aF = 20, aB = -10, lF = 10, lB = -10, j_aF = -40, j_aB = -30, j_lF = 20, j_lB = 10; 
     
     if(f.action === 'karthik_meme') {
-       // Turn to face user and pump arms strictly up and down
-       el.querySelector('.f-head').style.transform = `rotate(0deg) scaleX(${1.2 * f.dir})`; // Cancel direction flip for head
+       el.querySelector('.f-head').style.transform = `rotate(0deg) scaleX(${1.2 * f.dir})`; 
        el.querySelector('.f-torso').style.transform = `scaleX(${1.3 * f.dir})`;
        aF = 160 + Math.sin(t*15) * 40; aB = 160 + Math.sin(t*15 + Math.PI) * 40; 
        j_aF = 0; j_aB = 0; lF = 0; lB = 0;
