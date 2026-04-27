@@ -15,7 +15,6 @@
   .screen { display: none; width: 100%; max-width: 900px; }
   .screen.active { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
 
-  /* ARENA LOCKS SCREEN */
   #arena-screen.active { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; padding: 0; background: #05050a; overflow: hidden; touch-action: none; justify-content: center; z-index: 999;}
 
   /* LOBBY UI */
@@ -48,14 +47,24 @@
   .char-icon { width: 50px; height: 50px; margin: 0 auto; border-radius: 14px; background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(0,0,0,0.4) 100%); box-shadow: inset 0px 2px 4px rgba(255,255,255,0.5), 0 5px 10px rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
   .char-icon svg { width: 28px; height: 28px; fill: #fff; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6)); z-index: 2; }
 
-  /* ARENA DYNAMICS & SCREEN SHAKE */
-  @keyframes shake { 0%{transform:translate(4px,2px);} 25%{transform:translate(-3px,-4px);} 50%{transform:translate(-6px,0px);} 75%{transform:translate(3px,4px);} 100%{transform:translate(0,0);} }
-  .shake-anim { animation: shake 0.25s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
+  @keyframes shake { 0%{transform:translate(6px,3px);} 25%{transform:translate(-5px,-6px);} 50%{transform:translate(-8px,0px);} 75%{transform:translate(5px,6px);} 100%{transform:translate(0,0);} }
+  .shake-anim { animation: shake 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
 
-  #game-container { position: relative; width: 100%; flex: 1; border-radius: 12px; overflow: hidden; border: 2px solid #2a2a4a; display: flex; flex-direction: column; max-height: 800px; background-size: cover; background-position: center bottom; }
+  #game-container { position: relative; width: 100%; flex: 1; border-radius: 12px; overflow: hidden; border: 2px solid #2a2a4a; display: flex; flex-direction: column; max-height: 800px; }
   #arena { position: absolute; width: 100%; height: 100%; perspective: 800px; overflow: hidden; }
-  .floor { position: absolute; bottom: 0; width: 120%; left: -10%; height: 35%; transform: rotateX(70deg); transform-origin: top; }
+  .floor { position: absolute; bottom: 0; width: 120%; left: -10%; height: 40%; transform: rotateX(75deg); transform-origin: top; box-shadow: 0 -20px 50px rgba(0,0,0,0.8); }
   
+  /* VFX LAYER FOR SPECIAL MOVES */
+  #vfx-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 15; overflow: hidden;}
+  
+  .vfx-ring { position: absolute; border-radius: 50%; transform: translate(-50%, -50%) scale(0); opacity: 1; animation: explodeRing 0.5s ease-out forwards; }
+  @keyframes explodeRing { to { transform: translate(-50%, -50%) scale(3); opacity: 0; border-width: 0px; } }
+
+  .vfx-acid { position: absolute; background: rgba(34, 197, 94, 0.5); border-radius: 50%; transform: rotateX(70deg) translate(-50%, -50%); box-shadow: 0 0 20px #22c55e, inset 0 0 20px #22c55e; filter: blur(2px); }
+  
+  .vfx-text { position: absolute; font-family: monospace; font-weight: bold; font-size: 20px; animation: floatUp 1s ease-out forwards; }
+  @keyframes floatUp { to { transform: translateY(-50px); opacity: 0; } }
+
   /* HUD */
   .hud { position: absolute; top: 0; width: 100%; padding: 12px 15px; display: flex; justify-content: space-between; z-index: 10; background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%); }
   .player-tag { font-size: 12px; font-weight: 900; text-transform: uppercase; margin-bottom: 4px; text-shadow: 0 2px 4px black; letter-spacing: 1px; }
@@ -93,30 +102,43 @@
 
   .boss-rig { transform: scale(1.6); transform-origin: bottom center; filter: drop-shadow(0 0 15px rgba(255,0,0,0.5)); }
 
-  /* Damage Effects */
+  /* States */
   .hurt .f-head, .hurt .f-torso, .hurt .f-limb { filter: brightness(2) drop-shadow(0 0 10px red) !important; background: #fff !important; }
   .hurt .f-head { transform: rotate(-20deg) translate(-5px, -5px); }
-  .blocking .f-arm-f { transform: rotate(-130deg) translate(0px, -5px) !important; }
-  .blocking .f-arm-b { transform: rotate(130deg) !important; }
+  
+  /* Dynamic Blocking Posture */
+  .blocking .f-arm-f { transform: rotate(-140deg) translate(5px, -5px) !important; }
+  .blocking .f-arm-f::after { transform: rotate(90deg) !important; }
+  .blocking .f-arm-b { transform: rotate(140deg) !important; }
+  .blocking .f-torso { transform: rotate(-10deg); }
+  .block-aura { box-shadow: 0 0 15px rgba(255,255,255,0.8), inset 0 0 10px rgba(255,255,255,0.8) !important; border: 2px solid white; }
 
   .special-label { position: absolute; top: -60px; left: 50%; transform: translateX(-50%); color: #ef4444; font-weight: 900; font-size: 16px; opacity: 0; transition: 0.1s; text-shadow: 0 4px 10px black; z-index: 20; width: 200px; text-align: center; pointer-events: none;}
   .special-label.show { opacity: 1; top: -80px; }
 
-  /* CONTROLS */
+  /* OVERLAY CONTROLS */
   #pc-controls { position: absolute; bottom: 5px; width: 100%; text-align: center; color: rgba(255,255,255,0.4); font-size: 12px; z-index: 5; pointer-events: none; font-weight: bold; }
-  #mobile-controls { position: absolute; bottom: 15px; left: 0; width: 100%; height: 130px; display: none; justify-content: space-between; padding: 0 20px; z-index: 50; pointer-events: none; }
+  #mobile-controls { position: absolute; bottom: 15px; left: 0; width: 100%; height: 140px; display: none; justify-content: space-between; padding: 0 20px; z-index: 50; pointer-events: none; }
   @media (max-width: 768px) { #pc-controls { display: none; } }
-  .d-pad, .action-pad { pointer-events: auto; display: grid; gap: 8px; grid-template-columns: 55px 55px 55px; grid-template-rows: 55px 55px; }
+  
+  .d-pad { pointer-events: auto; display: grid; gap: 8px; grid-template-columns: 55px 55px 55px; grid-template-rows: 55px 55px; }
+  .action-pad { pointer-events: auto; display: grid; gap: 10px; grid-template-columns: 55px 55px; grid-template-rows: 55px 55px; }
   #btn-up { grid-column: 2; grid-row: 1; } #btn-left { grid-column: 1; grid-row: 2; } #btn-right { grid-column: 3; grid-row: 2; }
-  #btn-sp { grid-column: 2; grid-row: 1; } #btn-punch { grid-column: 1; grid-row: 2; } #btn-kick { grid-column: 3; grid-row: 2; }
+  
+  /* 4-Button layout */
+  #btn-sp { grid-column: 1; grid-row: 1; } #btn-block { grid-column: 2; grid-row: 1; }
+  #btn-punch { grid-column: 1; grid-row: 2; } #btn-kick { grid-column: 2; grid-row: 2; }
+
   .touch-btn { background: rgba(15, 23, 42, 0.6); border: 2px solid rgba(255,255,255,0.2); color: #fff; border-radius: 50%; font-weight: 900; font-size: 20px; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); user-select: none; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
   .touch-btn.pressed { background: rgba(255,255,255,0.4); transform: scale(0.9); box-shadow: inset 0 0 10px rgba(0,0,0,0.8); }
+  .btn-sp { border-color: #fbbf24; color: #fbbf24; font-size: 24px; text-shadow: 0 0 8px rgba(251, 191, 36, 0.8); }
+  .btn-block { border-color: #60a5fa; color: #60a5fa; font-size: 20px; }
 </style>
 </head>
 <body>
 
 <div id="app">
-  <div class="version-badge">v0.3.9 (SPA Rematch & Realms Update)</div>
+  <div class="version-badge">v0.4.0 (Sync, Details & Maps)</div>
 
   <div id="select-screen" class="screen active">
     <div id="lobby-ui">
@@ -173,6 +195,7 @@
     </div>
 
     <div id="game-container">
+      <div id="vfx-layer"></div>
       <div class="hud">
         <div style="width: 40%;"><div id="p1-tag" class="player-tag">Player 1</div><div class="hp-bar-bg"><div id="hp-1" class="hp-bar-fill hp-p1"></div></div><div class="sp-bar-bg"><div id="sp-1" class="sp-bar-fill"></div></div></div>
         <div style="width: 40%; text-align: right;"><div id="p2-tag" class="player-tag">Player 2</div><div class="hp-bar-bg" style="margin-left:auto;"><div id="hp-2" class="hp-bar-fill hp-p2"></div></div><div class="sp-bar-bg" style="margin-left:auto;"><div id="sp-2" class="sp-bar-fill"></div></div></div>
@@ -184,15 +207,21 @@
 
       <div id="arena">
         <div class="floor" id="arena-floor"></div>
-        <div id="pc-controls">[A][D] Move &nbsp;|&nbsp; [W] Jump &nbsp;|&nbsp; [J] Punch &nbsp;|&nbsp; [K] Kick &nbsp;|&nbsp; [L] Special</div>
+        <div id="pc-controls">[A][D] Move &nbsp;|&nbsp; [W] Jump &nbsp;|&nbsp; [B] Block &nbsp;|&nbsp; [J] Punch &nbsp;|&nbsp; [K] Kick &nbsp;|&nbsp; [L] Special</div>
 
         <div id="p1" class="fighter"><div class="special-label" id="p1-label"></div><div class="f-rig"><div class="f-head"></div><div class="f-arm-b f-limb"></div><div class="f-torso"></div><div class="f-leg-b f-limb"></div><div class="f-leg-f f-limb"></div><div class="f-arm-f f-limb"></div></div></div>
         <div id="p2" class="fighter"><div class="special-label" id="p2-label"></div><div class="f-rig"><div class="f-head"></div><div class="f-arm-b f-limb"></div><div class="f-torso"></div><div class="f-leg-b f-limb"></div><div class="f-leg-f f-limb"></div><div class="f-arm-f f-limb"></div></div></div>
         <div id="p3" class="fighter" style="display:none;"><div class="special-label" id="p3-label"></div><div class="f-rig boss-rig"><div class="f-head" style="background:#450a0a;"></div><div class="f-arm-b f-limb" style="background:#7f1d1d;"></div><div class="f-torso" style="background:#200; border-color:#ef4444;"></div><div class="f-leg-b f-limb" style="background:#7f1d1d;"></div><div class="f-leg-f f-limb" style="background:#b91c1c;"></div><div class="f-arm-f f-limb" style="background:#b91c1c;"></div></div></div>
       </div>
+      
       <div id="mobile-controls">
         <div class="d-pad"><div class="touch-btn" id="btn-up">↑</div><div class="touch-btn" id="btn-left">←</div><div class="touch-btn" id="btn-right">→</div></div>
-        <div class="action-pad"><div class="touch-btn btn-sp" id="btn-sp">★</div><div class="touch-btn" id="btn-punch">P</div><div class="touch-btn" id="btn-kick">K</div></div>
+        <div class="action-pad">
+          <div class="touch-btn btn-sp" id="btn-sp">★</div>
+          <div class="touch-btn btn-block" id="btn-block">🛡️</div>
+          <div class="touch-btn" id="btn-punch">P</div>
+          <div class="touch-btn" id="btn-kick">K</div>
+        </div>
       </div>
     </div>
   </div>
@@ -211,11 +240,11 @@ const CHARS = [
   { id:'jerell', name:'Jerell', power:'IQ Strike', skin:'#ffffff', suit:'#000000', acc:'#e2e8f0', icon: '<path d="M12 15.5C8.5 15.5 5 12 5 12s3.5-3.5 7-3.5 7 3.5 7 3.5-3.5 3.5-7 3.5zm0-5a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"/>' }
 ];
 
-// ADVANCED MAP CSS (Sun, Grass, Red Moon)
+// HIGH DETAIL MAP CSS
 const MAPS = {
-  alley: { bg: 'linear-gradient(180deg, #0f172a 0%, #1e1b4b 100%)', floor: '#0c0a20', grid: '#4f46e5' },
-  dojo:  { bg: 'radial-gradient(circle at 50% 50%, #ef4444 10%, transparent 20%), linear-gradient(180deg, #7c2d12 0%, #f59e0b 60%, #000 100%)', floor: '#451a03', grid: '#fcd34d' },
-  mamak: { bg: 'radial-gradient(circle at 70% 30%, #fde047 10%, transparent 15%), linear-gradient(180deg, #38bdf8 0%, #bae6fd 50%, #4ade80 50%, #166534 100%)', floor: '#262626', grid: '#facc15' }
+  alley: { bg: 'radial-gradient(circle at top right, #312e81, #0f172a 60%)', floor: '#0c0a20', grid: '#4f46e5' },
+  dojo:  { bg: 'radial-gradient(circle at center 40%, #fca5a5 5%, #ef4444 15%, transparent 16%), linear-gradient(180deg, #7c2d12 0%, #f59e0b 60%, #000 100%)', floor: '#451a03', grid: '#fcd34d' },
+  mamak: { bg: 'radial-gradient(circle at 80% 20%, #fef08a 8%, transparent 10%), linear-gradient(180deg, #38bdf8 0%, #bae6fd 45%, #4ade80 45%, #166534 55%, #262626 55%)', floor: '#171717', grid: '#facc15' }
 };
 
 let peer, conn, myPeerId, isHost = true, onlineMode = false;
@@ -224,7 +253,7 @@ let p1Sel=null, p2Sel=null, f1, f2, f3;
 let keys1 = {}, keys2 = {}, keys = {}, keys3 = {}; 
 let activeMode = '1v1', activeMap = 'alley';
 let hitStopFrames = 0;
-let isGameOver = false; // Prevents multiple KOs and page reloads
+let isGameOver = false; // THE FIX: Synchronized KO state
 
 function checkMobileUI() { if ('ontouchstart' in window || navigator.maxTouchPoints > 0) document.getElementById('mobile-controls').style.display = 'flex'; }
 
@@ -241,9 +270,8 @@ window.onload = () => {
   myPeerId = `SF-${randomId}`; peer = new Peer(myPeerId);
   peer.on('open', id => { document.getElementById('my-peer-id').innerText = id; });
   
-  // HOST CONNECTION OVERWRITE LOGIC
   peer.on('connection', c => { 
-    if(conn && conn.open) conn.close(); // Clean up old connection if a new friend joins
+    if(conn && conn.open) conn.close(); 
     conn = c; isHost = true; onlineMode = true; 
     setupDataListeners(); showStatus("Opponent Connected!", "success"); 
   });
@@ -267,7 +295,7 @@ function connectToFriend() {
   const friendId = document.getElementById('join-id').value.toUpperCase().trim();
   if(!friendId) { showStatus("Paste an ID to join.", "error"); return; }
   
-  if(peer) peer.destroy(); // Clear old peer to generate a new connection if needed
+  if(peer) peer.destroy(); 
   peer = new Peer(); 
   peer.on('open', () => {
     showStatus("Searching...", "success");
@@ -295,12 +323,9 @@ function setupDataListeners() {
       p1Sel = CHARS.find(c => c.id === data.p1); p2Sel = CHARS.find(c => c.id === data.p2); 
       activeMap = data.map; activeMode = data.mode; startFight(); 
     }
-    // REMATCH LOGIC (Receiving end)
+    // SYNCED KO SCREEN LOGIC
+    if (data.type === 'gameover') { triggerKO(data.winner, false); }
     if (data.type === 'rematch') { resetToLobby(); }
-  });
-
-  conn.on('close', () => {
-    if (onlineMode) { alert("Opponent disconnected."); location.reload(); }
   });
 }
 
@@ -355,7 +380,6 @@ function applyMap() {
   floor.style.backgroundImage = `linear-gradient(90deg, ${m.grid}40 1px, transparent 1px), linear-gradient(${m.grid}40 1px, transparent 1px)`;
 }
 
-// REMATCH / LOBBY RESET LOGIC (No Reloads)
 function resetToLobby() {
   isGameOver = false;
   document.getElementById('victory-screen').style.display = 'none';
@@ -363,6 +387,7 @@ function resetToLobby() {
   document.getElementById('select-screen').classList.add('active');
   p1Sel = null; p2Sel = null; keys = {}; keys1 = {}; keys2 = {};
   document.querySelectorAll('.char-card').forEach(c => { c.classList.remove('selected-p1', 'selected-p2'); });
+  document.getElementById('vfx-layer').innerHTML = ''; // Clear VFX
 }
 
 function handleRematch() {
@@ -380,25 +405,29 @@ function startFight(){
   document.getElementById('p2-tag').innerText = isHost ? oppName : myName;
 
   const aW = document.getElementById('game-container').offsetWidth;
-  f1 = { id:'p1', x:50, y:0, vx:0, vy:0, hp:100, sp:0, dir:1, action:'idle', hit:false, w:40, maxW: aW, isBlocking: false, team: 1 };
-  f2 = { id:'p2', x:aW - 90, y:0, vx:0, vy:0, hp:100, sp:0, dir:-1, action:'idle', hit:false, w:40, maxW: aW, isBlocking: false, team: activeMode === 'coop' ? 1 : 2 };
+  f1 = { id:'p1', x:50, y:0, vx:0, vy:0, hp:100, sp:0, dir:1, action:'idle', hit:false, w:40, maxW: aW, isBlocking: false, team: 1, buff: 0 };
+  f2 = { id:'p2', x:aW - 90, y:0, vx:0, vy:0, hp:100, sp:0, dir:-1, action:'idle', hit:false, w:40, maxW: aW, isBlocking: false, team: activeMode === 'coop' ? 1 : 2, buff: 0 };
   
   applySkin(f1, p1Sel); applySkin(f2, p2Sel);
 
   if(activeMode === 'coop') {
     document.getElementById('boss-hud').style.display = 'block'; document.getElementById('p3').style.display = 'flex';
-    f3 = { id:'p3', x: aW/2, y:0, vx:0, vy:0, hp:200, maxHp:200, sp:0, dir:-1, action:'idle', hit:false, w:60, maxW: aW, isBlocking: false, team: 2 }; // BOSS NERFED
+    f3 = { id:'p3', x: aW/2, y:0, vx:0, vy:0, hp:200, maxHp:200, sp:0, dir:-1, action:'idle', hit:false, w:60, maxW: aW, isBlocking: false, team: 2, buff: 0 }; // BOSS NERFED
   } else {
     document.getElementById('boss-hud').style.display = 'none'; document.getElementById('p3').style.display = 'none'; f3 = null;
   }
   requestAnimationFrame(gameLoop);
 }
 
-function triggerKO(winnerText) {
+// SYNC FIX: Dedicated function to force KO across both browsers
+function triggerKO(winnerText, sendSignal = true) {
   if(isGameOver) return;
   isGameOver = true;
   document.getElementById('winner-name').innerText = winnerText;
   document.getElementById('victory-screen').style.display = 'flex';
+  if(sendSignal && onlineMode && conn && conn.open) {
+    conn.send({type: 'gameover', winner: winnerText});
+  }
 }
 
 function gameLoop(){
@@ -421,14 +450,16 @@ function gameLoop(){
   }
   draw();
 
-  // SYNCED VICTORY CHECKS
-  if(activeMode === 'coop') {
-    if(f3 && f3.hp <= 0) { triggerKO("PLAYERS WIN!"); }
-    else if(f1.hp <= 0 && f2.hp <= 0) { triggerKO("BOSS WINS!"); }
-  } else {
-    if(f1.hp <= 0 || f2.hp <= 0) { 
-      const winner = f1.hp <= 0 ? document.getElementById('p2-tag').innerText : document.getElementById('p1-tag').innerText;
-      triggerKO(`${winner} WINS!`); 
+  // SYNCED VICTORY CHECKS (Only Host calculates to prevent desync logic, but offline calculates too)
+  if(isHost || !onlineMode) {
+    if(activeMode === 'coop') {
+      if(f3 && f3.hp <= 0) { triggerKO("PLAYERS WIN!"); }
+      else if(f1.hp <= 0 && f2.hp <= 0) { triggerKO("BOSS WINS!"); }
+    } else {
+      if(f1.hp <= 0 || f2.hp <= 0) { 
+        const winner = f1.hp <= 0 ? document.getElementById('p2-tag').innerText : document.getElementById('p1-tag').innerText;
+        triggerKO(`${winner} WINS!`); 
+      }
     }
   }
 
@@ -440,10 +471,16 @@ function updateFighter(f, opp, k, opp2){
   else { document.getElementById(f.id).style.display = 'flex'; }
   f.action = 'idle';
   
-  if(k['a']) { f.vx = -6; f.action = 'walk'; } else if(k['d']) { f.vx = 6; f.action = 'walk'; } else f.vx *= 0.8;
-  f.isBlocking = ((f.dir === 1 && k['a']) || (f.dir === -1 && k['d'])) && f.y === 0;
+  // DEDICATED BLOCK BUTTON (B Key)
+  if(k['b']) {
+    f.isBlocking = true;
+    f.vx *= 0.5; // Slow movement while blocking
+  } else {
+    f.isBlocking = false;
+    if(k['a']) { f.vx = -6; f.action = 'walk'; } else if(k['d']) { f.vx = 6; f.action = 'walk'; } else f.vx *= 0.8;
+  }
 
-  if(k['w'] && f.y === 0) { f.vy = -16; f.action = 'jump'; }
+  if(k['w'] && f.y === 0 && !f.isBlocking) { f.vy = -16; f.action = 'jump'; }
   f.x += f.vx; f.y += f.vy; f.vy += 0.9;
   if(f.y >= 0){ f.y=0; f.vy=0; }
   
@@ -456,11 +493,14 @@ function updateFighter(f, opp, k, opp2){
   }
   if(target && target.hp > 0) f.dir = (f.x < target.x) ? 1 : -1;
   
-  if(k['j']) { attack(f, opp, opp2, 6, 45); f.action = 'punch'; }
-  else if(k['k']) { attack(f, opp, opp2, 9, 55); f.action = 'kick'; }
-  else if(k['l'] && f.sp >= 100) doSpecial(f, target);
+  if(!f.isBlocking) {
+    if(k['j']) { attack(f, opp, opp2, 6, 45); f.action = 'punch'; }
+    else if(k['k']) { attack(f, opp, opp2, 9, 55); f.action = 'kick'; }
+    else if(k['l'] && f.sp >= 100) doSpecial(f, target);
+  }
   
   f.sp = Math.min(100, f.sp + 0.15);
+  if(f.buff > 0) f.buff--;
 }
 
 function triggerShake() {
@@ -468,17 +508,36 @@ function triggerShake() {
   arena.classList.remove('shake-anim'); void arena.offsetWidth; arena.classList.add('shake-anim');
 }
 
-function spawnParticles(x, y, dir) {
+function spawnParticles(x, y, dir, color = '#fbbf24') {
   for(let i=0; i<6; i++) {
-    const p = document.createElement('div'); p.className = 'particle'; document.getElementById('arena').appendChild(p);
+    const p = document.createElement('div'); p.className = 'particle'; p.style.background = color; p.style.boxShadow = `0 0 10px ${color}`;
+    document.getElementById('arena').appendChild(p);
     let vx = dir * (Math.random() * 8 + 4); let vy = (Math.random() - 1) * 12; let life = 20;
     let cx = x + 20; let cy = y - 40;
     const anim = () => {
-      if(life <= 0) { p.remove(); return; }
+      if(life <= 0 || isGameOver) { p.remove(); return; }
       cx += vx; cy += vy; vy += 1; p.style.transform = `translate(${cx}px, ${cy}px)`; p.style.opacity = life / 20;
       life--; requestAnimationFrame(anim);
     }; requestAnimationFrame(anim);
   }
+}
+
+// VFX HELPER FOR SPECIALS
+function createVFX(type, x, y, color) {
+  const layer = document.getElementById('vfx-layer');
+  const vfx = document.createElement('div');
+  if(type === 'ring') {
+    vfx.className = 'vfx-ring'; vfx.style.left = (x+20)+'px'; vfx.style.top = (y-30)+'px';
+    vfx.style.border = `5px solid ${color}`; vfx.style.width = '100px'; vfx.style.height = '100px';
+  } else if (type === 'acid') {
+    vfx.className = 'vfx-acid'; vfx.style.left = (x+20)+'px'; vfx.style.bottom = '10%';
+    vfx.style.width = '150px'; vfx.style.height = '40px';
+  } else if (type === 'text') {
+    vfx.className = 'vfx-text'; vfx.style.left = (x+20)+'px'; vfx.style.top = (y-60)+'px';
+    vfx.style.color = color; vfx.innerText = "CALCULATED.";
+  }
+  layer.appendChild(vfx);
+  setTimeout(() => { if(layer.contains(vfx)) vfx.remove(); }, 1500);
 }
 
 function attack(f, o1, o2, dmg, range){
@@ -489,7 +548,7 @@ function attack(f, o1, o2, dmg, range){
     if(dist < range + f.w/2 + opp.w/2){
       triggerShake(); spawnParticles(opp.x, opp.y, f.dir); hitStopFrames = 4;
       if(opp.isBlocking) {
-        opp.hp -= dmg * 0.5; showLabel(opp.id, "BLOCKED", "#a1a1aa");
+        showLabel(opp.id, "BLOCKED!", "#a1a1aa");
       } else {
         opp.hp -= dmg; opp.vx = f.dir * 10;
         if(f.id === 'p3') { opp.vx = f.dir * 18; opp.vy = -6; showLabel(opp.id, `-${dmg} SLAM!`, "#ef4444"); }
@@ -499,9 +558,44 @@ function attack(f, o1, o2, dmg, range){
   });
 }
 
+// HIGHLY DETAILED SPECIAL MOVES
 function doSpecial(f, opp){
-  if(!opp) return; f.sp = 0; showLabel(f.id, "SPECIAL!", "#fbbf24");
-  opp.hp -= 20; opp.vx = f.dir * 20; triggerShake(); spawnParticles(opp.x, opp.y, f.dir); hitStopFrames = 8;
+  if(!opp) return; f.sp = 0; hitStopFrames = 8;
+  const charId = (f.id === 'p1' ? p1Sel : p2Sel).id;
+  
+  if(charId === 'parv') { // Dhol Wave
+    showLabel(f.id, "DHOL WAVE!", "#ea580c"); createVFX('ring', f.x, f.y, '#ea580c');
+    setTimeout(() => { if(!opp.isBlocking) { opp.hp -= 25; opp.vx = f.dir * 25; } triggerShake(); }, 200);
+  } else if (charId === 'andi') { // Hulk Out
+    showLabel(f.id, "HULK OUT!", "#22c55e"); f.buff = 300; f.hp = Math.min(100, f.hp + 15); triggerShake(); spawnParticles(f.x, f.y, 1, '#22c55e');
+  } else if (charId === 'jz') { // Rhythm Dash
+    showLabel(f.id, "RHYTHM DASH!", "#ec4899");
+    let count = 0;
+    const dash = setInterval(() => {
+      f.x += f.dir * 40; spawnParticles(f.x, f.y, f.dir * -1, '#ec4899');
+      if(Math.abs(f.x - opp.x) < 50 && !opp.isBlocking) { opp.hp -= 8; opp.vx = f.dir * 5; triggerShake(); }
+      if(++count > 2) clearInterval(dash);
+    }, 150);
+  } else if (charId === 'yiliang') { // Smoke Vanish
+    showLabel(f.id, "SMOKE VANISH!", "#94a3b8"); spawnParticles(f.x, f.y, 0, '#94a3b8');
+    f.x = opp.x + (opp.dir * 40); // Teleport behind
+    setTimeout(() => { if(!opp.isBlocking) { opp.hp -= 30; opp.vx = f.dir * 15; } triggerShake(); }, 300);
+  } else if (charId === 'dexter') { // Acid Spit
+    showLabel(f.id, "ACID SPIT!", "#22c55e"); createVFX('acid', opp.x, opp.y, '#22c55e');
+    if(!opp.isBlocking) { opp.hp -= 20; opp.vx = f.dir * 5; }
+  } else if (charId === 'karthik') { // 67 Burst
+    showLabel(f.id, "67 BURST!", "#4f46e5");
+    let count = 0;
+    const flurry = setInterval(() => {
+      if(!opp.isBlocking) opp.hp -= 2; triggerShake(); spawnParticles(opp.x, opp.y, f.dir, '#4f46e5');
+      if(++count > 5) { clearInterval(flurry); if(!opp.isBlocking){ opp.hp -= 15; opp.vx = f.dir * 20;} createVFX('ring', opp.x, opp.y, '#4f46e5'); }
+    }, 100);
+  } else if (charId === 'jerell') { // IQ Strike
+    showLabel(f.id, "CALCULATED.", "#22c55e"); createVFX('text', f.x, f.y, '#22c55e');
+    setTimeout(() => { if(!opp.isBlocking) { opp.hp -= 28; opp.vx = f.dir * 10; } triggerShake(); }, 400);
+  } else { // Generic Fallback (Sherman/Hari)
+    showLabel(f.id, "SPECIAL!", "#fbbf24"); if(!opp.isBlocking) { opp.hp -= 20; opp.vx = f.dir * 20; } triggerShake(); spawnParticles(opp.x, opp.y, f.dir);
+  }
 }
 
 function showLabel(pid, txt, color){
@@ -529,8 +623,16 @@ function draw(){
     el.querySelector('.f-arm-f').style.setProperty('--joint', `${j_aF}deg`); el.querySelector('.f-arm-b').style.setProperty('--joint', `${j_aB}deg`);
     el.querySelector('.f-leg-f').style.setProperty('--joint', `${j_lF}deg`); el.querySelector('.f-leg-b').style.setProperty('--joint', `${j_lB}deg`);
 
+    // VISUAL BLOCKING FEEDBACK
+    if(f.isBlocking) {
+      el.querySelector('.f-arm-f').style.transform = `rotate(-140deg) translate(5px, -5px)`;
+      el.querySelector('.f-arm-b').style.transform = `rotate(140deg)`;
+      el.querySelector('.f-torso').classList.add('block-aura');
+    } else {
+      el.querySelector('.f-torso').classList.remove('block-aura');
+    }
+
     if(f.hit) el.classList.add('hurt'); else el.classList.remove('hurt');
-    if(f.isBlocking) el.classList.add('blocking'); else el.classList.remove('blocking');
   };
   updateF(f1, document.getElementById('p1')); updateF(f2, document.getElementById('p2')); if(f3) updateF(f3, document.getElementById('p3'));
   document.getElementById('hp-1').style.width = Math.max(0, f1.hp) + '%'; document.getElementById('hp-2').style.width = Math.max(0, f2.hp) + '%';
@@ -551,7 +653,7 @@ function bindTouch(id, k) {
   btn.addEventListener('touchstart', e => { e.preventDefault(); keys[k] = true; btn.classList.add('pressed'); }, {passive: false});
   btn.addEventListener('touchend', e => { e.preventDefault(); keys[k] = false; btn.classList.remove('pressed'); }, {passive: false});
 }
-bindTouch('btn-left', 'a'); bindTouch('btn-right', 'd'); bindTouch('btn-up', 'w'); bindTouch('btn-punch', 'j'); bindTouch('btn-kick', 'k'); bindTouch('btn-sp', 'l');
+bindTouch('btn-left', 'a'); bindTouch('btn-right', 'd'); bindTouch('btn-up', 'w'); bindTouch('btn-block', 'b'); bindTouch('btn-punch', 'j'); bindTouch('btn-kick', 'k'); bindTouch('btn-sp', 'l');
 </script>
 </body>
 </html>
