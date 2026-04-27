@@ -161,14 +161,12 @@ window.onload = () => {
   
   peer.on('open', id => { document.getElementById('my-peer-id').innerText = id; });
   
-  // Handle incoming connections (When YOU are the host)
   peer.on('connection', c => {
     conn = c; isHost = true; onlineMode = true;
     setupDataListeners();
     showStatus("Connecting...", "success");
   });
 
-  // Handle errors (like bad ID)
   peer.on('error', err => {
     if(err.type === 'peer-unavailable') {
       showStatus("Error: Session ID not found.", "error");
@@ -207,10 +205,7 @@ function connectToFriend() {
 function setupDataListeners() {
   conn.on('open', () => {
     myName = getMyName();
-    // Send our name to the other player immediately
     conn.send({type: 'hello', name: myName});
-    
-    // Unlock characters once connected
     document.querySelectorAll('.char-card').forEach(c => c.classList.add('unlocked'));
   });
 
@@ -218,12 +213,17 @@ function setupDataListeners() {
     if (data.type === 'hello') {
       oppName = data.name;
       showStatus(`Connected to: ${oppName}! Pick your character.`, "success");
-      // If we received a hello, make sure they get ours if we haven't sent it
       if(isHost) {
         myName = getMyName();
         conn.send({type: 'hello', name: myName});
         document.querySelectorAll('.char-card').forEach(c => c.classList.add('unlocked'));
       }
+    }
+    // THE FIX: Listen for the Joiner saying they are ready
+    if (data.type === 'ready') {
+      p2Sel = CHARS.find(c => c.id === data.p2);
+      showStatus(`${oppName} is ready!`, "success");
+      if(p1Sel) sendStart(); // If Host also picked, start!
     }
     if (data.type === 'keys') { if (isHost) keys2 = data.keys; else keys1 = data.keys; }
     if (data.type === 'start') {
@@ -234,7 +234,6 @@ function setupDataListeners() {
   });
 }
 
-// Enable Solo play immediately
 function pickAI() {
   aiMode = true; onlineMode = false;
   document.querySelectorAll('.char-card').forEach(c => c.classList.add('unlocked'));
@@ -266,10 +265,10 @@ function selectChar(c, el){
       document.querySelectorAll('.char-card').forEach(x=>x.classList.remove('selected-p2'));
       el.classList.add('selected-p2');
       conn.send({type:'ready', p2: p2Sel.id});
+      showStatus("Waiting for Host to pick...", "success");
     }
     return;
   }
-  // Offline / AI selection
   if(!p1Sel){ p1Sel=c; el.classList.add('selected-p1'); } 
   if(aiMode) {
     const others = CHARS.filter(char => char.id !== p1Sel.id);
@@ -289,7 +288,6 @@ function startFight(){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('arena-screen').classList.add('active');
   
-  // Set Names on HUD
   if(onlineMode) {
     document.getElementById('p1-tag').innerText = isHost ? myName : oppName;
     document.getElementById('p2-tag').innerText = isHost ? oppName : myName;
