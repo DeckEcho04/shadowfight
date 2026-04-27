@@ -52,13 +52,31 @@
   @keyframes shakeHeavy { 0%{transform:translate(15px,10px) rotate(2deg);} 25%{transform:translate(-15px,-12px) rotate(-2deg);} 50%{transform:translate(-20px,5px) rotate(1deg);} 75%{transform:translate(15px,15px) rotate(0deg);} 100%{transform:translate(0,0);} }
   .shake-anim-heavy { animation: shakeHeavy 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
 
-  /* ARENA & VIVID BACKGROUNDS */
+  /* VIVID LAYERED BACKGROUNDS */
   #game-container { position: relative; width: 100%; flex: 1; overflow: hidden; display: flex; flex-direction: column; max-height: 800px; background-size: cover; background-position: center bottom; }
+  
+  .map-alley {
+    background: 
+      linear-gradient(to top, #0f172a 0%, transparent 30%), 
+      linear-gradient(to right, transparent 10%, #020205 10%, #020205 25%, transparent 25%, transparent 40%, #05050a 40%, #05050a 50%, transparent 50%, transparent 75%, #020205 75%, #020205 90%, transparent 90%), 
+      radial-gradient(circle at 50% 30%, #312e81 0%, transparent 70%), 
+      #05050a !important;
+  }
+  .map-dojo {
+    background: 
+      linear-gradient(to top, #000 0%, #2a0800 25%, transparent 25%), 
+      radial-gradient(circle at 50% 60%, #ef4444 20%, transparent 21%), 
+      linear-gradient(180deg, #7c2d12 0%, #b45309 100%) !important;
+  }
+  .map-mamak {
+    background: 
+      linear-gradient(to top, #166534 0%, #4ade80 20%, transparent 20%), 
+      linear-gradient(to right, transparent 5%, #171717 5%, #171717 25%, transparent 25%, transparent 45%, #262626 45%, #262626 65%, transparent 65%, transparent 80%, #171717 80%, #171717 95%, transparent 95%), 
+      radial-gradient(circle at 75% 30%, #fde047 12%, transparent 13%), 
+      linear-gradient(180deg, #38bdf8 0%, #7dd3fc 100%) !important;
+  }
+
   #arena { position: absolute; width: 100%; height: 100%; perspective: 1000px; }
-  
-  .bg-sun { position: absolute; border-radius: 50%; display: none; z-index: 1;}
-  .bg-horizon { position: absolute; bottom: 35%; width: 100%; height: 20%; display: none; z-index: 2;}
-  
   #scroll-world { position: absolute; width: 10000px; height: 100%; top: 0; left: 0; transform-origin: left; z-index: 5;}
   .floor { position: absolute; bottom: 0; width: 100%; height: 40%; transform: rotateX(75deg); transform-origin: top; box-shadow: 0 -30px 60px rgba(0,0,0,0.9); }
   
@@ -75,7 +93,7 @@
   .vfx-smoke { width: 180px; height: 180px; background: radial-gradient(circle, rgba(148,163,184,1) 0%, rgba(245, 158, 11,0.8) 40%, transparent 70%); border-radius: 50%; opacity: 1; animation: smokePoof 0.8s ease-out forwards; filter: blur(10px); mix-blend-mode: screen; }
   @keyframes smokePoof { 0% { transform: translate(var(--vx), var(--vy)) scale(0.2); opacity: 1; } 100% { transform: translate(var(--vx), var(--vy)) scale(2.5); opacity: 0; } }
   .vfx-crosshair { width: 80px; height: 80px; border: 6px solid #dc2626; border-radius: 50%; opacity: 0; animation: lockOn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; box-shadow: 0 0 15px #dc2626, inset 0 0 15px #dc2626;}
-  .vfx-crosshair::before, .vfx-crosshair::after { content: absolute; background: #dc2626; box-shadow: 0 0 8px #dc2626;}
+  .vfx-crosshair::before, .vfx-crosshair::after { content: ''; position: absolute; background: #dc2626; box-shadow: 0 0 8px #dc2626;}
   .vfx-crosshair::before { top: 50%; left: -20px; right: -20px; height: 6px; margin-top: -3px; }
   .vfx-crosshair::after { left: 50%; top: -20px; bottom: -20px; width: 6px; margin-left: -3px; }
   @keyframes lockOn { 0% { transform: translate(var(--vx), var(--vy)) scale(4) rotate(90deg); opacity: 0; } 100% { transform: translate(var(--vx), var(--vy)) scale(1) rotate(0deg); opacity: 1; } }
@@ -83,7 +101,6 @@
   @keyframes flyAcross { 0% { transform: translate(var(--start-x), var(--start-y)) rotate(0deg); } 100% { transform: translate(var(--end-x), var(--end-y)) rotate(360deg); } }
   .vfx-text { font-family: monospace; font-weight: bold; font-size: 24px; animation: floatUp 1s ease-out forwards; text-shadow: 0 0 10px currentColor; }
   @keyframes floatUp { 0% { transform: translate(var(--vx), var(--vy)) scale(0.5); opacity: 1; } 100% { transform: translate(var(--vx), calc(var(--vy) - 80px)) scale(1.5); opacity: 0; } }
-  
   .vfx-comic { position: absolute; font-family: Impact, sans-serif; font-weight: 900; font-size: 80px; font-style: italic; letter-spacing: 2px; text-transform: uppercase; animation: kapow 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; text-shadow: 4px 4px 0px #fff, 0 0 20px currentColor; z-index: 100; white-space: nowrap; }
   @keyframes kapow { 0% { transform: translate(var(--vx), var(--vy)) scale(0) rotate(-15deg); opacity: 1; } 80% { transform: translate(var(--vx), var(--vy)) scale(1) rotate(5deg); opacity: 1; } 100% { transform: translate(var(--vx), calc(var(--vy) + 20px)) scale(0.8) rotate(0deg); opacity: 0; } }
   .vfx-paper { width: 80px; height: 100px; background: white; border: 2px solid #ccc; font-family: impact; color: red; font-size: 40px; text-align: center; line-height: 100px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); animation: dropDown 0.4s ease-in forwards; }
@@ -91,7 +108,6 @@
 
   /* DYNAMIC HUD WITH RESTORED SP BAR */
   .hud { position: absolute; top: 0; width: 100%; padding: 12px 15px; display: flex; justify-content: space-between; z-index: 20; background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, transparent 100%); align-items: flex-start;}
-  
   .scoreboard { display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 10px; background: rgba(0,0,0,0.6); padding: 5px 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); }
   .score-title { font-size: 9px; color: #fbbf24; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }
   .score-numbers { font-size: 20px; font-weight: 900; font-family: monospace; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
@@ -103,7 +119,6 @@
   .hp-bar-bg { width: 100%; height: 18px; background: rgba(0,0,0,0.8); border-radius: 9px; border: 2px solid rgba(255,255,255,0.2); box-shadow: 0 0 10px rgba(0,0,0,0.5); }
   .hp-bar-fill { height: 100%; border-radius: 6px; transition: width 0.15s ease-out; box-shadow: inset 0 0 8px rgba(255,255,255,0.4); }
   
-  /* FIXED SP BAR CSS */
   .sp-bar-bg { width: 100%; height: 10px; background: rgba(0,0,0,0.8); border-radius: 5px; margin-top: 8px; border: 1px solid rgba(255,255,255,0.3); box-shadow: inset 0 0 5px rgba(0,0,0,0.8); overflow: hidden; }
   .sp-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #f59e0b, #fef08a); transition: width 0.1s linear; box-shadow: 0 0 10px #facc15; border-radius: 3px;}
   
@@ -166,7 +181,7 @@
 <body>
 
 <div id="app">
-  <div class="version-badge">v0.7.5 (Parkour Fix & SP Bar Restore)</div>
+  <div class="version-badge">v0.8.0 (The Solo Parkour & Visuals Fix)</div>
 
   <div id="select-screen" class="screen active">
     <div id="lobby-ui">
@@ -209,7 +224,7 @@
     
     <div class="header">
       <h2>Choose Fighter</h2>
-      <button onclick="pickAI()" style="width:auto; padding:10px 16px; background:rgba(255,255,255,0.1); box-shadow:none;">Solo vs AI</button>
+      <button id="ai-btn" onclick="pickAI()" style="width:auto; padding:10px 16px; background:rgba(255,255,255,0.1); box-shadow:none;">Solo vs AI</button>
     </div>
     <div class="char-grid locked" id="char-list" onclick="checkNameLock()"></div>
   </div>
@@ -222,11 +237,7 @@
       <button class="rematch-btn" onclick="handleRematch()">Return to Lobby</button>
     </div>
 
-    <div id="game-container">
-      
-      <div class="bg-sun" id="map-sun"></div>
-      <div class="bg-horizon" id="map-horizon"></div>
-
+    <div id="game-container" class="map-alley">
       <div id="arena">
         <div id="scroll-world">
             <div class="floor" id="arena-floor"></div>
@@ -286,12 +297,12 @@ const CHARS = [
 ];
 
 const MAPS = {
-  alley: { bg: 'radial-gradient(circle at 50% 10%, #312e81 0%, #0f172a 60%)', floor: '#0c0a20', grid: '#4f46e5', sun: 'none', horizon: 'none' },
-  dojo:  { bg: 'linear-gradient(180deg, #7c2d12 0%, #b45309 60%, #000 60%)', floor: '#451a03', grid: '#fcd34d', sun: 'block', sunColor: '#ef4444', horizon: 'none' },
-  mamak: { bg: 'linear-gradient(180deg, #38bdf8 0%, #7dd3fc 45%, #22c55e 45%, #14532d 50%, #171717 50%)', floor: '#262626', grid: '#facc15', sun: 'block', sunColor: '#fde047', horizon: 'block', horizonColor: '#22c55e' }
+  alley: { floor: '#0c0a20', grid: '#4f46e5' },
+  dojo:  { floor: '#451a03', grid: '#fcd34d' },
+  mamak: { floor: '#262626', grid: '#facc15' }
 };
 
-// PARKOUR RACE STAGES (Width, then array of [x, width] for pits)
+// PARKOUR RACE STAGES
 const STAGES = [
   { w: 2000, pits: [[500, 150], [1000, 150], [1500, 180]] }, 
   { w: 2500, pits: [[400, 150], [800, 150], [1300, 180], [1900, 200]] }, 
@@ -308,6 +319,7 @@ let p1Score = 0, p2Score = 0;
 let p1Sel=null, p2Sel=null, f1, f2; 
 let keys1 = {}, keys2 = {}, keys = {}; 
 let activeMode = '1v1', activeMap = 'alley';
+let soloParkour = false;
 let hitStopFrames = 0;
 let isGameOver = false;
 let connTimeout; 
@@ -320,6 +332,13 @@ function checkMobileUI() { if ('ontouchstart' in window || navigator.maxTouchPoi
 document.getElementById('player-name').addEventListener('input', (e) => {
   if(e.target.value.trim().length > 0) document.getElementById('char-list').classList.remove('locked');
   else document.getElementById('char-list').classList.add('locked');
+});
+
+// Dynamic Button Text based on Mode Selection
+document.getElementById('mode-select').addEventListener('change', (e) => {
+    const btn = document.getElementById('ai-btn');
+    if(e.target.value === 'parkour') btn.innerText = "Parkour Solo";
+    else btn.innerText = "Solo vs AI";
 });
 
 function checkNameLock() { if(document.getElementById('char-list').classList.contains('locked')) alert("Please type your Nickname first!"); }
@@ -420,15 +439,23 @@ function selectChar(c, el){
     else { p2Sel = c; document.querySelectorAll('.char-card').forEach(x=>x.classList.remove('selected-p2')); el.classList.add('selected-p2'); conn.send({type:'ready', p2: p2Sel.id}); }
   } else {
     if(!checkName()) return;
-    p1Sel = c; const others = CHARS.filter(char => char.id !== p1Sel.id);
-    p2Sel = others[Math.floor(Math.random() * others.length)]; oppName = "AI Bot";
+    p1Sel = c; 
+    if(!soloParkour) {
+        const others = CHARS.filter(char => char.id !== p1Sel.id);
+        p2Sel = others[Math.floor(Math.random() * others.length)]; oppName = "AI Bot";
+    } else { p2Sel = CHARS[0]; oppName = "None"; }
     startFight();
   }
 }
 
 function pickAI() {
   if(!checkName()) return;
-  aiMode = true; onlineMode = false; isHost = true; p1Score = 0; p2Score = 0; updateScoreboard();
+  
+  activeMode = document.getElementById('mode-select').value;
+  if(activeMode === 'parkour') { soloParkour = true; aiMode = false; }
+  else { soloParkour = false; aiMode = true; }
+
+  onlineMode = false; isHost = true; p1Score = 0; p2Score = 0; updateScoreboard();
   document.getElementById('char-list').classList.remove('locked');
   document.querySelectorAll('.char-card').forEach(c => c.classList.add('unlocked'));
   document.getElementById('lobby-ui').style.display = 'none';
@@ -436,6 +463,7 @@ function pickAI() {
 
 function sendStart() { 
   activeMap = document.getElementById('map-select').value; activeMode = document.getElementById('mode-select').value;
+  soloParkour = false; // Always multiplayer if we reached here
   conn.send({type:'start', p1: p1Sel.id, p2: p2Sel.id, map: activeMap, mode: activeMode}); 
   startFight(); 
 }
@@ -448,22 +476,13 @@ function applySkin(fObj, sel) {
 
 function applyMap() {
   const m = MAPS[activeMap];
-  document.getElementById('game-container').style.background = m.bg;
+  const container = document.getElementById('game-container');
+  container.className = `map-${activeMap}`; // Triggers the vivid CSS layers
+  container.style.background = ''; // Clean up any inline overrides
+  
   const floor = document.getElementById('arena-floor');
   floor.style.backgroundColor = m.floor; floor.style.borderTopColor = m.grid;
   floor.style.backgroundImage = `linear-gradient(90deg, ${m.grid}40 1px, transparent 1px), linear-gradient(${m.grid}40 1px, transparent 1px)`;
-  
-  const sun = document.getElementById('map-sun');
-  if(m.sun !== 'none') {
-    sun.style.display = 'block'; sun.style.background = m.sunColor; sun.style.width = '200px'; sun.style.height = '200px'; 
-    sun.style.left = '50%'; sun.style.marginLeft = '-100px'; sun.style.bottom = '30%'; sun.style.boxShadow = `0 0 50px ${m.sunColor}`;
-  } else { sun.style.display = 'none'; }
-  
-  const horizon = document.getElementById('map-horizon');
-  if(m.horizon !== 'none') {
-    horizon.style.display = 'block'; horizon.style.background = m.horizonColor;
-    horizon.style.boxShadow = `0 -5px 20px ${m.horizonColor}`;
-  } else { horizon.style.display = 'none'; }
 }
 
 function buildPits() {
@@ -486,6 +505,10 @@ function buildPits() {
 
 function resetToLobby() {
   isGameOver = false;
+  // Cleanup memory leaks from special moves
+  if(f1 && f1.specialInt) clearInterval(f1.specialInt);
+  if(f2 && f2.specialInt) clearInterval(f2.specialInt);
+
   document.getElementById('victory-screen').style.display = 'none';
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('select-screen').classList.add('active');
@@ -496,6 +519,7 @@ function resetToLobby() {
   document.getElementById('p2').querySelector('.f-rig').classList.remove('hulk-mode');
   document.getElementById('p1').querySelector('.f-torso').classList.remove('dhol-active');
   document.getElementById('p2').querySelector('.f-torso').classList.remove('dhol-active');
+  document.getElementById('p2').style.display = 'flex'; // Un-hide if solo
 }
 
 function handleRematch() {
@@ -523,11 +547,19 @@ function startFight(){
       document.getElementById('stage-progress').innerText = `STAGE 1/5`;
   } else { document.getElementById('stage-progress').style.display = 'none'; }
 
-  const aW = activeMode === 'parkour' ? STAGES[currentStage].w : document.getElementById('game-container').offsetWidth;
-  f1 = { id:'p1', x:50, y:0, vx:0, vy:0, hp:100, sp:0, dir:1, action:'idle', hit:false, jump:false, w:40, maxW: aW, isBlocking: false, buff: 0 };
-  f2 = { id:'p2', x: activeMode === 'parkour' ? 100 : aW - 90, y:0, vx:0, vy:0, hp:100, sp:0, dir:-1, action:'idle', hit:false, jump:false, w:40, maxW: aW, isBlocking: false, buff: 0 };
+  f1 = { id:'p1', x:50, y:0, vx:0, vy:0, hp:100, sp:0, dir:1, action:'idle', hit:false, jump:false, w:40, isBlocking: false, buff: 0 };
+  f2 = { id:'p2', x: activeMode === 'parkour' ? 100 : document.getElementById('game-container').offsetWidth - 90, y:0, vx:0, vy:0, hp:100, sp:0, dir:-1, action:'idle', hit:false, jump:false, w:40, isBlocking: false, buff: 0 };
   
   applySkin(f1, p1Sel); applySkin(f2, p2Sel);
+
+  if(soloParkour && activeMode === 'parkour') {
+      f2.x = -2000; f2.hp = 0; // Nullify P2
+      document.getElementById('p2').style.display = 'none';
+      document.getElementById('p2-tag').style.display = 'none';
+  } else {
+      document.getElementById('p2').style.display = 'flex';
+      document.getElementById('p2-tag').style.display = 'flex';
+  }
 
   lastTime = performance.now();
   requestAnimationFrame(gameLoop);
@@ -571,23 +603,22 @@ function triggerStageWin(winnerText, sendSignal = true) {
         try { conn.send({type: 'stage_win', winner: winnerText}); } catch(e){}
     }
 
-    // Auto progress stage
     setTimeout(() => {
         currentStage++;
         if(currentStage >= 5 || p1Score === 3 || p2Score === 3) {
             let overall = p1Score > p2Score ? (isHost?myName:oppName) : (isHost?oppName:myName);
-            isGameOver = false; // Reset to allow triggerKO
+            isGameOver = false; 
             triggerKO(`${overall} WINS THE RACE!`, true);
         } else {
             isGameOver = false;
             document.getElementById('victory-screen').style.display = 'none';
             document.getElementById('stage-progress').innerText = `STAGE ${currentStage+1}/5`;
-            f1.maxW = STAGES[currentStage].w; f2.maxW = STAGES[currentStage].w;
             f1.x = 50; f1.y = 0; f1.hp = 100; f1.sp = 0; f1.vy = 0; f1.jump = false;
             f2.x = 100; f2.y = 0; f2.hp = 100; f2.sp = 0; f2.vy = 0; f2.jump = false;
+            if(soloParkour) { f2.hp = 0; f2.x = -2000; }
             cameraX = 0; buildPits();
         }
-    }, 3000);
+    }, 2000);
 }
 
 function gameLoop(timestamp){
@@ -617,23 +648,20 @@ function gameLoop(timestamp){
 
           if(activeMode === 'parkour') {
               const sw = document.getElementById('game-container').offsetWidth;
-              const leaderX = Math.max(f1.x, f2.x);
+              const leaderX = soloParkour ? f1.x : Math.max(f1.x, f2.x);
               cameraX = Math.max(0, leaderX - sw/2);
               document.getElementById('scroll-world').style.transform = `translateX(${-cameraX}px)`;
               
-              // Death wall penalty
               [f1, f2].forEach(f => {
-                  if(f.x < cameraX - 50) { f.hp -= 2; f.x = cameraX - 40; } // Sucked into the void
+                  if(f.hp > 0 && f.x < cameraX - 50) { f.hp -= 2; f.x = cameraX - 40; } 
               });
 
               if(isHost || !onlineMode) {
-                  if(f1.hp <= 0 || f2.hp <= 0) {
-                      let p1Name = isHost ? myName : oppName; let p2Name = isHost ? oppName : myName;
-                      const winner = f1.hp <= 0 ? p2Name : p1Name;
-                      triggerStageWin(`${winner} TAKES THE STAGE!`); 
+                  if(f1.hp <= 0 && (!soloParkour && f2.hp <= 0)) {
+                      triggerStageWin(`NOBODY SURVIVED`); 
                   }
                   else if(f1.x >= STAGES[currentStage].w - 50) triggerStageWin(`${isHost ? myName : oppName} TAKES THE STAGE!`);
-                  else if (f2.x >= STAGES[currentStage].w - 50) triggerStageWin(`${isHost ? oppName : myName} TAKES THE STAGE!`);
+                  else if (!soloParkour && f2.x >= STAGES[currentStage].w - 50) triggerStageWin(`${isHost ? oppName : myName} TAKES THE STAGE!`);
               }
           }
       }
@@ -651,6 +679,9 @@ function gameLoop(timestamp){
 }
 
 function updateFighter(f, opp, k){
+  // DYNAMIC BOUNDARY FIX: No more invisible walls stopping you early!
+  let currentArenaWidth = activeMode === 'parkour' ? STAGES[currentStage].w : document.getElementById('game-container').offsetWidth;
+
   if(f.action !== 'special_active' && f.action !== 'dhol_beat' && f.action !== 'karthik_meme') {
       f.action = 'idle';
       if(k['b']) { f.isBlocking = true; f.vx *= 0.5; } 
@@ -674,9 +705,8 @@ function updateFighter(f, opp, k){
   }
 
   if(f.y >= 0 && !inPit){ f.y=0; f.vy=0; f.jump=false; }
-  if(inPit && f.y >= 0) { f.vy += 0.9; } // Fall in
+  if(inPit && f.y >= 0) { f.vy += 0.9; } 
 
-  // JUMP Logic
   if(k['w'] && f.y === 0 && !f.isBlocking && !inPit && !f.jump && f.action !== 'special_active' && f.action !== 'karthik_meme') { 
       f.vy = -16; 
       f.jump = true;
@@ -684,16 +714,14 @@ function updateFighter(f, opp, k){
       f.action = 'jump'; 
   }
 
-  // Pit Death Penalty
   if(f.y > 600) { 
       f.hp -= 20; 
-      f.x -= 300; 
-      if(f.x < cameraX) f.x = cameraX + 50; // Don't respawn behind camera wall
-      f.y = -200; f.vy = 0; 
+      f.x = Math.max(0, f.x - 150); 
+      f.y = -200; f.vy = -10; // Pop up respawn
       triggerShake('heavy'); 
   }
 
-  if(f.x < 0) f.x=0; if(f.x > f.maxW - f.w) f.x = f.maxW - f.w;
+  if(f.x < 0) f.x=0; if(f.x > currentArenaWidth - f.w) f.x = currentArenaWidth - f.w;
   
   if(opp && opp.hp > 0 && f.action !== 'special_active' && f.action !== 'dhol_beat' && f.action !== 'karthik_meme') f.dir = (f.x < opp.x) ? 1 : -1;
   
@@ -722,7 +750,7 @@ function spawnParticles(x, y, dir, color = '#fbbf24') {
     let vx = dir * (Math.random() * 8 + 4); let vy = (Math.random() - 1) * 12; let life = 20;
     let cx = x + 20; let cy = y - 40;
     const anim = () => {
-      if(life <= 0 || isGameOver) { p.remove(); return; }
+      if(life <= 0) { p.remove(); return; }
       cx += vx; cy += vy; vy += 1; p.style.transform = `translate(${cx}px, ${cy}px)`; p.style.opacity = life / 20;
       life--; requestAnimationFrame(anim);
     }; requestAnimationFrame(anim);
@@ -731,6 +759,7 @@ function spawnParticles(x, y, dir, color = '#fbbf24') {
 
 function createVFX(type, x, y, color, text = '', dir = 1, destX = 0) {
   const layer = document.getElementById('vfx-layer');
+  if(!layer) return;
   const vfx = document.createElement('div');
   vfx.classList.add('vfx-base', `vfx-${type}`);
   
@@ -772,10 +801,10 @@ function createVFX(type, x, y, color, text = '', dir = 1, destX = 0) {
 
 function applyDamage(opp, dmg, dir, isSpecial = false) {
     if(activeMode === 'parkour') return; 
-    if(opp.isBlocking) {
+    if(opp && opp.isBlocking) {
         opp.hp -= 10; 
         showLabel(opp.id, "BLOCKED!", "#a1a1aa");
-    } else {
+    } else if (opp) {
         opp.hp -= dmg; 
         opp.vx = dir * (isSpecial ? 25 : 10);
         triggerShake(isSpecial ? 'heavy' : 'normal');
@@ -799,27 +828,29 @@ function attack(f, opp, dmg, range){
 }
 
 function doSpecial(f, opp){
-  if(!opp) return; f.sp = 0; 
+  f.sp = 0; 
   const charId = (f.id === 'p1' ? p1Sel : p2Sel).id;
+  
+  if(f.specialInt) clearInterval(f.specialInt); // MEMORY LEAK FIX
   
   if (charId === 'karthik') { 
     showLabel(f.id, "WAIT FOR IT...", "#4f46e5");
     f.action = 'karthik_meme'; 
     let count = 0;
-    const runInt = setInterval(() => {
-        if(isGameOver && activeMode !== 'parkour') { clearInterval(runInt); return; }
+    f.specialInt = setInterval(() => {
+        if(isGameOver || f.hp <= 0) { clearInterval(f.specialInt); return; }
         count++;
         f.x += f.dir * 15; 
-        if((Math.abs(f.x - opp.x) < 60 && activeMode === '1v1') || count > 25) {
-            clearInterval(runInt); f.action = 'idle'; hitStopFrames = 10;
-            createVFX('comic', opp.x, opp.y, '#4f46e5', 'SIX!');
-            if(activeMode === '1v1') { if(!opp.isBlocking) { opp.hp -= 15; opp.vx = f.dir * 5; } else { opp.hp -= 5; } }
-            triggerShake(); spawnParticles(opp.x, opp.y, f.dir, '#4f46e5');
+        if((opp && Math.abs(f.x - opp.x) < 60 && activeMode === '1v1') || count > 25) {
+            clearInterval(f.specialInt); f.action = 'idle'; hitStopFrames = 10;
+            createVFX('comic', opp ? opp.x : f.x, f.y, '#4f46e5', 'SIX!');
+            if(activeMode === '1v1' && opp) { if(!opp.isBlocking) { opp.hp -= 15; opp.vx = f.dir * 5; } else { opp.hp -= 5; } }
+            triggerShake(); spawnParticles(opp ? opp.x : f.x, f.y, f.dir, '#4f46e5');
             setTimeout(() => {
                 hitStopFrames = 15;
-                createVFX('comic', opp.x, opp.y - 30, '#ef4444', 'SEVEN!');
-                if(activeMode === '1v1') { if(!opp.isBlocking) { opp.hp -= 25; opp.vx = f.dir * 30; } else { opp.hp -= 5; } }
-                triggerShake('heavy'); spawnParticles(opp.x, opp.y, f.dir, '#ef4444');
+                createVFX('comic', opp ? opp.x : f.x, f.y - 30, '#ef4444', 'SEVEN!');
+                if(activeMode === '1v1' && opp) { if(!opp.isBlocking) { opp.hp -= 25; opp.vx = f.dir * 30; } else { opp.hp -= 5; } }
+                triggerShake('heavy'); spawnParticles(opp ? opp.x : f.x, f.y, f.dir, '#ef4444');
             }, 400);
         }
     }, 50);
@@ -827,87 +858,98 @@ function doSpecial(f, opp){
   else if (charId === 'andi') { 
     showLabel(f.id, "HULK SMASH!", "#22c55e"); document.getElementById(f.id).querySelector('.f-rig').classList.add('hulk-mode');
     createVFX('ring', f.x, f.y, '#22c55e'); hitStopFrames = 10; f.buff = 300;
-    if(activeMode === '1v1' && Math.abs(f.x - opp.x) < 150) { applyDamage(opp, 40, f.dir, true); }
+    if(activeMode === '1v1' && opp && Math.abs(f.x - opp.x) < 150) { applyDamage(opp, 40, f.dir, true); }
     spawnParticles(f.x, f.y, 1, '#22c55e'); spawnParticles(f.x, f.y, -1, '#22c55e');
   } 
   else if (charId === 'dexter') { 
     showLabel(f.id, "SPITBALL!", "#22c55e");
-    createVFX('projectile', f.x, f.y, '#22c55e', '', f.dir, f.x + (f.dir*200));
+    let targetX = opp ? opp.x : f.x + (f.dir*200);
+    createVFX('projectile', f.x, f.y, '#22c55e', '', f.dir, targetX);
     setTimeout(() => {
-        createVFX('acid', opp.x, opp.y, '#22c55e');
-        if(activeMode === '1v1') applyDamage(opp, 40, f.dir, true);
-        spawnParticles(opp.x, opp.y, f.dir, '#22c55e');
+        createVFX('acid', targetX, f.y, '#22c55e');
+        if(activeMode === '1v1' && opp) applyDamage(opp, 40, f.dir, true);
+        spawnParticles(targetX, f.y, f.dir, '#22c55e');
     }, 400);
   }
   else if (charId === 'sherman') { 
     showLabel(f.id, "BO TAH BO LAMPAH!", "#f59e0b");
     f.action = 'special_active'; 
-    createVFX('projectile', f.x, f.y, 'transparent', '🍺', f.dir, f.x + (f.dir*150));
+    let targetX = opp ? opp.x : f.x + (f.dir*150);
+    createVFX('projectile', f.x, f.y, 'transparent', '🍺', f.dir, targetX);
     setTimeout(() => {
         f.action = 'idle';
-        if(activeMode === '1v1') applyDamage(opp, 40, f.dir, true);
-        createVFX('smoke', opp.x, opp.y, '#f59e0b');
+        if(activeMode === '1v1' && opp) applyDamage(opp, 40, f.dir, true);
+        createVFX('smoke', targetX, f.y, '#f59e0b');
     }, 400);
   }
   else if (charId === 'parv') { 
     showLabel(f.id, "DHOL BEAT!", "#ea580c");
     f.action = 'dhol_beat';
     let beat = 0;
-    const dholInt = setInterval(() => {
-        if(isGameOver && activeMode !== 'parkour') { clearInterval(dholInt); return; }
+    f.specialInt = setInterval(() => {
+        if(isGameOver || f.hp <= 0) { clearInterval(f.specialInt); return; }
         createVFX('ring', f.x, f.y, '#facc15'); triggerShake();
         if(activeMode === 'parkour') f.x += f.dir * 40; 
-        if(activeMode === '1v1') { if(!opp.isBlocking) { opp.hp -= (beat===2 ? 14 : 13); opp.vx = f.dir * 10; } else { opp.hp -= 3; } }
-        if(++beat > 2) { clearInterval(dholInt); setTimeout(() => f.action = 'idle', 300); }
+        if(activeMode === '1v1' && opp) { if(!opp.isBlocking) { opp.hp -= (beat===2 ? 14 : 13); opp.vx = f.dir * 10; } else { opp.hp -= 3; } }
+        if(++beat > 2) { clearInterval(f.specialInt); setTimeout(() => f.action = 'idle', 300); }
     }, 400);
   }
   else if (charId === 'hari') { 
     showLabel(f.id, "ZZZ...", "#60a5fa");
     let z = 0;
-    const zInt = setInterval(() => {
-        if(isGameOver && activeMode !== 'parkour') { clearInterval(zInt); return; }
-        createVFX('projectile', f.x, f.y, 'transparent', 'Z', f.dir, opp.x);
-        setTimeout(() => { if(activeMode === '1v1') { if(!opp.isBlocking) { opp.hp -= (z===2 ? 14 : 13); opp.vx = f.dir * 5; triggerShake();} else { opp.hp-=3; } } }, 400);
-        if(++z > 2) clearInterval(zInt);
+    f.specialInt = setInterval(() => {
+        if(isGameOver || f.hp <= 0) { clearInterval(f.specialInt); return; }
+        let targetX = opp ? opp.x : f.x + (f.dir*150);
+        createVFX('projectile', f.x, f.y, 'transparent', 'Z', f.dir, targetX);
+        setTimeout(() => { if(activeMode === '1v1' && opp) { if(!opp.isBlocking) { opp.hp -= (z===2 ? 14 : 13); opp.vx = f.dir * 5; triggerShake();} else { opp.hp-=3; } } }, 400);
+        if(++z > 2) clearInterval(f.specialInt);
     }, 200);
   }
   else if (charId === 'jerell') { 
     showLabel(f.id, "CALCULATED.", "#e2e8f0"); createVFX('text', f.x, f.y, '#e2e8f0', 'E=MC^2');
     setTimeout(() => { 
-        createVFX('paper', opp.x, opp.y, '#fff'); 
-        setTimeout(() => { if(activeMode === '1v1') applyDamage(opp, 40, f.dir, true); }, 400); 
+        createVFX('paper', opp ? opp.x : f.x + (f.dir*100), f.y, '#fff'); 
+        setTimeout(() => { if(activeMode === '1v1' && opp) applyDamage(opp, 40, f.dir, true); }, 400); 
     }, 200);
   }
   else if (charId === 'sham') { 
-    showLabel(f.id, "DEADEYE", "#dc2626"); createVFX('crosshair', opp.x, opp.y, '#dc2626');
+    showLabel(f.id, "DEADEYE", "#dc2626"); 
+    let targetX = opp ? opp.x : f.x + (f.dir*200);
+    createVFX('crosshair', targetX, f.y, '#dc2626');
     hitStopFrames = 25; 
-    setTimeout(() => { createVFX('ring', opp.x, opp.y, '#dc2626'); if(activeMode==='1v1') applyDamage(opp, 40, f.dir, true); spawnParticles(opp.x, opp.y, f.dir, '#dc2626'); }, 400); 
+    setTimeout(() => { createVFX('ring', targetX, f.y, '#dc2626'); if(activeMode==='1v1' && opp) applyDamage(opp, 40, f.dir, true); spawnParticles(targetX, f.y, f.dir, '#dc2626'); }, 400); 
   }
   else if (charId === 'jz') { 
     showLabel(f.id, "RHYTHM DASH!", "#ec4899"); let count = 0;
-    const dash = setInterval(() => {
-      if(isGameOver && activeMode !== 'parkour') { clearInterval(dash); return; }
+    f.specialInt = setInterval(() => {
+      if(isGameOver || f.hp <= 0) { clearInterval(f.specialInt); return; }
       f.x += f.dir * 55; spawnParticles(f.x, f.y, f.dir * -1, '#ec4899'); triggerShake('heavy');
       createVFX('comic', f.x, f.y, '#ec4899', 'BAM!');
-      if(activeMode === '1v1' && Math.abs(f.x - opp.x) < 70) { if(!opp.isBlocking){ opp.hp -= (count===2 ? 14 : 13); opp.vx = f.dir * 10; } else { opp.hp-=3;} }
-      if(++count > 2) clearInterval(dash);
+      if(activeMode === '1v1' && opp && Math.abs(f.x - opp.x) < 70) { if(!opp.isBlocking){ opp.hp -= (count===2 ? 14 : 13); opp.vx = f.dir * 10; } else { opp.hp-=3;} }
+      if(++count > 2) clearInterval(f.specialInt);
     }, 180);
   } else if (charId === 'yiliang') { 
     showLabel(f.id, "SMOKE VANISH!", "#94a3b8"); createVFX('smoke', f.x, f.y, '#94a3b8');
-    f.x = activeMode === 'parkour' ? f.x + (f.dir * 180) : opp.x - (opp.dir * 60); 
+    f.x = activeMode === 'parkour' ? f.x + (f.dir * 180) : (opp ? opp.x - (opp.dir * 60) : f.x + 100); 
     createVFX('smoke', f.x, f.y, '#94a3b8');
-    setTimeout(() => { if(activeMode === '1v1') applyDamage(opp, 40, f.dir, true); }, 300);
+    setTimeout(() => { if(activeMode === '1v1' && opp) applyDamage(opp, 40, f.dir, true); }, 300);
   }
 }
 
 function showLabel(pid, txt, color){
-  const l = document.getElementById(pid+'-label'); l.innerText = txt; l.style.color = color;
+  const l = document.getElementById(pid+'-label'); 
+  if(!l) return;
+  l.innerText = txt; l.style.color = color;
   l.classList.add('show'); setTimeout(()=>l.classList.remove('show'), 800);
 }
 
 function draw(){
   const t = Date.now() / 100;
   
+  if(activeMode === 'parkour') {
+      document.getElementById('scroll-world').style.transform = `translateX(${-cameraX}px)`;
+  } else { document.getElementById('scroll-world').style.transform = `none`; }
+
   const updateF = (f, el) => {
     if(f.hp <= 0 && !isGameOver) { el.style.opacity = '0.3'; } else { el.style.opacity = '1'; } 
     
@@ -963,6 +1005,7 @@ function draw(){
 }
 
 function doAI(){
+  if(soloParkour) return;
   let target = f1;
   const dist = Math.abs(f2.x - target.x);
   if (dist > 80) { keys2['a'] = f2.x > target.x; keys2['d'] = f2.x < target.x; } 
