@@ -15,16 +15,27 @@
   .screen { display: none; }
   .screen.active { display: block; }
 
-  /* MULTIPLAYER LOBBY */
-  #lobby-ui { background: #1a1a2e; padding: 16px; border-radius: 12px; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.1); color: white; }
-  .lobby-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-  .id-label { font-size: 12px; color: #888; }
-  .my-id { font-family: monospace; color: #4f46e5; font-weight: bold; font-size: 16px; }
+  /* IMPROVED LOBBY UI */
+  #lobby-ui { background: #1a1a2e; padding: 20px; border-radius: 12px; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.1); color: white; text-align: center; }
+  .input-group { margin-bottom: 12px; text-align: left; }
+  .input-group label { font-size: 12px; color: #888; display: block; margin-bottom: 4px; }
+  input { width: 100%; padding: 10px; background: #0d0d1f; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: #fff; font-size: 14px; outline: none; }
+  input:focus { border-color: #4f46e5; }
+  button { width: 100%; padding: 10px; background: #4f46e5; color: #fff; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 5px; }
+  button:hover { background: #6366f1; }
+  
+  .id-box { background: rgba(79, 70, 229, 0.1); border: 1px dashed #4f46e5; padding: 10px; border-radius: 6px; margin: 15px 0; }
+  .my-id { font-family: monospace; color: #818cf8; font-weight: bold; font-size: 18px; letter-spacing: 1px; }
+  
+  #connection-status { font-size: 14px; margin-top: 15px; padding: 10px; border-radius: 6px; display: none; font-weight: bold; }
+  .status-success { background: rgba(74, 222, 128, 0.2); color: #4ade80; border: 1px solid #4ade80; }
+  .status-error { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; }
 
   /* CHAR SELECT */
   .header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 20px; color: #fff; }
   .char-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-  .char-card { background: #1a1a2e; border-radius: 10px; border: 2px solid transparent; padding: 12px; text-align: center; cursor: pointer; transition: 0.2s; }
+  .char-card { background: #1a1a2e; border-radius: 10px; border: 2px solid transparent; padding: 12px; text-align: center; cursor: pointer; transition: 0.2s; opacity: 0.5; pointer-events: none; }
+  .char-card.unlocked { opacity: 1; pointer-events: auto; }
   .char-card.selected-p1 { border-color: #4f46e5; background: #1e1e3f; }
   .char-card.selected-p2 { border-color: #ef4444; background: #3f1e1e; }
   .char-emoji { font-size: 32px; margin-bottom: 8px; display: block; }
@@ -37,11 +48,11 @@
   .floor { position: absolute; bottom: 0; width: 100%; height: 20px; background: #0a0a1a; }
   
   .hud { position: absolute; top: 0; width: 100%; padding: 12px; display: flex; justify-content: space-between; z-index: 10; }
+  .player-tag { font-size: 10px; color: rgba(255,255,255,0.8); margin-bottom: 4px; font-weight: bold; text-transform: uppercase; }
   .hp-bar-bg { width: 45%; height: 14px; background: rgba(0,0,0,0.5); border-radius: 7px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
   .hp-bar-fill { height: 100%; transition: width 0.2s; }
   .hp-p1 { background: linear-gradient(90deg, #4f46e5, #818cf8); width: 100%; }
   .hp-p2 { background: linear-gradient(90deg, #f87171, #ef4444); width: 100%; }
-  
   .sp-bar-bg { width: 45%; height: 6px; background: rgba(0,0,0,0.5); border-radius: 3px; margin-top: 4px; }
   .sp-bar-fill { height: 100%; width: 0%; background: #fbbf24; transition: width 0.2s; }
 
@@ -66,21 +77,33 @@
 <body>
 
 <div id="app">
-  <div class="version-badge">v0.3.1 (Singapore Multiplayer)</div>
+  <div class="version-badge">v0.3.2 (Lobby Update)</div>
 
   <div id="select-screen" class="screen active">
+    
     <div id="lobby-ui">
-      <div class="id-label">Your ID (Send this to friend): <span class="my-id" id="my-peer-id">Generating...</span></div>
-      <div class="lobby-grid">
-        <input type="text" id="join-id" placeholder="Paste Friend's ID here">
-        <button onclick="connectToFriend()">Join Friend</button>
+      <div class="input-group">
+        <label>Step 1: What is your name?</label>
+        <input type="text" id="player-name" placeholder="e.g. Parv" maxlength="12">
       </div>
-      <div id="connection-status" style="font-size:11px; margin-top:8px; color:#4ade80; display:none; font-weight:bold;">● Player Connected!</div>
+      
+      <div class="id-box">
+        <div class="id-label">Your Session ID (Give to friend):</div>
+        <div class="my-id" id="my-peer-id">Generating...</div>
+      </div>
+      
+      <div class="input-group" style="margin-top: 15px;">
+        <label>Step 2: Join a friend (Leave blank if you are hosting)</label>
+        <input type="text" id="join-id" placeholder="Paste Session ID here" style="text-transform: uppercase;">
+        <button onclick="connectToFriend()">Connect</button>
+      </div>
+      
+      <div id="connection-status"></div>
     </div>
 
     <div class="header">
       <h2 id="select-title">Choose Your Fighter</h2>
-      <button onclick="pickAI()" style="width:auto; padding:6px 12px; font-size:12px; background:rgba(255,255,255,0.1);">Solo vs AI</button>
+      <button onclick="pickAI()" style="width:auto; padding:6px 12px; font-size:12px; background:rgba(255,255,255,0.1); margin-top:0;">Play Solo (vs AI)</button>
     </div>
     <div class="char-grid" id="char-list"></div>
   </div>
@@ -88,8 +111,16 @@
   <div id="arena-screen" class="screen">
     <div id="game-container">
       <div class="hud">
-        <div style="width: 45%;"><div class="hp-bar-bg"><div id="hp-1" class="hp-bar-fill hp-p1"></div></div><div class="sp-bar-bg"><div id="sp-1" class="sp-bar-fill"></div></div></div>
-        <div style="width: 45%; text-align: right;"><div class="hp-bar-bg" style="margin-left:auto;"><div id="hp-2" class="hp-bar-fill hp-p2"></div></div><div class="sp-bar-bg" style="margin-left:auto;"><div id="sp-2" class="sp-bar-fill"></div></div></div>
+        <div style="width: 45%;">
+          <div id="p1-tag" class="player-tag">Player 1</div>
+          <div class="hp-bar-bg"><div id="hp-1" class="hp-bar-fill hp-p1"></div></div>
+          <div class="sp-bar-bg"><div id="sp-1" class="sp-bar-fill"></div></div>
+        </div>
+        <div style="width: 45%; text-align: right;">
+          <div id="p2-tag" class="player-tag">Player 2</div>
+          <div class="hp-bar-bg" style="margin-left:auto;"><div id="hp-2" class="hp-bar-fill hp-p2"></div></div>
+          <div class="sp-bar-bg" style="margin-left:auto;"><div id="sp-2" class="sp-bar-fill"></div></div>
+        </div>
       </div>
       <div id="arena">
         <div id="p1" class="fighter"><div class="fighter-body" id="p1-b"></div><div class="special-label" id="p1-label">SPECIAL!</div></div>
@@ -101,7 +132,7 @@
       <div class="d-pad"><div class="touch-btn" id="tb-left">←</div><div class="touch-btn" id="tb-jump">↑</div><div class="touch-btn" id="tb-right">→</div></div>
       <div class="action-pad"><div class="touch-btn" id="tb-punch">P</div><div class="touch-btn" id="tb-kick">K</div><div class="touch-btn btn-sp" id="tb-sp">S</div></div>
     </div>
-    <button onclick="location.reload()" style="margin-top:20px; background:transparent; border:1px solid rgba(255,255,255,0.1); color:#888;">Back to Menu</button>
+    <button onclick="location.reload()" style="margin-top:20px; background:transparent; border:1px solid rgba(255,255,255,0.1); color:#888;">Disconnect & Exit</button>
   </div>
 </div>
 
@@ -119,35 +150,81 @@ const CHARS = [
 ];
 
 let peer, conn, myPeerId, isHost = false, onlineMode = false;
+let myName = "Player", oppName = "Opponent";
 let p1Sel=null, p2Sel=null, aiMode=false, f1, f2;
 let keys1 = {}, keys2 = {}, keys = {};
 
-// 1. AUTO-START PEER
 window.onload = () => {
-  const randomId = Math.floor(1000 + Math.random() * 9000);
+  const randomId = Math.floor(100 + Math.random() * 900);
   myPeerId = `SF-${randomId}`;
   peer = new Peer(myPeerId);
   
   peer.on('open', id => { document.getElementById('my-peer-id').innerText = id; });
+  
+  // Handle incoming connections (When YOU are the host)
   peer.on('connection', c => {
     conn = c; isHost = true; onlineMode = true;
     setupDataListeners();
-    document.getElementById('connection-status').style.display = 'block';
+    showStatus("Connecting...", "success");
   });
+
+  // Handle errors (like bad ID)
+  peer.on('error', err => {
+    if(err.type === 'peer-unavailable') {
+      showStatus("Error: Session ID not found.", "error");
+    } else {
+      showStatus("Connection error.", "error");
+    }
+  });
+
   renderChars();
 };
 
+function showStatus(text, type) {
+  const el = document.getElementById('connection-status');
+  el.style.display = 'block';
+  el.innerText = text;
+  el.className = type === "error" ? "status-error" : "status-success";
+}
+
+function getMyName() {
+  const input = document.getElementById('player-name').value.trim();
+  return input !== "" ? input : (isHost ? "Host" : "Challenger");
+}
+
 function connectToFriend() {
-  const friendId = document.getElementById('join-id').value.toUpperCase();
-  if(!friendId) return;
+  const friendId = document.getElementById('join-id').value.toUpperCase().trim();
+  if(!friendId) {
+    showStatus("Please enter an ID to join.", "error");
+    return;
+  }
+  showStatus("Searching for session...", "success");
   conn = peer.connect(friendId);
   isHost = false; onlineMode = true;
   setupDataListeners();
-  document.getElementById('connection-status').style.display = 'block';
 }
 
 function setupDataListeners() {
+  conn.on('open', () => {
+    myName = getMyName();
+    // Send our name to the other player immediately
+    conn.send({type: 'hello', name: myName});
+    
+    // Unlock characters once connected
+    document.querySelectorAll('.char-card').forEach(c => c.classList.add('unlocked'));
+  });
+
   conn.on('data', data => {
+    if (data.type === 'hello') {
+      oppName = data.name;
+      showStatus(`Connected to: ${oppName}! Pick your character.`, "success");
+      // If we received a hello, make sure they get ours if we haven't sent it
+      if(isHost) {
+        myName = getMyName();
+        conn.send({type: 'hello', name: myName});
+        document.querySelectorAll('.char-card').forEach(c => c.classList.add('unlocked'));
+      }
+    }
     if (data.type === 'keys') { if (isHost) keys2 = data.keys; else keys1 = data.keys; }
     if (data.type === 'start') {
       p1Sel = CHARS.find(c => c.id === data.p1);
@@ -155,6 +232,14 @@ function setupDataListeners() {
       startFight();
     }
   });
+}
+
+// Enable Solo play immediately
+function pickAI() {
+  aiMode = true; onlineMode = false;
+  document.querySelectorAll('.char-card').forEach(c => c.classList.add('unlocked'));
+  document.getElementById('lobby-ui').style.display = 'none';
+  document.getElementById('select-title').innerText = "Pick your fighter to start";
 }
 
 function renderChars(){
@@ -184,8 +269,15 @@ function selectChar(c, el){
     }
     return;
   }
+  // Offline / AI selection
   if(!p1Sel){ p1Sel=c; el.classList.add('selected-p1'); } 
-  else if(!p2Sel){ p2Sel=c; el.classList.add('selected-p2'); setTimeout(startFight, 500); }
+  if(aiMode) {
+    const others = CHARS.filter(char => char.id !== p1Sel.id);
+    p2Sel = others[Math.floor(Math.random() * others.length)];
+    myName = getMyName();
+    oppName = "AI Bot";
+    startFight();
+  }
 }
 
 function sendStart() {
@@ -196,6 +288,16 @@ function sendStart() {
 function startFight(){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('arena-screen').classList.add('active');
+  
+  // Set Names on HUD
+  if(onlineMode) {
+    document.getElementById('p1-tag').innerText = isHost ? myName : oppName;
+    document.getElementById('p2-tag').innerText = isHost ? oppName : myName;
+  } else {
+    document.getElementById('p1-tag').innerText = myName;
+    document.getElementById('p2-tag').innerText = oppName;
+  }
+
   f1 = { id:'p1', x:100, y:0, vx:0, vy:0, hp:100, sp:0, w:p1Sel.w, h:p1Sel.h, color:p1Sel.color, dir:1, state:'idle', jump:false, hit:false, lastHits:0, acid:0, buff:0, parry:false };
   f2 = { id:'p2', x:500, y:0, vx:0, vy:0, hp:100, sp:0, w:p2Sel.w, h:p2Sel.h, color:p2Sel.color, dir:-1, state:'idle', jump:false, hit:false, lastHits:0, acid:0, buff:0, parry:false };
   document.getElementById('p1-b').style.backgroundColor = f1.color;
