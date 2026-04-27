@@ -2,113 +2,182 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Shadow Fight — Multiplayer</title>
 <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: #0d0d1f; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 16px 8px; overflow-x: hidden; }
-  #app { width: 100%; max-width: 680px; }
-  .version-badge { font-size: 10px; color: rgba(255,255,255,0.25); text-align: right; padding: 0 4px 6px; }
+  body { 
+    background: #05050a; 
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+    display: flex; justify-content: center; align-items: center; 
+    height: 100vh; width: 100vw; 
+    overflow: hidden; /* Prevents scroll bounce */
+    touch-action: none; 
+    overscroll-behavior: none;
+  }
+  
+  #app { width: 100%; max-width: 900px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
+  .version-badge { position: absolute; top: 10px; right: 10px; font-size: 10px; color: rgba(255,255,255,0.3); z-index: 100; }
 
   /* Screens */
-  .screen { display: none; }
+  .screen { display: none; width: 100%; padding: 10px; }
   .screen.active { display: block; }
 
-  /* IMPROVED LOBBY UI */
-  #lobby-ui { background: #1a1a2e; padding: 20px; border-radius: 12px; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.1); color: white; text-align: center; }
+  /* LOBBY UI (Kept from v0.3.2) */
+  #lobby-ui { background: #111122; padding: 20px; border-radius: 12px; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.1); color: white; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); max-width: 500px; margin: 0 auto 20px; }
   .input-group { margin-bottom: 12px; text-align: left; }
-  .input-group label { font-size: 12px; color: #888; display: block; margin-bottom: 4px; }
-  input { width: 100%; padding: 10px; background: #0d0d1f; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: #fff; font-size: 14px; outline: none; }
+  .input-group label { font-size: 12px; color: #aaa; display: block; margin-bottom: 4px; }
+  input { width: 100%; padding: 10px; background: #05050a; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: #fff; font-size: 14px; outline: none; }
   input:focus { border-color: #4f46e5; }
-  button { width: 100%; padding: 10px; background: #4f46e5; color: #fff; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 5px; }
-  button:hover { background: #6366f1; }
+  button { width: 100%; padding: 10px; background: linear-gradient(90deg, #4f46e5, #6366f1); color: #fff; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4); }
+  button:active { transform: scale(0.98); }
   
   .id-box { background: rgba(79, 70, 229, 0.1); border: 1px dashed #4f46e5; padding: 10px; border-radius: 6px; margin: 15px 0; }
-  .my-id { font-family: monospace; color: #818cf8; font-weight: bold; font-size: 18px; letter-spacing: 1px; }
+  .my-id { font-family: monospace; color: #818cf8; font-weight: bold; font-size: 20px; letter-spacing: 2px; text-shadow: 0 0 10px rgba(129, 140, 248, 0.5); }
   
   #connection-status { font-size: 14px; margin-top: 15px; padding: 10px; border-radius: 6px; display: none; font-weight: bold; }
-  .status-success { background: rgba(74, 222, 128, 0.2); color: #4ade80; border: 1px solid #4ade80; }
-  .status-error { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; }
+  .status-success { background: rgba(74, 222, 128, 0.1); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.3); }
+  .status-error { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
 
   /* CHAR SELECT */
-  .header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 20px; color: #fff; }
-  .char-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-  .char-card { background: #1a1a2e; border-radius: 10px; border: 2px solid transparent; padding: 12px; text-align: center; cursor: pointer; transition: 0.2s; opacity: 0.5; pointer-events: none; }
+  .header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px; color: #fff; max-width: 600px; margin: 0 auto 15px; }
+  .char-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 600px; margin: 0 auto; }
+  .char-card { background: #111122; border-radius: 10px; border: 2px solid rgba(255,255,255,0.05); padding: 12px; text-align: center; cursor: pointer; transition: 0.2s; opacity: 0.4; pointer-events: none; }
   .char-card.unlocked { opacity: 1; pointer-events: auto; }
-  .char-card.selected-p1 { border-color: #4f46e5; background: #1e1e3f; }
-  .char-card.selected-p2 { border-color: #ef4444; background: #3f1e1e; }
-  .char-emoji { font-size: 32px; margin-bottom: 8px; display: block; }
-  .char-name { font-size: 14px; font-weight: 600; color: #fff; display: block; }
-  .char-power { font-size: 10px; color: rgba(255,255,255,0.4); margin-top: 4px; display: block; }
+  .char-card.unlocked:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.3); }
+  .char-card.selected-p1 { border-color: #4f46e5; background: #1e1e3f; box-shadow: 0 0 15px rgba(79, 70, 229, 0.4); }
+  .char-card.selected-p2 { border-color: #ef4444; background: #3f1e1e; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
+  .char-emoji { font-size: 32px; margin-bottom: 4px; display: block; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); }
+  .char-name { font-size: 14px; font-weight: bold; color: #fff; display: block; }
+  .char-power { font-size: 10px; color: #fbbf24; margin-top: 2px; display: block; font-weight: bold; }
   
-  /* ARENA */
-  #game-container { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #16213e; border-radius: 12px; overflow: hidden; border: 2px solid #1a1a2e; }
-  #arena { width: 100%; height: 100%; background: linear-gradient(to bottom, #16213e, #0f3460); position: relative; }
-  .floor { position: absolute; bottom: 0; width: 100%; height: 20px; background: #0a0a1a; }
+  /* HIGH-DEF ARENA */
+  #arena-screen { height: 100%; display: flex; flex-direction: column; justify-content: center; padding: 0; }
+  #game-container { position: relative; width: 100%; max-width: 900px; height: 100%; max-height: 500px; background: linear-gradient(180deg, #0f172a 0%, #1e1b4b 100%); border-radius: 16px; overflow: hidden; border: 2px solid #2a2a4a; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
   
-  .hud { position: absolute; top: 0; width: 100%; padding: 12px; display: flex; justify-content: space-between; z-index: 10; }
-  .player-tag { font-size: 10px; color: rgba(255,255,255,0.8); margin-bottom: 4px; font-weight: bold; text-transform: uppercase; }
-  .hp-bar-bg { width: 45%; height: 14px; background: rgba(0,0,0,0.5); border-radius: 7px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
-  .hp-bar-fill { height: 100%; transition: width 0.2s; }
-  .hp-p1 { background: linear-gradient(90deg, #4f46e5, #818cf8); width: 100%; }
-  .hp-p2 { background: linear-gradient(90deg, #f87171, #ef4444); width: 100%; }
-  .sp-bar-bg { width: 45%; height: 6px; background: rgba(0,0,0,0.5); border-radius: 3px; margin-top: 4px; }
-  .sp-bar-fill { height: 100%; width: 0%; background: #fbbf24; transition: width 0.2s; }
+  /* 3D Floor Effect */
+  #arena { width: 100%; height: 100%; position: relative; perspective: 800px; }
+  .floor { 
+    position: absolute; bottom: -20px; width: 120%; left: -10%; height: 120px; 
+    background-color: #0c0a20;
+    background-image: 
+      linear-gradient(90deg, rgba(79, 70, 229, 0.3) 1px, transparent 1px),
+      linear-gradient(rgba(79, 70, 229, 0.3) 1px, transparent 1px);
+    background-size: 40px 40px;
+    transform: rotateX(70deg);
+    transform-origin: top;
+    border-top: 3px solid #4f46e5;
+    box-shadow: 0 -10px 30px rgba(79, 70, 229, 0.4);
+  }
+  
+  /* HUD Overlay */
+  .hud { position: absolute; top: 0; width: 100%; padding: 16px 20px; display: flex; justify-content: space-between; z-index: 10; background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, transparent 100%); }
+  .player-tag { font-size: 12px; color: #fff; margin-bottom: 6px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 2px 4px rgba(0,0,0,1); }
+  .hp-bar-bg { width: 42vw; max-width: 350px; height: 18px; background: rgba(0,0,0,0.7); border-radius: 9px; overflow: hidden; border: 2px solid rgba(255,255,255,0.2); box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+  .hp-bar-fill { height: 100%; transition: width 0.15s ease-out; }
+  .hp-p1 { background: linear-gradient(90deg, #4f46e5, #a5b4fc); box-shadow: inset 0 0 10px rgba(255,255,255,0.5); }
+  .hp-p2 { background: linear-gradient(90deg, #ef4444, #fca5a5); box-shadow: inset 0 0 10px rgba(255,255,255,0.5); }
+  .sp-bar-bg { width: 42vw; max-width: 350px; height: 8px; background: rgba(0,0,0,0.7); border-radius: 4px; margin-top: 6px; }
+  .sp-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #d97706, #fbbf24); transition: width 0.2s; box-shadow: 0 0 8px #fbbf24; }
 
-  .fighter { position: absolute; bottom: 20px; transition: transform 0.1s; }
-  .fighter-body { position: relative; width: 100%; height: 100%; border-radius: 4px; }
-  .hurt { animation: flash 0.1s; }
-  @keyframes flash { from { opacity: 0.5; } to { opacity: 1; } }
+  /* 2.5D FIGHTER MODELS */
+  .fighter { position: absolute; bottom: 30px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; transition: transform 0.05s; }
+  .fighter-head { font-size: 38px; z-index: 3; margin-bottom: -15px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.8)); transition: 0.1s; }
+  .fighter-body { 
+    position: relative; width: 100%; height: 100%; 
+    border-radius: 20px 20px 8px 8px; 
+    border: 2px solid rgba(255,255,255,0.7);
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 10px 20px rgba(0,0,0,0.6);
+    z-index: 2;
+    overflow: hidden;
+  }
+  /* Neon Core inside the body */
+  .fighter-body::after {
+    content: ''; position: absolute; top: 20%; left: 20%; width: 60%; height: 60%;
+    background: rgba(255,255,255,0.3); border-radius: 50%; filter: blur(8px);
+  }
+  
+  .hurt .fighter-body { filter: brightness(2) contrast(1.5); background-color: #fff !important; box-shadow: 0 0 30px red; border-color: red; }
+  .hurt .fighter-head { transform: scale(1.2) rotate(-10deg); filter: brightness(1.5) drop-shadow(0 0 10px red); }
+  
+  .parry-glow { box-shadow: 0 0 25px #60a5fa, inset 0 0 15px #60a5fa !important; border-color: #60a5fa !important; }
 
-  .special-label { position: absolute; top: -30px; left: 50%; transform: translateX(-50%); color: #fbbf24; font-weight: bold; font-size: 12px; white-space: nowrap; pointer-events: none; opacity: 0; transition: 0.5s; }
-  .special-label.show { opacity: 1; top: -50px; }
+  .special-label { position: absolute; top: -50px; left: 50%; transform: translateX(-50%) scale(0.5); color: #fbbf24; font-weight: 900; font-size: 16px; white-space: nowrap; pointer-events: none; opacity: 0; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-shadow: 0 4px 10px rgba(0,0,0,0.8); z-index: 20; }
+  .special-label.show { opacity: 1; transform: translateX(-50%) scale(1.2); top: -70px; }
 
-  /* MOBILE CONTROLS */
-  #mobile-controls { display: none; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 15px; }
-  .d-pad, .action-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
-  .touch-btn { background: #1a1a2e; border: 1px solid rgba(255,255,255,0.1); color: #fff; height: 50px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; user-select: none; }
-  .touch-btn.pressed { background: #334155; transform: scale(0.95); }
-  .btn-sp { border-color: #fbbf24; color: #fbbf24; }
+  /* PC CONTROLS HUD */
+  #pc-controls { position: absolute; bottom: 10px; width: 100%; text-align: center; color: rgba(255,255,255,0.4); font-size: 12px; font-weight: bold; letter-spacing: 1px; z-index: 5; pointer-events: none; }
+  #pc-controls span { background: rgba(0,0,0,0.5); padding: 4px 8px; border-radius: 4px; margin: 0 4px; }
 
-  @media (max-width: 600px) { #mobile-controls { display: grid; } }
+  /* OVERLAY MOBILE CONTROLS (Landscape Optimized) */
+  #mobile-controls { 
+    position: absolute; bottom: 15px; width: 100%; height: 120px;
+    display: none; justify-content: space-between; padding: 0 15px; 
+    z-index: 50; pointer-events: none; /* Allows canvas touching */
+  }
+  .d-pad, .action-pad { 
+    pointer-events: auto; display: grid; gap: 8px;
+    grid-template-columns: 60px 60px 60px; grid-template-rows: 60px 60px;
+  }
+  
+  /* D-Pad positioning */
+  #btn-up { grid-column: 2; grid-row: 1; }
+  #btn-left { grid-column: 1; grid-row: 2; }
+  #btn-right { grid-column: 3; grid-row: 2; }
+  
+  /* Action Pad positioning */
+  #btn-sp { grid-column: 2; grid-row: 1; }
+  #btn-punch { grid-column: 1; grid-row: 2; }
+  #btn-kick { grid-column: 3; grid-row: 2; }
+
+  .touch-btn { 
+    background: rgba(15, 23, 42, 0.6); border: 2px solid rgba(255,255,255,0.15); 
+    color: #fff; border-radius: 50%; font-weight: 900; font-size: 20px;
+    display: flex; align-items: center; justify-content: center; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+    transition: 0.1s; user-select: none; -webkit-touch-callout: none;
+  }
+  .touch-btn.pressed { background: rgba(255,255,255,0.3); transform: scale(0.9); box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
+  .btn-sp { border-color: rgba(251, 191, 36, 0.5); color: #fbbf24; font-size: 24px; text-shadow: 0 0 8px rgba(251, 191, 36, 0.8); }
+  
+  #quit-btn { position: absolute; top: 10px; right: 10px; z-index: 100; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 5px 10px; border-radius: 4px; font-size: 10px; cursor: pointer; display: none; }
+
 </style>
 </head>
 <body>
 
 <div id="app">
-  <div class="version-badge">v0.3.2 (Lobby Update)</div>
+  <div class="version-badge">v0.3.3 (Graphics & Mobile Patch)</div>
 
   <div id="select-screen" class="screen active">
-    
     <div id="lobby-ui">
       <div class="input-group">
-        <label>Step 1: What is your name?</label>
+        <label>Step 1: Enter your tag</label>
         <input type="text" id="player-name" placeholder="e.g. Parv" maxlength="12">
       </div>
-      
       <div class="id-box">
-        <div class="id-label">Your Session ID (Give to friend):</div>
+        <div class="id-label">Your Session ID (Host):</div>
         <div class="my-id" id="my-peer-id">Generating...</div>
       </div>
-      
       <div class="input-group" style="margin-top: 15px;">
-        <label>Step 2: Join a friend (Leave blank if you are hosting)</label>
+        <label>Step 2: Join a friend (Leave blank to Host)</label>
         <input type="text" id="join-id" placeholder="Paste Session ID here" style="text-transform: uppercase;">
-        <button onclick="connectToFriend()">Connect</button>
+        <button onclick="connectToFriend()">Connect via P2P</button>
       </div>
-      
       <div id="connection-status"></div>
     </div>
 
     <div class="header">
       <h2 id="select-title">Choose Your Fighter</h2>
-      <button onclick="pickAI()" style="width:auto; padding:6px 12px; font-size:12px; background:rgba(255,255,255,0.1); margin-top:0;">Play Solo (vs AI)</button>
+      <button onclick="pickAI()" style="width:auto; padding:8px 16px; background:rgba(255,255,255,0.1); box-shadow:none;">Play Solo vs AI</button>
     </div>
     <div class="char-grid" id="char-list"></div>
   </div>
 
   <div id="arena-screen" class="screen">
+    <button id="quit-btn" onclick="location.reload()">EXIT</button>
+    
     <div id="game-container">
       <div class="hud">
         <div style="width: 45%;">
@@ -122,31 +191,54 @@
           <div class="sp-bar-bg" style="margin-left:auto;"><div id="sp-2" class="sp-bar-fill"></div></div>
         </div>
       </div>
+      
       <div id="arena">
-        <div id="p1" class="fighter"><div class="fighter-body" id="p1-b"></div><div class="special-label" id="p1-label">SPECIAL!</div></div>
-        <div id="p2" class="fighter"><div class="fighter-body" id="p2-b"></div><div class="special-label" id="p2-label">SPECIAL!</div></div>
         <div class="floor"></div>
+        
+        <div id="pc-controls">
+          <span>[A][D] Move</span> <span>[W] Jump</span> <span>[J] Punch</span> <span>[K] Kick</span> <span>[L] Special</span>
+        </div>
+
+        <div id="p1" class="fighter">
+          <div class="special-label" id="p1-label">SPECIAL!</div>
+          <div class="fighter-head" id="p1-h">👤</div>
+          <div class="fighter-body" id="p1-b"></div>
+        </div>
+        <div id="p2" class="fighter">
+          <div class="special-label" id="p2-label">SPECIAL!</div>
+          <div class="fighter-head" id="p2-h">👤</div>
+          <div class="fighter-body" id="p2-b"></div>
+        </div>
       </div>
+
+      <div id="mobile-controls">
+        <div class="d-pad">
+          <div class="touch-btn" id="btn-up">↑</div>
+          <div class="touch-btn" id="btn-left">←</div>
+          <div class="touch-btn" id="btn-right">→</div>
+        </div>
+        <div class="action-pad">
+          <div class="touch-btn btn-sp" id="btn-sp">★</div>
+          <div class="touch-btn" id="btn-punch">P</div>
+          <div class="touch-btn" id="btn-kick">K</div>
+        </div>
+      </div>
+      
     </div>
-    <div id="mobile-controls">
-      <div class="d-pad"><div class="touch-btn" id="tb-left">←</div><div class="touch-btn" id="tb-jump">↑</div><div class="touch-btn" id="tb-right">→</div></div>
-      <div class="action-pad"><div class="touch-btn" id="tb-punch">P</div><div class="touch-btn" id="tb-kick">K</div><div class="touch-btn btn-sp" id="tb-sp">S</div></div>
-    </div>
-    <button onclick="location.reload()" style="margin-top:20px; background:transparent; border:1px solid rgba(255,255,255,0.1); color:#888;">Disconnect & Exit</button>
   </div>
 </div>
 
 <script>
 const CHARS = [
-  { id:'karthik', name:'Karthik', emoji:'⚡', power:'67 Burst', color:'#4f46e5', h:70, w:45 },
-  { id:'andi', name:'Andi', emoji:'🤢', power:'Hulk Out', color:'#22c55e', h:70, w:45 },
-  { id:'jz', name:'JZ', emoji:'🎧', power:'Rhythm Dash', color:'#ec4899', h:70, w:45 },
-  { id:'dexter', name:'Dexter', emoji:'🧪', power:'Acid Spit', color:'#a855f7', h:70, w:45 },
-  { id:'yiliang', name:'Yi Liang', emoji:'💨', power:'Smoke Vanish', color:'#94a3b8', h:70, w:45 },
-  { id:'sherman', name:'Sherman', emoji:'🍺', power:'Drunken Sip', color:'#f59e0b', h:70, w:45 },
-  { id:'parveer', name:'Parveer', emoji:'🥁', power:'Dhol Wave', color:'#ea580c', h:70, w:45 },
-  { id:'hari', name:'Hari', emoji:'😴', power:'Sleepwalk', color:'#60a5fa', h:70, w:45 },
-  { id:'jerell', name:'Jerell', emoji:'🤓', power:'IQ Strike', color:'#ffffff', h:70, w:45 }
+  { id:'karthik', name:'Karthik', emoji:'⚡', power:'67 Burst', color:'#4f46e5', h:60, w:45 },
+  { id:'andi', name:'Andi', emoji:'🤢', power:'Hulk Out', color:'#22c55e', h:60, w:45 },
+  { id:'jz', name:'JZ', emoji:'🎧', power:'Rhythm Dash', color:'#ec4899', h:60, w:45 },
+  { id:'dexter', name:'Dexter', emoji:'🧪', power:'Acid Spit', color:'#a855f7', h:60, w:45 },
+  { id:'yiliang', name:'Yi Liang', emoji:'💨', power:'Smoke Vanish', color:'#94a3b8', h:60, w:45 },
+  { id:'sherman', name:'Sherman', emoji:'🍺', power:'Drunken Sip', color:'#f59e0b', h:60, w:45 },
+  { id:'parveer', name:'Parveer', emoji:'🥁', power:'Dhol Wave', color:'#ea580c', h:60, w:45 },
+  { id:'hari', name:'Hari', emoji:'😴', power:'Sleepwalk', color:'#60a5fa', h:60, w:45 },
+  { id:'jerell', name:'Jerell', emoji:'🤓', power:'IQ Strike', color:'#ffffff', h:60, w:45 }
 ];
 
 let peer, conn, myPeerId, isHost = false, onlineMode = false;
@@ -154,7 +246,16 @@ let myName = "Player", oppName = "Opponent";
 let p1Sel=null, p2Sel=null, aiMode=false, f1, f2;
 let keys1 = {}, keys2 = {}, keys = {};
 
+// Mobile UI Detection
+function checkMobileUI() {
+  if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+    document.getElementById('mobile-controls').style.display = 'flex';
+    document.getElementById('pc-controls').style.display = 'none';
+  }
+}
+
 window.onload = () => {
+  checkMobileUI();
   const randomId = Math.floor(100 + Math.random() * 900);
   myPeerId = `SF-${randomId}`;
   peer = new Peer(myPeerId);
@@ -170,18 +271,14 @@ window.onload = () => {
   peer.on('error', err => {
     if(err.type === 'peer-unavailable') {
       showStatus("Error: Session ID not found.", "error");
-    } else {
-      showStatus("Connection error.", "error");
-    }
+    } else { showStatus("Connection error.", "error"); }
   });
-
   renderChars();
 };
 
 function showStatus(text, type) {
   const el = document.getElementById('connection-status');
-  el.style.display = 'block';
-  el.innerText = text;
+  el.style.display = 'block'; el.innerText = text;
   el.className = type === "error" ? "status-error" : "status-success";
 }
 
@@ -192,10 +289,7 @@ function getMyName() {
 
 function connectToFriend() {
   const friendId = document.getElementById('join-id').value.toUpperCase().trim();
-  if(!friendId) {
-    showStatus("Please enter an ID to join.", "error");
-    return;
-  }
+  if(!friendId) { showStatus("Please enter an ID to join.", "error"); return; }
   showStatus("Searching for session...", "success");
   conn = peer.connect(friendId);
   isHost = false; onlineMode = true;
@@ -219,11 +313,10 @@ function setupDataListeners() {
         document.querySelectorAll('.char-card').forEach(c => c.classList.add('unlocked'));
       }
     }
-    // THE FIX: Listen for the Joiner saying they are ready
     if (data.type === 'ready') {
       p2Sel = CHARS.find(c => c.id === data.p2);
       showStatus(`${oppName} is ready!`, "success");
-      if(p1Sel) sendStart(); // If Host also picked, start!
+      if(p1Sel) sendStart();
     }
     if (data.type === 'keys') { if (isHost) keys2 = data.keys; else keys1 = data.keys; }
     if (data.type === 'start') {
@@ -273,20 +366,17 @@ function selectChar(c, el){
   if(aiMode) {
     const others = CHARS.filter(char => char.id !== p1Sel.id);
     p2Sel = others[Math.floor(Math.random() * others.length)];
-    myName = getMyName();
-    oppName = "AI Bot";
+    myName = getMyName(); oppName = "AI Bot";
     startFight();
   }
 }
 
-function sendStart() {
-  conn.send({type:'start', p1: p1Sel.id, p2: p2Sel.id});
-  startFight();
-}
+function sendStart() { conn.send({type:'start', p1: p1Sel.id, p2: p2Sel.id}); startFight(); }
 
 function startFight(){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('arena-screen').classList.add('active');
+  document.getElementById('quit-btn').style.display = 'block';
   
   if(onlineMode) {
     document.getElementById('p1-tag').innerText = isHost ? myName : oppName;
@@ -296,10 +386,20 @@ function startFight(){
     document.getElementById('p2-tag').innerText = oppName;
   }
 
-  f1 = { id:'p1', x:100, y:0, vx:0, vy:0, hp:100, sp:0, w:p1Sel.w, h:p1Sel.h, color:p1Sel.color, dir:1, state:'idle', jump:false, hit:false, lastHits:0, acid:0, buff:0, parry:false };
-  f2 = { id:'p2', x:500, y:0, vx:0, vy:0, hp:100, sp:0, w:p2Sel.w, h:p2Sel.h, color:p2Sel.color, dir:-1, state:'idle', jump:false, hit:false, lastHits:0, acid:0, buff:0, parry:false };
-  document.getElementById('p1-b').style.backgroundColor = f1.color;
-  document.getElementById('p2-b').style.backgroundColor = f2.color;
+  // Setup Graphical Models
+  document.getElementById('p1-h').innerText = p1Sel.emoji;
+  document.getElementById('p2-h').innerText = p2Sel.emoji;
+  document.getElementById('p1-b').style.backgroundColor = p1Sel.color;
+  document.getElementById('p2-b').style.backgroundColor = p2Sel.color;
+  document.getElementById('p1-b').style.boxShadow = `inset 0 0 20px rgba(0,0,0,0.5), 0 0 20px ${p1Sel.color}`;
+  document.getElementById('p2-b').style.boxShadow = `inset 0 0 20px rgba(0,0,0,0.5), 0 0 20px ${p2Sel.color}`;
+
+  // Get arena width for boundaries
+  const arenaWidth = document.getElementById('game-container').offsetWidth;
+
+  f1 = { id:'p1', x:50, y:0, vx:0, vy:0, hp:100, sp:0, w:p1Sel.w, h:p1Sel.h, color:p1Sel.color, dir:1, state:'idle', jump:false, hit:false, lastHits:0, acid:0, buff:0, parry:false, maxW: arenaWidth };
+  f2 = { id:'p2', x:arenaWidth - 100, y:0, vx:0, vy:0, hp:100, sp:0, w:p2Sel.w, h:p2Sel.h, color:p2Sel.color, dir:-1, state:'idle', jump:false, hit:false, lastHits:0, acid:0, buff:0, parry:false, maxW: arenaWidth };
+  
   requestAnimationFrame(gameLoop);
 }
 
@@ -314,21 +414,31 @@ function gameLoop(){
   if(aiMode) doAI();
   draw();
   if(f1.hp > 0 && f2.hp > 0) requestAnimationFrame(gameLoop);
+  else {
+    const winner = f1.hp <= 0 ? document.getElementById('p2-tag').innerText : document.getElementById('p1-tag').innerText;
+    setTimeout(() => { alert(`${winner} WINS!`); location.reload(); }, 500);
+  }
 }
 
 function updateFighter(f, opp, k){
-  if(k['a']) f.vx = -4; else if(k['d']) f.vx = 4; else f.vx *= 0.8;
-  if(k['w'] && !f.jump) { f.vy = -12; f.jump = true; }
-  f.x += f.vx; f.y += f.vy; f.vy += 0.6;
+  if(k['a']) f.vx = -5; else if(k['d']) f.vx = 5; else f.vx *= 0.8;
+  if(k['w'] && !f.jump) { f.vy = -14; f.jump = true; }
+  f.x += f.vx; f.y += f.vy; f.vy += 0.8;
   if(f.y >= 0){ f.y=0; f.vy=0; f.jump=false; }
-  if(f.x < 0) f.x=0; if(f.x > 630) f.x=630;
+  
+  // Dynamic boundaries based on screen size
+  if(f.x < 0) f.x=0; 
+  if(f.x > f.maxW - f.w) f.x = f.maxW - f.w;
+  
   f.dir = (f.x < opp.x) ? 1 : -1;
-  if(k['j']) attack(f, opp, 5, 20);
-  if(k['k']) attack(f, opp, 8, 30);
+  
+  if(k['j']) attack(f, opp, 6, 25);
+  if(k['k']) attack(f, opp, 9, 35);
   if(k['l'] && f.sp >= 100) doSpecial(f, opp);
+  
   if(f.acid > 0 && Math.random() < 0.05) { f.hp -= 1; f.acid--; }
   if(f.buff > 0) f.buff--; else { f.w = (f.id==='p1'?p1Sel:p2Sel).w; f.h = (f.id==='p1'?p1Sel:p2Sel).h; }
-  f.sp = Math.min(100, f.sp + 0.1);
+  f.sp = Math.min(100, f.sp + 0.15);
 }
 
 function attack(f, opp, dmg, range){
@@ -336,8 +446,8 @@ function attack(f, opp, dmg, range){
   const dist = Math.abs((f.x + f.w/2) - (opp.x + opp.w/2));
   if(dist < range + f.w/2 + opp.w/2){
     if(opp.parry){ f.hp -= 10; opp.parry=false; return;}
-    let finalDmg = dmg * (f.buff > 0 ? 1.6 : 1);
-    opp.hp -= finalDmg; opp.vx = f.dir * 5;
+    let finalDmg = dmg * (f.buff > 0 ? 1.5 : 1);
+    opp.hp -= finalDmg; opp.vx = f.dir * 8;
   }
 }
 
@@ -346,15 +456,15 @@ function doSpecial(f, opp){
   f.sp = 0;
   showLabel(f.id, "SPECIAL: " + char.toUpperCase() + "!");
   switch(char){
-    case 'andi': f.buff = 240; f.w=60; f.h=90; break;
-    case 'jz': let i=0; let itv = setInterval(()=>{ f.x += f.dir * 40; attack(f, opp, 10, 40); if(++i > 3) clearInterval(itv); }, 100); break;
+    case 'andi': f.buff = 240; f.w=65; f.h=80; break;
+    case 'jz': let i=0; let itv = setInterval(()=>{ f.x += f.dir * 45; attack(f, opp, 10, 40); if(++i > 3) clearInterval(itv); }, 100); break;
     case 'dexter': opp.acid = 200; break;
-    case 'yiliang': f.x = opp.x - (f.dir * 40); setTimeout(()=>attack(f,opp,15,50), 100); break;
+    case 'yiliang': f.x = opp.x - (f.dir * 50); setTimeout(()=>attack(f,opp,15,50), 100); break;
     case 'sherman': f.hp = Math.min(100, f.hp+20); attack(f, opp, 15, 40); break;
-    case 'parveer': opp.hp -= 22; opp.vx = f.dir * 25; break;
+    case 'parveer': opp.hp -= 22; opp.vx = f.dir * 30; break;
     case 'hari': f.parry = true; setTimeout(()=>f.parry=false, 2000); break;
     case 'jerell': let j=0; let jitv = setInterval(()=>{ attack(f, opp, 12, 40); if(++j > 3) clearInterval(jitv); }, 150); break;
-    case 'karthik': opp.hp -= 15; opp.vx = f.dir * 10; break;
+    case 'karthik': opp.hp -= 15; opp.vx = f.dir * 12; break;
   }
 }
 
@@ -366,13 +476,21 @@ function showLabel(pid, txt){
 
 function draw(){
   const updateF = (f, el) => {
+    // Math logic for placement relative to the screen width
     el.style.transform = `translate(${f.x}px, ${f.y}px)`;
     const b = el.querySelector('.fighter-body');
     b.style.width = f.w + 'px'; b.style.height = f.h + 'px';
-    if(f.hit) b.classList.add('hurt'); else b.classList.remove('hurt');
+    
+    // Direction facing
+    el.querySelector('.fighter-head').style.transform = `scaleX(${f.dir})`;
+    
+    // Status visual effects
+    if(f.hit) el.classList.add('hurt'); else el.classList.remove('hurt');
+    if(f.parry) b.classList.add('parry-glow'); else b.classList.remove('parry-glow');
   };
   updateF(f1, document.getElementById('p1'));
   updateF(f2, document.getElementById('p2'));
+  
   document.getElementById('hp-1').style.width = f1.hp + '%';
   document.getElementById('hp-2').style.width = f2.hp + '%';
   document.getElementById('sp-1').style.width = f1.sp + '%';
@@ -381,21 +499,23 @@ function draw(){
 
 function doAI(){
   const dist = Math.abs(f1.x - f2.x);
-  if (dist > 60) { keys2['a'] = f2.x > f1.x; keys2['d'] = f2.x < f1.x; } 
-  else { keys2['a'] = false; keys2['d'] = false; keys2['j'] = Math.random() < 0.1; }
+  if (dist > 70) { keys2['a'] = f2.x > f1.x; keys2['d'] = f2.x < f1.x; } 
+  else { keys2['a'] = false; keys2['d'] = false; keys2['j'] = Math.random() < 0.15; }
   if(f2.sp >= 100) keys2['l'] = true; else keys2['l'] = false;
 }
 
+// Keyboard Listeners
 document.addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; });
 document.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
 
+// Mobile Touch Listeners (preventing default avoids screen scrolling/zooming)
 function bindTouch(id, k) {
   const btn = document.getElementById(id);
-  btn.addEventListener('touchstart', e => { e.preventDefault(); keys[k] = true; btn.classList.add('pressed'); });
-  btn.addEventListener('touchend', e => { e.preventDefault(); keys[k] = false; btn.classList.remove('pressed'); });
+  btn.addEventListener('touchstart', e => { e.preventDefault(); keys[k] = true; btn.classList.add('pressed'); }, {passive: false});
+  btn.addEventListener('touchend', e => { e.preventDefault(); keys[k] = false; btn.classList.remove('pressed'); }, {passive: false});
 }
-bindTouch('tb-left', 'a'); bindTouch('tb-right', 'd'); bindTouch('tb-jump', 'w');
-bindTouch('tb-punch', 'j'); bindTouch('tb-kick', 'k'); bindTouch('tb-sp', 'l');
+bindTouch('btn-left', 'a'); bindTouch('btn-right', 'd'); bindTouch('btn-up', 'w');
+bindTouch('btn-punch', 'j'); bindTouch('btn-kick', 'k'); bindTouch('btn-sp', 'l');
 </script>
 </body>
 </html>
