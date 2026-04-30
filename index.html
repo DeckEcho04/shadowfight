@@ -52,18 +52,16 @@
   @keyframes shakeHeavy { 0%{transform:translate(15px,10px) rotate(2deg);} 25%{transform:translate(-15px,-12px) rotate(-2deg);} 50%{transform:translate(-20px,5px) rotate(1deg);} 75%{transform:translate(15px,15px) rotate(0deg);} 100%{transform:translate(0,0);} }
   .shake-anim-heavy { animation: shakeHeavy 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
 
-  /* VIVID LAYERED BACKGROUNDS */
+  /* ARENA & VIVID BACKGROUNDS */
   #game-container { position: relative; width: 100%; flex: 1; overflow: hidden; display: flex; flex-direction: column; max-height: 800px; background-size: cover; background-position: center bottom; }
-  
-  .map-alley { background: linear-gradient(to top, #0f172a 0%, transparent 30%), linear-gradient(to right, transparent 10%, #020205 10%, #020205 25%, transparent 25%, transparent 40%, #05050a 40%, #05050a 50%, transparent 50%, transparent 75%, #020205 75%, #020205 90%, transparent 90%), radial-gradient(circle at 50% 30%, #312e81 0%, transparent 70%), #05050a !important; }
-  .map-dojo { background: linear-gradient(to top, #000 0%, #2a0800 25%, transparent 25%), radial-gradient(circle at 50% 60%, #ef4444 20%, transparent 21%), linear-gradient(180deg, #7c2d12 0%, #b45309 100%) !important; }
-  .map-mamak { background: linear-gradient(to top, #166534 0%, #4ade80 20%, transparent 20%), linear-gradient(to right, transparent 5%, #171717 5%, #171717 25%, transparent 25%, transparent 45%, #262626 45%, #262626 65%, transparent 65%, transparent 80%, #171717 80%, #171717 95%, transparent 95%), radial-gradient(circle at 75% 30%, #fde047 12%, transparent 13%), linear-gradient(180deg, #38bdf8 0%, #7dd3fc 100%) !important; }
-
   #arena { position: absolute; width: 100%; height: 100%; perspective: 1000px; }
+  
+  .bg-sun { position: absolute; border-radius: 50%; display: none; z-index: 1;}
+  .bg-horizon { position: absolute; bottom: 35%; width: 100%; height: 20%; display: none; z-index: 2;}
+  
   #scroll-world { position: absolute; width: 10000px; height: 100%; top: 0; left: 0; transform-origin: left; z-index: 5;}
   .floor { position: absolute; bottom: 0; width: 100%; height: 40%; transform: rotateX(75deg); transform-origin: top; box-shadow: 0 -30px 60px rgba(0,0,0,0.9); }
   
-  /* PARKOUR PITS */
   #pits-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 6; pointer-events: none;}
   .pit { position: absolute; bottom: 0; height: 40%; background: #000; z-index: 6; border-top: 10px solid #05050a; box-shadow: inset 0 30px 30px rgba(0,0,0,1); }
   .finish-line { position: absolute; bottom: 40%; width: 30px; height: 300px; background: repeating-linear-gradient(45deg, #fff, #fff 15px, #000 15px, #000 30px); z-index: 10; box-shadow: 0 0 20px rgba(255,255,255,0.5);}
@@ -76,7 +74,7 @@
   .vfx-smoke { width: 180px; height: 180px; background: radial-gradient(circle, rgba(148,163,184,1) 0%, rgba(245, 158, 11,0.8) 40%, transparent 70%); border-radius: 50%; opacity: 1; animation: smokePoof 0.8s ease-out forwards; filter: blur(10px); mix-blend-mode: screen; }
   @keyframes smokePoof { 0% { transform: translate(var(--vx), var(--vy)) scale(0.2); opacity: 1; } 100% { transform: translate(var(--vx), var(--vy)) scale(2.5); opacity: 0; } }
   .vfx-crosshair { width: 80px; height: 80px; border: 6px solid #dc2626; border-radius: 50%; opacity: 0; animation: lockOn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; box-shadow: 0 0 15px #dc2626, inset 0 0 15px #dc2626;}
-  .vfx-crosshair::before, .vfx-crosshair::after { content: ''; position: absolute; background: #dc2626; box-shadow: 0 0 8px #dc2626;}
+  .vfx-crosshair::before, .vfx-crosshair::after { content: absolute; background: #dc2626; box-shadow: 0 0 8px #dc2626;}
   .vfx-crosshair::before { top: 50%; left: -20px; right: -20px; height: 6px; margin-top: -3px; }
   .vfx-crosshair::after { left: 50%; top: -20px; bottom: -20px; width: 6px; margin-left: -3px; }
   @keyframes lockOn { 0% { transform: translate(var(--vx), var(--vy)) scale(4) rotate(90deg); opacity: 0; } 100% { transform: translate(var(--vx), var(--vy)) scale(1) rotate(0deg); opacity: 1; } }
@@ -164,7 +162,7 @@
 <body>
 
 <div id="app">
-  <div class="version-badge">v1.0.0 (The Online WebRTC Return)</div>
+  <div class="version-badge">v1.1.0 (Relay Fallback & Local Co-Op)</div>
 
   <!-- SELECT SCREEN -->
   <div id="select-screen" class="screen active">
@@ -183,20 +181,21 @@
           </select><br>
           <label style="font-size:10px; color:#aaa; font-weight:bold; text-transform:uppercase;">Mode:</label><br>
           <select id="mode-select" style="padding:8px; font-size:12px;">
-            <option value="1v1">1v1 Street Fight</option>
-            <option value="parkour">Parkour Race (5 Stages)</option>
+            <option value="1v1">1v1 Online Fight</option>
+            <option value="parkour">Parkour Race (Online)</option>
+            <option value="local">Local 1v1 (Shared Keyboard)</option>
           </select>
         </div>
       </div>
 
-      <div class="lobby-row">
+      <div class="lobby-row" id="nickname-row">
         <div class="input-group" style="flex:2;">
           <label>1. Your Nickname (Required)</label>
           <input type="text" id="player-name" placeholder="e.g. Parv" maxlength="12">
         </div>
       </div>
 
-      <div class="lobby-row" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+      <div class="lobby-row" id="join-row" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
         <div class="input-group" style="flex:2;">
           <label>2. Join a Friend (Leave blank to host)</label>
           <input type="text" id="join-id" placeholder="Paste 5-Letter ID" style="text-transform: uppercase;" maxlength="5">
@@ -209,6 +208,7 @@
     <div class="header">
       <h2>Choose Fighter</h2>
       <button id="ai-btn" onclick="pickAI()" style="width:auto; padding:10px 16px; background:rgba(255,255,255,0.1); box-shadow:none;">Solo vs AI</button>
+      <button id="start-local-btn" onclick="startLocalMatch()" style="display:none; width:auto; padding:10px 16px; background:linear-gradient(135deg, #4f46e5, #6366f1); box-shadow:none;">Start Local Match</button>
     </div>
     <div class="char-grid locked" id="char-list" onclick="checkNameLock()"></div>
   </div>
@@ -287,7 +287,6 @@ const MAPS = {
   mamak: { floor: '#262626', grid: '#facc15' }
 };
 
-// PARKOUR RACE STAGES
 const STAGES = [
   { w: 2000, pits: [[500, 150], [1000, 150], [1500, 180]] }, 
   { w: 2500, pits: [[400, 150], [800, 150], [1300, 180], [1900, 200]] }, 
@@ -296,7 +295,18 @@ const STAGES = [
   { w: 4000, pits: [[700, 250], [1400, 250], [2100, 280], [2800, 250], [3400, 200]] }  
 ];
 
-const peerConfig = { config: { 'iceServers': [ { urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' } ] } };
+// Added RELAY TURN servers for heavy firewall penetration
+const peerConfig = { 
+    config: { 
+        'iceServers': [ 
+            { urls: 'stun:stun.l.google.com:19302' }, 
+            { urls: 'stun:stun1.l.google.com:19302' },
+            // Public relay fallback (can be slow but pierces NAT)
+            { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+            { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }
+        ] 
+    } 
+};
 
 let peer, conn, myPeerId, isHost = true, onlineMode = false;
 let myName = "", oppName = "Opponent";
@@ -305,6 +315,7 @@ let p1Sel=null, p2Sel=null, f1, f2;
 let keys1 = {}, keys2 = {}, keys = {}; 
 let activeMode = '1v1', activeMap = 'alley';
 let soloParkour = false;
+let isLocalMultiplayer = false;
 let hitStopFrames = 0;
 let isGameOver = false;
 let connTimeout; 
@@ -319,11 +330,28 @@ document.getElementById('player-name').addEventListener('input', (e) => {
   else document.getElementById('char-list').classList.add('locked');
 });
 
-// Dynamic Button Text based on Mode Selection
+// UI TOGGLES FOR MODES
 document.getElementById('mode-select').addEventListener('change', (e) => {
     const btn = document.getElementById('ai-btn');
-    if(e.target.value === 'parkour') btn.innerText = "Parkour Solo";
-    else btn.innerText = "Solo vs AI";
+    const localBtn = document.getElementById('start-local-btn');
+    const joinRow = document.getElementById('join-row');
+    const idRow = document.getElementById('host-panel');
+
+    if(e.target.value === 'local') {
+        btn.style.display = 'none';
+        joinRow.style.display = 'none';
+        idRow.style.display = 'none';
+        localBtn.style.display = 'block';
+        document.getElementById('char-list').classList.remove('locked'); // Unlocked immediately for local
+    } else {
+        btn.style.display = 'block';
+        joinRow.style.display = 'flex';
+        idRow.style.display = 'flex';
+        localBtn.style.display = 'none';
+        document.getElementById('char-list').classList.add('locked');
+        if(e.target.value === 'parkour') btn.innerText = "Parkour Solo";
+        else btn.innerText = "Solo vs AI";
+    }
 });
 
 function checkNameLock() { if(document.getElementById('char-list').classList.contains('locked')) alert("Please type your Nickname first!"); }
@@ -339,7 +367,7 @@ window.onload = () => {
   peer.on('open', id => { document.getElementById('my-peer-id').innerText = id; });
   peer.on('connection', c => { 
     if(conn && conn.open) conn.close(); 
-    conn = c; isHost = true; onlineMode = true; 
+    conn = c; isHost = true; onlineMode = true; isLocalMultiplayer = false;
     p1Score = 0; p2Score = 0; updateScoreboard(); 
     setupDataListeners(); showStatus("Opponent Connected!", "success"); 
   });
@@ -364,10 +392,12 @@ function connectToFriend() {
   if(peer) peer.destroy(); peer = new Peer(peerConfig); 
   showStatus("Initiating Handshake...", "success");
   peer.on('open', () => {
-    showStatus("Routing Connection...", "success");
+    showStatus("Routing via Relay...", "success");
     conn = peer.connect(friendId);
-    isHost = false; onlineMode = true; p1Score = 0; p2Score = 0; updateScoreboard();
-    connTimeout = setTimeout(() => { if(conn && !conn.open) { showStatus("Firewall blocked connection. Try hosting instead.", "error"); peer.destroy(); } }, 12000);
+    isHost = false; onlineMode = true; isLocalMultiplayer = false; p1Score = 0; p2Score = 0; updateScoreboard();
+    
+    // Increased timeout for Relay fallback
+    connTimeout = setTimeout(() => { if(conn && !conn.open) { showStatus("Firewall blocked connection. Try playing Local.", "error"); peer.destroy(); } }, 15000);
     setupDataListeners();
   });
   peer.on('error', err => showStatus("Session not found. Try again.", "error"));
@@ -413,7 +443,14 @@ function renderChars(){
   CHARS.forEach(c=>{
     const div = document.createElement('div'); div.className = 'char-card';
     div.innerHTML = `<div class="char-icon" style="background-color:${c.suit}"><svg viewBox="0 0 24 24">${c.icon}</svg></div><span class="char-name">${c.name}</span><span class="char-power" style="color:${c.acc}">${c.power}</span>`;
-    div.onclick = () => { if(!grid.classList.contains('locked')) selectChar(c, div); }
+    
+    div.onclick = () => { 
+        if(document.getElementById('mode-select').value === 'local') {
+            selectCharLocal(c, div);
+        } else {
+            if(!grid.classList.contains('locked')) selectChar(c, div); 
+        }
+    }
     grid.appendChild(div);
   });
 }
@@ -433,14 +470,48 @@ function selectChar(c, el){
   }
 }
 
+// LOCAL MULTIPLAYER LOGIC
+function selectCharLocal(c, el) {
+    if(!p1Sel) {
+        p1Sel = c;
+        el.classList.add('selected-p1');
+        document.getElementById('pc-controls').innerText = "Player 1 Selected. Player 2, pick your fighter.";
+    } else if(!p2Sel) {
+        p2Sel = c;
+        el.classList.add('selected-p2');
+        document.getElementById('pc-controls').innerText = "[P1: W A S D / P2: Arrows] - Click Start Local Match";
+    } else {
+        // Reset selection
+        p1Sel = c; p2Sel = null;
+        document.querySelectorAll('.char-card').forEach(x=>x.classList.remove('selected-p1', 'selected-p2'));
+        el.classList.add('selected-p1');
+    }
+}
+
+function startLocalMatch() {
+    if(!p1Sel || !p2Sel) { alert("Both players must select a fighter!"); return; }
+    isLocalMultiplayer = true;
+    onlineMode = false;
+    isHost = true;
+    aiMode = false;
+    soloParkour = false;
+    myName = "Player 1";
+    oppName = "Player 2";
+    p1Score = 0; p2Score = 0; updateScoreboard();
+    
+    document.getElementById('pc-controls').innerHTML = "<b>P1:</b> [W A S D] Move | [V] Block | [B] Punch | [N] Kick | [M] Special<br><b>P2:</b> [ARROWS] Move | [Num1] Block | [Num2] Punch | [Num3] Kick | [Num0] Special";
+    
+    activeMap = document.getElementById('map-select').value; 
+    activeMode = '1v1'; // Force 1v1 for local
+    startFight();
+}
+
+
 function pickAI() {
   if(!checkName()) return;
-  
   activeMode = document.getElementById('mode-select').value;
-  if(activeMode === 'parkour') { soloParkour = true; aiMode = false; }
-  else { soloParkour = false; aiMode = true; }
-
-  onlineMode = false; isHost = true; p1Score = 0; p2Score = 0; updateScoreboard();
+  if(activeMode === 'parkour') { soloParkour = true; aiMode = false; } else { soloParkour = false; aiMode = true; }
+  onlineMode = false; isHost = true; isLocalMultiplayer = false; p1Score = 0; p2Score = 0; updateScoreboard();
   document.getElementById('char-list').classList.remove('locked');
   document.querySelectorAll('.char-card').forEach(c => c.classList.add('unlocked'));
   document.getElementById('lobby-ui').style.display = 'none';
@@ -620,7 +691,12 @@ function gameLoop(timestamp){
       if(!isGameOver) {
           if(hitStopFrames > 0) { hitStopFrames--; return; } 
 
-          if(onlineMode && conn && conn.open) {
+          if(isLocalMultiplayer) {
+              // Map local shared keyboard
+              keys1 = { 'w':keys['w'], 'a':keys['a'], 's':keys['s'], 'd':keys['d'], 'b':keys['v'], 'j':keys['b'], 'k':keys['n'], 'l':keys['m'] };
+              keys2 = { 'w':keys['arrowup'], 'a':keys['arrowleft'], 's':keys['arrowdown'], 'd':keys['arrowright'], 'b':keys['1'], 'j':keys['2'], 'k':keys['3'], 'l':keys['0'] };
+          } 
+          else if(onlineMode && conn && conn.open) {
             if(isHost) { 
               keys1 = keys; 
               try { conn.send({type: 'sync', hp1: f1.hp, hp2: f2.hp, x1: f1.x, x2: f2.x, s1: p1Score, s2: p2Score, stg: currentStage}); } catch(e){}
