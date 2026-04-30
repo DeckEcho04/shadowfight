@@ -55,26 +55,9 @@
   /* VIVID LAYERED BACKGROUNDS */
   #game-container { position: relative; width: 100%; flex: 1; overflow: hidden; display: flex; flex-direction: column; max-height: 800px; background-size: cover; background-position: center bottom; }
   
-  .map-alley {
-    background: 
-      linear-gradient(to top, #0f172a 0%, transparent 30%), 
-      linear-gradient(to right, transparent 10%, #020205 10%, #020205 25%, transparent 25%, transparent 40%, #05050a 40%, #05050a 50%, transparent 50%, transparent 75%, #020205 75%, #020205 90%, transparent 90%), 
-      radial-gradient(circle at 50% 30%, #312e81 0%, transparent 70%), 
-      #05050a !important;
-  }
-  .map-dojo {
-    background: 
-      linear-gradient(to top, #000 0%, #2a0800 25%, transparent 25%), 
-      radial-gradient(circle at 50% 60%, #ef4444 20%, transparent 21%), 
-      linear-gradient(180deg, #7c2d12 0%, #b45309 100%) !important;
-  }
-  .map-mamak {
-    background: 
-      linear-gradient(to top, #166534 0%, #4ade80 20%, transparent 20%), 
-      linear-gradient(to right, transparent 5%, #171717 5%, #171717 25%, transparent 25%, transparent 45%, #262626 45%, #262626 65%, transparent 65%, transparent 80%, #171717 80%, #171717 95%, transparent 95%), 
-      radial-gradient(circle at 75% 30%, #fde047 12%, transparent 13%), 
-      linear-gradient(180deg, #38bdf8 0%, #7dd3fc 100%) !important;
-  }
+  .map-alley { background: linear-gradient(to top, #0f172a 0%, transparent 30%), linear-gradient(to right, transparent 10%, #020205 10%, #020205 25%, transparent 25%, transparent 40%, #05050a 40%, #05050a 50%, transparent 50%, transparent 75%, #020205 75%, #020205 90%, transparent 90%), radial-gradient(circle at 50% 30%, #312e81 0%, transparent 70%), #05050a !important; }
+  .map-dojo { background: linear-gradient(to top, #000 0%, #2a0800 25%, transparent 25%), radial-gradient(circle at 50% 60%, #ef4444 20%, transparent 21%), linear-gradient(180deg, #7c2d12 0%, #b45309 100%) !important; }
+  .map-mamak { background: linear-gradient(to top, #166534 0%, #4ade80 20%, transparent 20%), linear-gradient(to right, transparent 5%, #171717 5%, #171717 25%, transparent 25%, transparent 45%, #262626 45%, #262626 65%, transparent 65%, transparent 80%, #171717 80%, #171717 95%, transparent 95%), radial-gradient(circle at 75% 30%, #fde047 12%, transparent 13%), linear-gradient(180deg, #38bdf8 0%, #7dd3fc 100%) !important; }
 
   #arena { position: absolute; width: 100%; height: 100%; perspective: 1000px; }
   #scroll-world { position: absolute; width: 10000px; height: 100%; top: 0; left: 0; transform-origin: left; z-index: 5;}
@@ -181,8 +164,9 @@
 <body>
 
 <div id="app">
-  <div class="version-badge">v0.8.0 (The Solo Parkour & Visuals Fix)</div>
+  <div class="version-badge">v1.0.0 (The Online WebRTC Return)</div>
 
+  <!-- SELECT SCREEN -->
   <div id="select-screen" class="screen active">
     <div id="lobby-ui">
       <div class="id-box" id="host-panel">
@@ -229,6 +213,7 @@
     <div class="char-grid locked" id="char-list" onclick="checkNameLock()"></div>
   </div>
 
+  <!-- ARENA SCREEN -->
   <div id="arena-screen" class="screen">
     
     <div id="victory-screen">
@@ -463,7 +448,7 @@ function pickAI() {
 
 function sendStart() { 
   activeMap = document.getElementById('map-select').value; activeMode = document.getElementById('mode-select').value;
-  soloParkour = false; // Always multiplayer if we reached here
+  soloParkour = false; 
   conn.send({type:'start', p1: p1Sel.id, p2: p2Sel.id, map: activeMap, mode: activeMode}); 
   startFight(); 
 }
@@ -477,8 +462,8 @@ function applySkin(fObj, sel) {
 function applyMap() {
   const m = MAPS[activeMap];
   const container = document.getElementById('game-container');
-  container.className = `map-${activeMap}`; // Triggers the vivid CSS layers
-  container.style.background = ''; // Clean up any inline overrides
+  container.className = `map-${activeMap}`; 
+  container.style.background = ''; 
   
   const floor = document.getElementById('arena-floor');
   floor.style.backgroundColor = m.floor; floor.style.borderTopColor = m.grid;
@@ -505,7 +490,6 @@ function buildPits() {
 
 function resetToLobby() {
   isGameOver = false;
-  // Cleanup memory leaks from special moves
   if(f1 && f1.specialInt) clearInterval(f1.specialInt);
   if(f2 && f2.specialInt) clearInterval(f2.specialInt);
 
@@ -519,7 +503,7 @@ function resetToLobby() {
   document.getElementById('p2').querySelector('.f-rig').classList.remove('hulk-mode');
   document.getElementById('p1').querySelector('.f-torso').classList.remove('dhol-active');
   document.getElementById('p2').querySelector('.f-torso').classList.remove('dhol-active');
-  document.getElementById('p2').style.display = 'flex'; // Un-hide if solo
+  document.getElementById('p2').style.display = 'flex'; 
 }
 
 function handleRematch() {
@@ -547,13 +531,14 @@ function startFight(){
       document.getElementById('stage-progress').innerText = `STAGE 1/5`;
   } else { document.getElementById('stage-progress').style.display = 'none'; }
 
-  f1 = { id:'p1', x:50, y:0, vx:0, vy:0, hp:100, sp:0, dir:1, action:'idle', hit:false, jump:false, w:40, isBlocking: false, buff: 0 };
-  f2 = { id:'p2', x: activeMode === 'parkour' ? 100 : document.getElementById('game-container').offsetWidth - 90, y:0, vx:0, vy:0, hp:100, sp:0, dir:-1, action:'idle', hit:false, jump:false, w:40, isBlocking: false, buff: 0 };
+  const aW = activeMode === 'parkour' ? STAGES[currentStage].w : document.getElementById('game-container').offsetWidth;
+  f1 = { id:'p1', x:50, y:0, vx:0, vy:0, hp:100, sp:0, dir:1, action:'idle', hit:false, jump:false, w:40, maxW: aW, isBlocking: false, buff: 0 };
+  f2 = { id:'p2', x: activeMode === 'parkour' ? 100 : document.getElementById('game-container').offsetWidth - 90, y:0, vx:0, vy:0, hp:100, sp:0, dir:-1, action:'idle', hit:false, jump:false, w:40, maxW: aW, isBlocking: false, buff: 0 };
   
   applySkin(f1, p1Sel); applySkin(f2, p2Sel);
 
   if(soloParkour && activeMode === 'parkour') {
-      f2.x = -2000; f2.hp = 0; // Nullify P2
+      f2.x = -2000; f2.hp = 0; 
       document.getElementById('p2').style.display = 'none';
       document.getElementById('p2-tag').style.display = 'none';
   } else {
@@ -613,6 +598,7 @@ function triggerStageWin(winnerText, sendSignal = true) {
             isGameOver = false;
             document.getElementById('victory-screen').style.display = 'none';
             document.getElementById('stage-progress').innerText = `STAGE ${currentStage+1}/5`;
+            f1.maxW = STAGES[currentStage].w; f2.maxW = STAGES[currentStage].w;
             f1.x = 50; f1.y = 0; f1.hp = 100; f1.sp = 0; f1.vy = 0; f1.jump = false;
             f2.x = 100; f2.y = 0; f2.hp = 100; f2.sp = 0; f2.vy = 0; f2.jump = false;
             if(soloParkour) { f2.hp = 0; f2.x = -2000; }
@@ -679,7 +665,6 @@ function gameLoop(timestamp){
 }
 
 function updateFighter(f, opp, k){
-  // DYNAMIC BOUNDARY FIX: No more invisible walls stopping you early!
   let currentArenaWidth = activeMode === 'parkour' ? STAGES[currentStage].w : document.getElementById('game-container').offsetWidth;
 
   if(f.action !== 'special_active' && f.action !== 'dhol_beat' && f.action !== 'karthik_meme') {
@@ -717,7 +702,7 @@ function updateFighter(f, opp, k){
   if(f.y > 600) { 
       f.hp -= 20; 
       f.x = Math.max(0, f.x - 150); 
-      f.y = -200; f.vy = -10; // Pop up respawn
+      f.y = -200; f.vy = -10; 
       triggerShake('heavy'); 
   }
 
@@ -750,7 +735,7 @@ function spawnParticles(x, y, dir, color = '#fbbf24') {
     let vx = dir * (Math.random() * 8 + 4); let vy = (Math.random() - 1) * 12; let life = 20;
     let cx = x + 20; let cy = y - 40;
     const anim = () => {
-      if(life <= 0) { p.remove(); return; }
+      if(life <= 0 || isGameOver) { p.remove(); return; }
       cx += vx; cy += vy; vy += 1; p.style.transform = `translate(${cx}px, ${cy}px)`; p.style.opacity = life / 20;
       life--; requestAnimationFrame(anim);
     }; requestAnimationFrame(anim);
@@ -831,7 +816,7 @@ function doSpecial(f, opp){
   f.sp = 0; 
   const charId = (f.id === 'p1' ? p1Sel : p2Sel).id;
   
-  if(f.specialInt) clearInterval(f.specialInt); // MEMORY LEAK FIX
+  if(f.specialInt) clearInterval(f.specialInt); 
   
   if (charId === 'karthik') { 
     showLabel(f.id, "WAIT FOR IT...", "#4f46e5");
@@ -848,7 +833,7 @@ function doSpecial(f, opp){
             triggerShake(); spawnParticles(opp ? opp.x : f.x, f.y, f.dir, '#4f46e5');
             setTimeout(() => {
                 hitStopFrames = 15;
-                createVFX('comic', opp ? opp.x : f.x, f.y - 30, '#ef4444', 'SEVEN!');
+                createVFX('comic', opp ? opp.x : f.x, f.y - 30, '#ef4444', 'SEVENN!');
                 if(activeMode === '1v1' && opp) { if(!opp.isBlocking) { opp.hp -= 25; opp.vx = f.dir * 30; } else { opp.hp -= 5; } }
                 triggerShake('heavy'); spawnParticles(opp ? opp.x : f.x, f.y, f.dir, '#ef4444');
             }, 400);
