@@ -40,6 +40,7 @@
   .char-grid.locked { opacity: 0.3; filter: grayscale(100%); pointer-events: none; }
   .char-card { background: linear-gradient(180deg, #1e1e3f 0%, #111122 100%); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); padding: 15px 10px; text-align: center; cursor: pointer; opacity: 0.5; transition: 0.2s; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
   .char-card.unlocked { opacity: 1; pointer-events: auto; }
+  .char-card.unlocked:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.4); box-shadow: 0 8px 20px rgba(0,0,0,0.6); }
   .char-card.selected-p1 { border-color: #6366f1; background: linear-gradient(180deg, #312e81 0%, #1e1b4b 100%); transform: scale(1.05); z-index: 2; position: relative; }
   .char-card.selected-p2 { border-color: #ef4444; background: linear-gradient(180deg, #7f1d1d 0%, #450a0a 100%); transform: scale(1.05); z-index: 2; position: relative; }
   .char-name { font-size: 15px; font-weight: 900; display: block; margin-top: 8px;}
@@ -52,29 +53,35 @@
   @keyframes shakeHeavy { 0%{transform:translate(15px,10px) rotate(2deg);} 25%{transform:translate(-15px,-12px) rotate(-2deg);} 50%{transform:translate(-20px,5px) rotate(1deg);} 75%{transform:translate(15px,15px) rotate(0deg);} 100%{transform:translate(0,0);} }
   .shake-anim-heavy { animation: shakeHeavy 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
 
-  /* ARENA & VIVID BACKGROUNDS */
+  /* VIVID LAYERED BACKGROUNDS */
   #game-container { position: relative; width: 100%; flex: 1; overflow: hidden; display: flex; flex-direction: column; max-height: 800px; background-size: cover; background-position: center bottom; }
+  
+  .map-alley { background: linear-gradient(to top, #0f172a 0%, transparent 30%), linear-gradient(to right, transparent 10%, #020205 10%, #020205 25%, transparent 25%, transparent 40%, #05050a 40%, #05050a 50%, transparent 50%, transparent 75%, #020205 75%, #020205 90%, transparent 90%), radial-gradient(circle at 50% 30%, #312e81 0%, transparent 70%), #05050a !important; }
+  .map-dojo { background: linear-gradient(to top, #000 0%, #2a0800 25%, transparent 25%), radial-gradient(circle at 50% 60%, #ef4444 20%, transparent 21%), linear-gradient(180deg, #7c2d12 0%, #b45309 100%) !important; }
+  .map-mamak { background: linear-gradient(to top, #166534 0%, #4ade80 20%, transparent 20%), linear-gradient(to right, transparent 5%, #171717 5%, #171717 25%, transparent 25%, transparent 45%, #262626 45%, #262626 65%, transparent 65%, transparent 80%, #171717 80%, #171717 95%, transparent 95%), radial-gradient(circle at 75% 30%, #fde047 12%, transparent 13%), linear-gradient(180deg, #38bdf8 0%, #7dd3fc 100%) !important; }
+
   #arena { position: absolute; width: 100%; height: 100%; perspective: 1000px; }
   
-  .bg-sun { position: absolute; border-radius: 50%; display: none; z-index: 1;}
-  .bg-horizon { position: absolute; bottom: 35%; width: 100%; height: 20%; display: none; z-index: 2;}
-  
-  #scroll-world { position: absolute; width: 10000px; height: 100%; top: 0; left: 0; transform-origin: left; z-index: 5;}
+  /* FIXED SCROLL WORLD - Defaults to 100% for 1v1 */
+  #scroll-world { position: absolute; width: 100%; height: 100%; top: 0; left: 0; transform-origin: left; z-index: 5;}
   .floor { position: absolute; bottom: 0; width: 100%; height: 40%; transform: rotateX(75deg); transform-origin: top; box-shadow: 0 -30px 60px rgba(0,0,0,0.9); }
   
+  /* PARKOUR PITS */
   #pits-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 6; pointer-events: none;}
   .pit { position: absolute; bottom: 0; height: 40%; background: #000; z-index: 6; border-top: 10px solid #05050a; box-shadow: inset 0 30px 30px rgba(0,0,0,1); }
   .finish-line { position: absolute; bottom: 40%; width: 30px; height: 300px; background: repeating-linear-gradient(45deg, #fff, #fff 15px, #000 15px, #000 30px); z-index: 10; box-shadow: 0 0 20px rgba(255,255,255,0.5);}
 
-  #vfx-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 15; overflow: hidden;}
+  /* FIXED VFX LAYER - Now inside scroll-world to follow perfectly */
+  #vfx-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 15; overflow: visible;}
   .vfx-base { position: absolute; bottom: 25%; pointer-events: none; z-index: 15; }
+  
   .vfx-ring { border-radius: 50%; opacity: 1; animation: explodeRing 0.4s ease-out forwards; }
   @keyframes explodeRing { 0% { transform: translate(var(--vx), var(--vy)) scale(0); border-width: 15px; } 100% { transform: translate(var(--vx), var(--vy)) scale(3.5); opacity: 0; border-width: 0px; } }
   .vfx-acid { background: rgba(34, 197, 94, 0.5); border-radius: 50%; transform: translate(var(--vx), calc(var(--vy) + 60px)) rotateX(70deg); box-shadow: 0 0 30px #22c55e, inset 0 0 30px #22c55e; filter: blur(2px); width: 180px; height: 50px; }
   .vfx-smoke { width: 180px; height: 180px; background: radial-gradient(circle, rgba(148,163,184,1) 0%, rgba(245, 158, 11,0.8) 40%, transparent 70%); border-radius: 50%; opacity: 1; animation: smokePoof 0.8s ease-out forwards; filter: blur(10px); mix-blend-mode: screen; }
   @keyframes smokePoof { 0% { transform: translate(var(--vx), var(--vy)) scale(0.2); opacity: 1; } 100% { transform: translate(var(--vx), var(--vy)) scale(2.5); opacity: 0; } }
   .vfx-crosshair { width: 80px; height: 80px; border: 6px solid #dc2626; border-radius: 50%; opacity: 0; animation: lockOn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; box-shadow: 0 0 15px #dc2626, inset 0 0 15px #dc2626;}
-  .vfx-crosshair::before, .vfx-crosshair::after { content: absolute; background: #dc2626; box-shadow: 0 0 8px #dc2626;}
+  .vfx-crosshair::before, .vfx-crosshair::after { content: ''; position: absolute; background: #dc2626; box-shadow: 0 0 8px #dc2626;}
   .vfx-crosshair::before { top: 50%; left: -20px; right: -20px; height: 6px; margin-top: -3px; }
   .vfx-crosshair::after { left: 50%; top: -20px; bottom: -20px; width: 6px; margin-left: -3px; }
   @keyframes lockOn { 0% { transform: translate(var(--vx), var(--vy)) scale(4) rotate(90deg); opacity: 0; } 100% { transform: translate(var(--vx), var(--vy)) scale(1) rotate(0deg); opacity: 1; } }
@@ -162,7 +169,7 @@
 <body>
 
 <div id="app">
-  <div class="version-badge">v1.1.0 (Relay Fallback & Local Co-Op)</div>
+  <div class="version-badge">v1.2.0 (The Anchor & Resolution Fix)</div>
 
   <!-- SELECT SCREEN -->
   <div id="select-screen" class="screen active">
@@ -223,6 +230,9 @@
     </div>
 
     <div id="game-container" class="map-alley">
+      <div class="bg-sun" id="map-sun"></div>
+      <div class="bg-horizon" id="map-horizon"></div>
+
       <div id="arena">
         <div id="scroll-world">
             <div class="floor" id="arena-floor"></div>
@@ -230,8 +240,10 @@
             
             <div id="p1" class="fighter"><div class="special-label" id="p1-label"></div><div class="f-rig"><div class="f-head"></div><div class="f-arm-b f-limb"></div><div class="f-torso"><div class="dhol-prop">🥁</div></div><div class="f-leg-b f-limb"></div><div class="f-leg-f f-limb"></div><div class="f-arm-f f-limb"></div></div></div>
             <div id="p2" class="fighter"><div class="special-label" id="p2-label"></div><div class="f-rig"><div class="f-head"></div><div class="f-arm-b f-limb"></div><div class="f-torso"><div class="dhol-prop">🥁</div></div><div class="f-leg-b f-limb"></div><div class="f-leg-f f-limb"></div><div class="f-arm-f f-limb"></div></div></div>
+            
+            <!-- FIXED: VFX Layer moved INSIDE the scroll world -->
+            <div id="vfx-layer"></div>
         </div>
-        <div id="vfx-layer"></div>
       </div>
       
       <div class="hud">
@@ -295,13 +307,11 @@ const STAGES = [
   { w: 4000, pits: [[700, 250], [1400, 250], [2100, 280], [2800, 250], [3400, 200]] }  
 ];
 
-// Added RELAY TURN servers for heavy firewall penetration
 const peerConfig = { 
     config: { 
         'iceServers': [ 
             { urls: 'stun:stun.l.google.com:19302' }, 
             { urls: 'stun:stun1.l.google.com:19302' },
-            // Public relay fallback (can be slow but pierces NAT)
             { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
             { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }
         ] 
@@ -330,7 +340,6 @@ document.getElementById('player-name').addEventListener('input', (e) => {
   else document.getElementById('char-list').classList.add('locked');
 });
 
-// UI TOGGLES FOR MODES
 document.getElementById('mode-select').addEventListener('change', (e) => {
     const btn = document.getElementById('ai-btn');
     const localBtn = document.getElementById('start-local-btn');
@@ -342,7 +351,7 @@ document.getElementById('mode-select').addEventListener('change', (e) => {
         joinRow.style.display = 'none';
         idRow.style.display = 'none';
         localBtn.style.display = 'block';
-        document.getElementById('char-list').classList.remove('locked'); // Unlocked immediately for local
+        document.getElementById('char-list').classList.remove('locked'); 
     } else {
         btn.style.display = 'block';
         joinRow.style.display = 'flex';
@@ -396,7 +405,6 @@ function connectToFriend() {
     conn = peer.connect(friendId);
     isHost = false; onlineMode = true; isLocalMultiplayer = false; p1Score = 0; p2Score = 0; updateScoreboard();
     
-    // Increased timeout for Relay fallback
     connTimeout = setTimeout(() => { if(conn && !conn.open) { showStatus("Firewall blocked connection. Try playing Local.", "error"); peer.destroy(); } }, 15000);
     setupDataListeners();
   });
@@ -445,11 +453,8 @@ function renderChars(){
     div.innerHTML = `<div class="char-icon" style="background-color:${c.suit}"><svg viewBox="0 0 24 24">${c.icon}</svg></div><span class="char-name">${c.name}</span><span class="char-power" style="color:${c.acc}">${c.power}</span>`;
     
     div.onclick = () => { 
-        if(document.getElementById('mode-select').value === 'local') {
-            selectCharLocal(c, div);
-        } else {
-            if(!grid.classList.contains('locked')) selectChar(c, div); 
-        }
+        if(document.getElementById('mode-select').value === 'local') { selectCharLocal(c, div); } 
+        else { if(!grid.classList.contains('locked')) selectChar(c, div); }
     }
     grid.appendChild(div);
   });
@@ -470,18 +475,14 @@ function selectChar(c, el){
   }
 }
 
-// LOCAL MULTIPLAYER LOGIC
 function selectCharLocal(c, el) {
     if(!p1Sel) {
-        p1Sel = c;
-        el.classList.add('selected-p1');
+        p1Sel = c; el.classList.add('selected-p1');
         document.getElementById('pc-controls').innerText = "Player 1 Selected. Player 2, pick your fighter.";
     } else if(!p2Sel) {
-        p2Sel = c;
-        el.classList.add('selected-p2');
+        p2Sel = c; el.classList.add('selected-p2');
         document.getElementById('pc-controls').innerText = "[P1: W A S D / P2: Arrows] - Click Start Local Match";
     } else {
-        // Reset selection
         p1Sel = c; p2Sel = null;
         document.querySelectorAll('.char-card').forEach(x=>x.classList.remove('selected-p1', 'selected-p2'));
         el.classList.add('selected-p1');
@@ -490,22 +491,12 @@ function selectCharLocal(c, el) {
 
 function startLocalMatch() {
     if(!p1Sel || !p2Sel) { alert("Both players must select a fighter!"); return; }
-    isLocalMultiplayer = true;
-    onlineMode = false;
-    isHost = true;
-    aiMode = false;
-    soloParkour = false;
-    myName = "Player 1";
-    oppName = "Player 2";
-    p1Score = 0; p2Score = 0; updateScoreboard();
-    
+    isLocalMultiplayer = true; onlineMode = false; isHost = true; aiMode = false; soloParkour = false;
+    myName = "Player 1"; oppName = "Player 2"; p1Score = 0; p2Score = 0; updateScoreboard();
     document.getElementById('pc-controls').innerHTML = "<b>P1:</b> [W A S D] Move | [V] Block | [B] Punch | [N] Kick | [M] Special<br><b>P2:</b> [ARROWS] Move | [Num1] Block | [Num2] Punch | [Num3] Kick | [Num0] Special";
-    
-    activeMap = document.getElementById('map-select').value; 
-    activeMode = '1v1'; // Force 1v1 for local
+    activeMap = document.getElementById('map-select').value; activeMode = '1v1'; 
     startFight();
 }
-
 
 function pickAI() {
   if(!checkName()) return;
@@ -536,6 +527,11 @@ function applyMap() {
   container.className = `map-${activeMap}`; 
   container.style.background = ''; 
   
+  // THE FIX: Scroll World Dynamic Width Control
+  const sw = document.getElementById('scroll-world');
+  if(activeMode === 'parkour') { sw.style.width = STAGES[currentStage].w + 'px'; } 
+  else { sw.style.width = '100%'; }
+
   const floor = document.getElementById('arena-floor');
   floor.style.backgroundColor = m.floor; floor.style.borderTopColor = m.grid;
   floor.style.backgroundImage = `linear-gradient(90deg, ${m.grid}40 1px, transparent 1px), linear-gradient(${m.grid}40 1px, transparent 1px)`;
@@ -543,8 +539,7 @@ function applyMap() {
 
 function buildPits() {
   const container = document.getElementById('pits-container');
-  if(!container) return;
-  container.innerHTML = '';
+  if(!container) return; container.innerHTML = '';
   if(activeMode !== 'parkour') return;
   const stageData = STAGES[currentStage];
   
@@ -602,9 +597,11 @@ function startFight(){
       document.getElementById('stage-progress').innerText = `STAGE 1/5`;
   } else { document.getElementById('stage-progress').style.display = 'none'; }
 
-  const aW = activeMode === 'parkour' ? STAGES[currentStage].w : document.getElementById('game-container').offsetWidth;
+  // THE FIX: Base width off the viewport in 1v1 to prevent off-screen spawns
+  const aW = activeMode === 'parkour' ? STAGES[currentStage].w : document.getElementById('game-container').clientWidth;
+  
   f1 = { id:'p1', x:50, y:0, vx:0, vy:0, hp:100, sp:0, dir:1, action:'idle', hit:false, jump:false, w:40, maxW: aW, isBlocking: false, buff: 0 };
-  f2 = { id:'p2', x: activeMode === 'parkour' ? 100 : document.getElementById('game-container').offsetWidth - 90, y:0, vx:0, vy:0, hp:100, sp:0, dir:-1, action:'idle', hit:false, jump:false, w:40, maxW: aW, isBlocking: false, buff: 0 };
+  f2 = { id:'p2', x: activeMode === 'parkour' ? 100 : aW - 90, y:0, vx:0, vy:0, hp:100, sp:0, dir:-1, action:'idle', hit:false, jump:false, w:40, maxW: aW, isBlocking: false, buff: 0 };
   
   applySkin(f1, p1Sel); applySkin(f2, p2Sel);
 
@@ -692,7 +689,6 @@ function gameLoop(timestamp){
           if(hitStopFrames > 0) { hitStopFrames--; return; } 
 
           if(isLocalMultiplayer) {
-              // Map local shared keyboard
               keys1 = { 'w':keys['w'], 'a':keys['a'], 's':keys['s'], 'd':keys['d'], 'b':keys['v'], 'j':keys['b'], 'k':keys['n'], 'l':keys['m'] };
               keys2 = { 'w':keys['arrowup'], 'a':keys['arrowleft'], 's':keys['arrowdown'], 'd':keys['arrowright'], 'b':keys['1'], 'j':keys['2'], 'k':keys['3'], 'l':keys['0'] };
           } 
@@ -709,7 +705,7 @@ function gameLoop(timestamp){
           if(aiMode) doAI();
 
           if(activeMode === 'parkour') {
-              const sw = document.getElementById('game-container').offsetWidth;
+              const sw = document.getElementById('game-container').clientWidth;
               const leaderX = soloParkour ? f1.x : Math.max(f1.x, f2.x);
               cameraX = Math.max(0, leaderX - sw/2);
               document.getElementById('scroll-world').style.transform = `translateX(${-cameraX}px)`;
@@ -741,7 +737,7 @@ function gameLoop(timestamp){
 }
 
 function updateFighter(f, opp, k){
-  let currentArenaWidth = activeMode === 'parkour' ? STAGES[currentStage].w : document.getElementById('game-container').offsetWidth;
+  let currentArenaWidth = activeMode === 'parkour' ? STAGES[currentStage].w : document.getElementById('game-container').clientWidth;
 
   if(f.action !== 'special_active' && f.action !== 'dhol_beat' && f.action !== 'karthik_meme') {
       f.action = 'idle';
@@ -818,27 +814,27 @@ function spawnParticles(x, y, dir, color = '#fbbf24') {
   }
 }
 
+// THE FIX: VFX logic restored to anchor properly inside the scrolling world
 function createVFX(type, x, y, color, text = '', dir = 1, destX = 0) {
   const layer = document.getElementById('vfx-layer');
   if(!layer) return;
   const vfx = document.createElement('div');
   vfx.classList.add('vfx-base', `vfx-${type}`);
   
-  let screenX = activeMode === 'parkour' ? x - cameraX : x;
-
-  vfx.style.setProperty('--vx', `${screenX + 20}px`);
+  vfx.style.setProperty('--vx', `${x + 20}px`);
   vfx.style.setProperty('--vy', `${y - 40}px`);
 
   if(type === 'ring') {
     vfx.style.border = `5px solid ${color}`; vfx.style.width = '100px'; vfx.style.height = '100px';
-    vfx.style.setProperty('--vx', `${screenX - 30}px`); vfx.style.setProperty('--vy', `${y - 90}px`);
+    vfx.style.setProperty('--vx', `${x - 30}px`); vfx.style.setProperty('--vy', `${y - 90}px`);
   } else if (type === 'acid') {
-    vfx.style.setProperty('--vx', `${screenX - 70}px`);
+    vfx.style.setProperty('--vx', `${x - 70}px`);
   } else if (type === 'text') {
     vfx.style.color = color; vfx.innerText = text;
   } else if (type === 'comic') {
-    let sw = document.getElementById('game-container').offsetWidth;
-    let safeX = Math.max(80, Math.min(screenX + 20, sw - 200)); 
+    let sw = document.getElementById('game-container').clientWidth;
+    // Map safe zone relative to camera
+    let safeX = Math.max(cameraX + 80, Math.min(x + 20, cameraX + sw - 200)); 
     vfx.style.setProperty('--vx', `${safeX}px`);
     vfx.style.color = color; vfx.innerText = text;
   } else if (type === 'projectile') {
@@ -848,12 +844,11 @@ function createVFX(type, x, y, color, text = '', dir = 1, destX = 0) {
     } else {
         vfx.style.background = color; vfx.style.boxShadow = `0 0 20px ${color}`;
     }
-    vfx.style.setProperty('--start-x', `${screenX + (dir*40)}px`); vfx.style.setProperty('--start-y', `${y - 40}px`);
-    let destScreenX = activeMode === 'parkour' ? destX - cameraX : destX;
-    vfx.style.setProperty('--end-x', `${destScreenX}px`); vfx.style.setProperty('--end-y', `${y - 20}px`);
+    vfx.style.setProperty('--start-x', `${x + (dir*40)}px`); vfx.style.setProperty('--start-y', `${y - 40}px`);
+    vfx.style.setProperty('--end-x', `${destX}px`); vfx.style.setProperty('--end-y', `${y - 20}px`);
   } else if (type === 'paper') {
     vfx.innerText = "A+";
-    vfx.style.setProperty('--vx', `${screenX - 20}px`); vfx.style.setProperty('--vy', `${y - 50}px`);
+    vfx.style.setProperty('--vx', `${x - 20}px`); vfx.style.setProperty('--vy', `${y - 50}px`);
   }
 
   layer.appendChild(vfx);
@@ -1007,15 +1002,11 @@ function showLabel(pid, txt, color){
 function draw(){
   const t = Date.now() / 100;
   
-  if(activeMode === 'parkour') {
-      document.getElementById('scroll-world').style.transform = `translateX(${-cameraX}px)`;
-  } else { document.getElementById('scroll-world').style.transform = `none`; }
-
+  // THE FIX: Directly transform scroll-world, fighters transform to local space
   const updateF = (f, el) => {
     if(f.hp <= 0 && !isGameOver) { el.style.opacity = '0.3'; } else { el.style.opacity = '1'; } 
     
-    let screenX = activeMode === 'parkour' ? f.x - cameraX : f.x;
-    el.style.transform = `translate(${screenX}px, ${f.y}px)`; 
+    el.style.transform = `translate(${f.x}px, ${f.y}px)`; 
     
     let scale = (((f.id==='p1'?p1Sel:p2Sel).id === 'andi' && f.buff > 0) ? 1.4 : 1);
     el.querySelector('.f-rig').style.transform = `scaleX(${f.dir * scale}) scaleY(${scale})`;
@@ -1060,6 +1051,7 @@ function draw(){
 
     if(f.hit) el.classList.add('hurt'); else el.classList.remove('hurt');
   };
+  
   updateF(f1, document.getElementById('p1')); updateF(f2, document.getElementById('p2'));
   document.getElementById('hp-1').style.width = Math.max(0, f1.hp) + '%'; document.getElementById('hp-2').style.width = Math.max(0, f2.hp) + '%';
   document.getElementById('sp-1').style.width = f1.sp + '%'; document.getElementById('sp-2').style.width = f2.sp + '%';
